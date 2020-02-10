@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"time"
 	"fmt"
+	"errors"
 )
 type HMACAuth struct {
 	apiKey string
@@ -14,12 +15,20 @@ type HMACAuth struct {
 	apiVersion string
 }
 
-func New(apiKey, apiSecret, apiVersion string) (HMACAuth) {
-	return HMACAuth{
+func NewAuth(apiKey, apiSecret, apiVersion string) (*HMACAuth, error) {
+	if apiKey == "" {
+		return nil, errors.New("api key can't be empty")
+
+	}
+	if apiSecret == ""{
+		return nil, errors.New("api secret can't be empty")
+	}
+	auth := &HMACAuth{
 		apiKey:apiKey,
 		apiSecret:apiSecret,
 		apiVersion:apiVersion,
 	}
+	return auth, nil
 }
 
 func (auth *HMACAuth) SetHeaders(req *http.Request) (error) {
