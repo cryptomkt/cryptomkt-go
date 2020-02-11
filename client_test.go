@@ -1,12 +1,31 @@
-package main
+package client
 import (
-    "fmt"
     "os"
     "log"
 	"bufio"
 	"testing"
+	"encoding/json"
 )
-func TestGetAutenticated(t *testing.T) {
+func assertSuccess(response string, t *testing.T) {
+	var resp map[string] interface{}
+		json.Unmarshal([]byte(response), &resp)
+		if val, ok := resp["status"]; ok {
+			switch val {
+			case "error":
+				t.Errorf(response)
+			case "success":
+				//all good
+			default:
+				t.Errorf("unexpected response")
+			}
+		} else {
+			t.Errorf("error in the response")
+		}
+}
+
+func TestAutenticated(t *testing.T) {
+	//load the keys for the connection to crypto market.
+	//apikey first, apisecret after,  every in its own line.
 	file, err := os.Open("keys.txt")
     if err != nil {
         log.Fatal(err)
@@ -21,14 +40,14 @@ func TestGetAutenticated(t *testing.T) {
 	
 	client, err := NewClient(apiKey, apiSecret)
 	if err != nil {
-		fmt.Println("error making the client")
+		t.Errorf("error making the client")
 	}
-
 	t.Run("account", func(t *testing.T){
 		response := client.getAccount()
-		fmt.Println(response)
-		if len(response) == 0 {
-			t.Errorf("Return msg of len 0")
-		}
+		assertSuccess(response, t)	
+	})
+	t.Run("wallet", func(t *testing.T){
+		response := client.getBalance()
+		assertSuccess(response, t)	
 	})
 }

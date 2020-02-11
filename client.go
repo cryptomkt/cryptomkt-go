@@ -1,4 +1,4 @@
-package main
+package client
 
 import (
 	"net/http"
@@ -42,7 +42,7 @@ func (client *Client) get(endpoint string) (string) {
 		fmt.Println("could not parse the base api uri", client.baseApiUri)
 	}
 	u.Path = path.Join(u.Path, client.apiVersion, endpoint)	
-
+	fmt.Println(u.String())
 	req, err := http.NewRequest("GET", u.String(), nil)
 	if err!=nil {
 		fmt.Println(err)
@@ -70,6 +70,13 @@ func (client *Client) getAccount() (string) {
 	return client.get("account")
 }
 
+func (client *Client) getBalance() (string) {
+	return client.get("balance")
+}
+
+func (client *Client) getWallet() (string) {
+	return client.get("balance")
+}
 
 /*
 func (client *Client) getActiveOrders(market, page) (string) {
@@ -102,20 +109,4 @@ func mockTrades() {
     fmt.Println("response Headers:", resp.Header)
     body, _ := ioutil.ReadAll(resp.Body)
     fmt.Println("response Body:", string(body))
-}
-
-func main () {
-	/*
-	client, err := NewClient(os.Args[1], os.Args[2])
-	if err != nil {
-		fmt.Println("error making the client")
-	}
-	
-	fmt.Println(client.get("account"))
-	fmt.Println(client.getAccount())
-	mockTrades()
-	*/
-
-	
-
 }
