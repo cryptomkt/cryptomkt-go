@@ -1,12 +1,15 @@
 package client
 
 import (
-	"net/http"
+	"strings"
+	
 	"fmt"
-	"os"
 	"io/ioutil"
+	"net/http"
 	"net/url"
+	"os"
 	"path"
+	"sort"
 )
 
 type Client struct {
@@ -46,13 +49,17 @@ func (client *Client) get(endpoint string, args map[string]string) (string) {
 	if err!=nil {
 		fmt.Println(err)
 	}
-	q := req.URL.Query()
-	for k, v := range args {
-		q.Add(k,v)
+	
+	if len(args) != 0 {
+		q := req.URL.Query()
+		for k, v := range args {
+			q.Add(k,v)
+		}
+		req.URL.RawQuery = q.Encode()
 	}
-	req.URL.RawQuery = q.Encode()
+	
 	requestPath := fmt.Sprintf("/%s/%s", client.apiVersion, endpoint)
-	client.auth.SetHeaders(req, requestPath)
+	client.auth.SetHeaders(req, requestPath, "")
 	
 	resp, err:= client.httpClient.Do(req) 
 	if err != nil {
@@ -60,57 +67,65 @@ func (client *Client) get(endpoint string, args map[string]string) (string) {
 		os.Exit(1)
 	}
 	defer resp.Body.Close()
-	body, err := ioutil.ReadAll(resp.Body)
+	respBody, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
-	return string(body)
+	return string(respBody)
 }
 
-func (client *Client) getAccount() (string) {
-	return client.get("account", map[string]string{})
-}
-
-func (client *Client) getBalance() (string) {
-	return client.get("balance", map[string]string{})
-}
-
-func (client *Client) getWallet() (string) {
-	return client.get("balance", map[string]string{})
-}
-
-func (client *Client) getTransactions() (string) {
-	return client.get("transactions", map[string]string{})
-}
-
-func (client *Client) getActiveOrders(args map[string]string) (string) {
-	return client.get("orders/active", args)
-}
-
-
-func mockTrades() {
-	args := map[string]string {
-		"market": "ETHCLP",
-		"end":"2018-06-06",
-		"page":"2",
-		"limit":"10",
+func (client *Client) post(endpoint string, args map[string]string) (string) {
+	u, err := url.Parse(client.baseApiUri)
+	if err != nil {
+		fmt.Println("could not parse the base api uri", client.baseApiUri)
 	}
-	urlandargs := "https://api.cryptomkt.com/v1/trades" + parseMapss(args)
-	fmt.Println(urlandargs)
-	req, err := http.NewRequest("GET", urlandargs, nil)
+	u.Path = path.Join(u.Path, client.apiVersion, endpoint)	
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	form := url.Values{}
+	for k, v := range args {
+		form.Add(k, v)
+	}	
+
+	req, err := http.NewRequest("POST", u.String(), strings.NewReader(form.Encode()))
 	if err!=nil {
 		fmt.Println(err)
 	}
-	client := &http.Client{}
-    resp, err := client.Do(req)
-    if err != nil {
-        panic(err)
-    }
-    defer resp.Body.Close()
+	if len(args) == 0 {
+		fmt.Println("error, post with no information")
+	}
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded; param=value") 
+	var body string
 
-    fmt.Println("response Status:", resp.Status)
-    fmt.Println("response Headers:", resp.Header)
-    body, _ := ioutil.ReadAll(resp.Body)
-    fmt.Println("response Body:", string(body))
+	keys := make([]string, 0, len(args))
+	for k := range args {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)		
+	for _, k := range keys {
+		body = fmt.Sprintf("%s%v", body, args[k])
+	}
+	
+	requestPath := fmt.Sprintf("/%s/%s", client.apiVersion, endpoint)
+	client.auth.SetHeaders(req, requestPath, body)
+	if err != nil {
+		fmt.Println("cannot parse form")
+	}
+
+	resp, err:= client.httpClient.Do(req) 
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	defer resp.Body.Close()
+	respBody, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	return string(respBody)
 }
+

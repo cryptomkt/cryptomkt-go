@@ -29,9 +29,9 @@ func NewAuth(apiKey, apiSecret string) (*HMACAuth, error) {
 	return auth, nil
 }
 
-func (auth *HMACAuth) SetHeaders(req *http.Request, endpoint string) {
+func (auth *HMACAuth) SetHeaders(req *http.Request, endpoint string, body string) {
 	timestamp := time.Now().Unix()
-	data := fmt.Sprintf("%v%s",timestamp, endpoint)
+	data := fmt.Sprintf("%v%s%s",timestamp, endpoint, body)
     h := hmac.New(sha512.New384, []byte(auth.apiSecret))
     h.Write([]byte(data))
 
