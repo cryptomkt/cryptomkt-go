@@ -21,7 +21,7 @@ func NewClient(apiKey, apiSecret string) (*Client, error) {
 	apiVersion := "v1"
 	baseApiUri := "https://api.cryptomkt.com/"
 
-	auth, err := NewAuth(apiKey, apiSecret, apiVersion)
+	auth, err := NewAuth(apiKey, apiSecret)
 	if err != nil {
 		fmt.Println("error with the api key or the api secert")
 		os.Exit(1)
@@ -36,22 +36,24 @@ func NewClient(apiKey, apiSecret string) (*Client, error) {
 	return client, nil
 }
 
-func (client *Client) get(endpoint string) (string) {
+func (client *Client) get(endpoint string, args map[string]string) (string) {
 	u, err := url.Parse(client.baseApiUri)
 	if err != nil {
 		fmt.Println("could not parse the base api uri", client.baseApiUri)
 	}
 	u.Path = path.Join(u.Path, client.apiVersion, endpoint)	
-	fmt.Println(u.String())
 	req, err := http.NewRequest("GET", u.String(), nil)
 	if err!=nil {
 		fmt.Println(err)
 	}
-	
-	err = client.auth.SetHeaders(req)
-	if err != nil {
-		fmt.Println(err)
+	q := req.URL.Query()
+	for k, v := range args {
+		q.Add(k,v)
 	}
+	req.URL.RawQuery = q.Encode()
+	requestPath := fmt.Sprintf("/%s/%s", client.apiVersion, endpoint)
+	client.auth.SetHeaders(req, requestPath)
+	
 	resp, err:= client.httpClient.Do(req) 
 	if err != nil {
 		fmt.Println(err)
@@ -67,23 +69,25 @@ func (client *Client) get(endpoint string) (string) {
 }
 
 func (client *Client) getAccount() (string) {
-	return client.get("account")
+	return client.get("account", map[string]string{})
 }
 
 func (client *Client) getBalance() (string) {
-	return client.get("balance")
+	return client.get("balance", map[string]string{})
 }
 
 func (client *Client) getWallet() (string) {
-	return client.get("balance")
+	return client.get("balance", map[string]string{})
 }
 
-/*
-func (client *Client) getActiveOrders(market, page) (string) {
-	
-	return client.get()
+func (client *Client) getTransactions() (string) {
+	return client.get("transactions", map[string]string{})
 }
-*/
+
+func (client *Client) getActiveOrders(args map[string]string) (string) {
+	return client.get("orders/active", args)
+}
+
 
 func mockTrades() {
 	args := map[string]string {

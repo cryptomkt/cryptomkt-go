@@ -1,11 +1,14 @@
 package client
+
 import (
     "os"
     "log"
 	"bufio"
 	"testing"
 	"encoding/json"
+	"time"
 )
+
 func assertSuccess(response string, t *testing.T) {
 	var resp map[string] interface{}
 		json.Unmarshal([]byte(response), &resp)
@@ -42,12 +45,25 @@ func TestAutenticated(t *testing.T) {
 	if err != nil {
 		t.Errorf("error making the client")
 	}
+	//test every endpoint
 	t.Run("account", func(t *testing.T){
 		response := client.getAccount()
 		assertSuccess(response, t)	
 	})
 	t.Run("wallet", func(t *testing.T){
 		response := client.getBalance()
+		assertSuccess(response, t)	
+	})
+	t.Run("transactions", func(t *testing.T){
+		response := client.getTransactions()
+		assertSuccess(response, t)	
+	})
+	t.Run("active orders", func(t *testing.T){
+		var args = map[string]string{
+			"market":"ETHCLP",
+			"page":"0",
+		}
+		response := client.getActiveOrders(args)
 		assertSuccess(response, t)	
 	})
 }

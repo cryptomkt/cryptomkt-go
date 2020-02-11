@@ -21,9 +21,9 @@ func checkUriSecurity(theUrl url.URL) (url.URL) {
 func parseMapss(data map[string]string) (string) {
 	var args string = "?"
 	for k, v := range data {
-		args = fmt.Sprintf("%s%s=%v&",args, k, v)
+		args = fmt.Sprintf("%s%s=%v&", args, k, v)
 	}
-	return args
+	return args[:len(args)-1]
 }
 
 func parseMapsi(data map[string]interface{}) (string) {
