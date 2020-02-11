@@ -17,3 +17,20 @@ func checkUriSecurity(theUrl url.URL) (url.URL) {
 	}
 	return theUrl
 }
+
+func parseMapss(data map[string]string) (string) {
+	var args string = "?"
+	for k, v := range data {
+		args = fmt.Sprintf("%s%s=%v&",args, k, v)
+	}
+	return args
+}
+
+func parseMapsi(data map[string]interface{}) (string) {
+	var args string = "?"
+	for k, v := range data {
+		args = fmt.Sprintf("%s%s=%v&",args, k, v)
+		
+	}
+	return args[:len(args)-1]
+}

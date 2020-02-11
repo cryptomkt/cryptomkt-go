@@ -69,26 +69,53 @@ func (client *Client) get(endpoint string) (string) {
 func (client *Client) getAccount() (string) {
 	return client.get("account")
 }
+
+
 /*
 func (client *Client) getActiveOrders(market, page) (string) {
-	requestBody, err := json.Marshal(map[string]string{
-		"market":market,
-		"page":page,
-	})
-	if err != nil {
-		fmt.Println(err)
-	}
-
+	
 	return client.get()
 }
 */
 
+func mockTrades() {
+	args := map[string]string {
+		"market": "ETHCLP",
+		"end":"2018-06-06",
+		"page":"2",
+		"limit":"10",
+	}
+	urlandargs := "https://api.cryptomkt.com/v1/trades" + parseMapss(args)
+	fmt.Println(urlandargs)
+	req, err := http.NewRequest("GET", urlandargs, nil)
+	if err!=nil {
+		fmt.Println(err)
+	}
+	client := &http.Client{}
+    resp, err := client.Do(req)
+    if err != nil {
+        panic(err)
+    }
+    defer resp.Body.Close()
+
+    fmt.Println("response Status:", resp.Status)
+    fmt.Println("response Headers:", resp.Header)
+    body, _ := ioutil.ReadAll(resp.Body)
+    fmt.Println("response Body:", string(body))
+}
+
 func main () {
+	/*
 	client, err := NewClient(os.Args[1], os.Args[2])
 	if err != nil {
 		fmt.Println("error making the client")
 	}
+	
 	fmt.Println(client.get("account"))
 	fmt.Println(client.getAccount())
+	mockTrades()
+	*/
+
+	
 
 }
