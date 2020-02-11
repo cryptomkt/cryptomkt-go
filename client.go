@@ -98,6 +98,7 @@ func (client *Client) post(endpoint string, args map[string]string) (string) {
 		fmt.Println("error, post with no information")
 	}
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded; param=value") 
+	
 	var body string
 
 	keys := make([]string, 0, len(args))
@@ -108,13 +109,11 @@ func (client *Client) post(endpoint string, args map[string]string) (string) {
 	for _, k := range keys {
 		body = fmt.Sprintf("%s%v", body, args[k])
 	}
-	
 	requestPath := fmt.Sprintf("/%s/%s", client.apiVersion, endpoint)
 	client.auth.SetHeaders(req, requestPath, body)
 	if err != nil {
 		fmt.Println("cannot parse form")
 	}
-
 	resp, err:= client.httpClient.Do(req) 
 	if err != nil {
 		fmt.Println(err)

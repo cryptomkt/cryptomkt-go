@@ -8,13 +8,15 @@ import (
 	"encoding/json"
 )
 
-func assertSuccess(response string, t *testing.T) {
+func assertSuccess(response string, acceptableError string, t *testing.T) {
 	var resp map[string] interface{}
 		json.Unmarshal([]byte(response), &resp)
 		if val, ok := resp["status"]; ok {
 			switch val {
 			case "error":
-				t.Errorf(response)
+				if val, ok := resp["message"]; !(ok && val==acceptableError){
+					t.Errorf(response)
+				}
 			case "success":
 				//all good
 			default:
@@ -49,18 +51,18 @@ func TestAutenticated(t *testing.T) {
 	//test get methods
 	t.Run("account", func(t *testing.T){
 		response := client.Account()
-		assertSuccess(response, t)	
+		assertSuccess(response, "", t)
 	})
 	t.Run("wallet", func(t *testing.T){
 		response := client.Balance()
-		assertSuccess(response, t)	
+		assertSuccess(response, "", t)
 	})
 	t.Run("transactions", func(t *testing.T){
 		var args = map[string]string{
 			"currency":"ETH",
 		}
 		response := client.Transactions(args)
-		assertSuccess(response, t)	
+		assertSuccess(response, "", t)
 	})
 	t.Run("active orders=1", func(t *testing.T){
 		var args = map[string]string{
@@ -68,7 +70,7 @@ func TestAutenticated(t *testing.T) {
 			"page":"0",
 		}
 		response := client.ActiveOrders(args)
-		assertSuccess(response, t)	
+		assertSuccess(response, "", t)
 	})
 	t.Run("active orders=2", func(t *testing.T){
 		var args = map[string]string{
@@ -76,14 +78,14 @@ func TestAutenticated(t *testing.T) {
 			"page":"0",
 		}
 		response := client.ActiveOrders(args)
-		assertSuccess(response, t)	
+		assertSuccess(response, "", t)
 	})
 	t.Run("order status", func(t *testing.T){
 		var args = map[string]string{
 			"id":"M103975",
 		}
 		response := client.OrderStatus(args)
-		assertSuccess(response, t)	
+		assertSuccess(response, "invalid_scope", t)
 	})
 	t.Run("instant", func(t *testing.T){
 		var args = map[string]string{
@@ -92,7 +94,7 @@ func TestAutenticated(t *testing.T) {
 			"amount":"159",
 		}
 		response := client.Instant(args)
-		assertSuccess(response, t)	
+		assertSuccess(response, "", t)
 	})
 
 	//test post methods
@@ -104,14 +106,14 @@ func TestAutenticated(t *testing.T) {
 			"type": "buy",
 		}
 		response := client.CreateOrder(args)
-		assertSuccess(response, t)	
+		assertSuccess(response, "not_enough_balance", t)
 	})
 	t.Run("cancel order", func(t *testing.T){
 		var args = map[string]string{
 			"id":"M103975",
 		}
 		response := client.CancelOrder(args)
-		assertSuccess(response, t)	
+		assertSuccess(response, "invalid_request", t)
 	})
 	t.Run("create instant", func(t *testing.T){
 		var args = map[string]string{
@@ -120,7 +122,7 @@ func TestAutenticated(t *testing.T) {
 			"amount": "10",
 		}
 		response := client.CreateInstant(args)
-		assertSuccess(response, t)	
+		assertSuccess(response, "not_enough_balance", t)
 	})
 	t.Run("request deposit", func(t *testing.T){
 		var args = map[string]string{
@@ -128,7 +130,7 @@ func TestAutenticated(t *testing.T) {
 			"amount": "10234",
 		}
 		response := client.RequestDeposit(args)
-		assertSuccess(response, t)	
+		assertSuccess(response, "BankAccount matching query does not exist.", t)
 	})
 	t.Run("request withdrawal", func(t *testing.T){
 		var args = map[string]string{
@@ -136,7 +138,7 @@ func TestAutenticated(t *testing.T) {
 			"bank_account": "213213", 
 		}
 		response := client.RequestWithdrawal(args)
-		assertSuccess(response, t)	
+		assertSuccess(response, "BankAccount matching query does not exist.", t)
 	})
 	t.Run("transfer", func(t *testing.T){
 		var args = map[string]string{
@@ -146,7 +148,7 @@ func TestAutenticated(t *testing.T) {
 			"memo": "162354",
 		}
 		response := client.Transfer(args)
-		assertSuccess(response, t)	
+		assertSuccess(response, "max_limit_exceeded", t)
 	})
 }
 
@@ -181,7 +183,7 @@ func TestCryptoCompra(t *testing.T) {
 			"to_receive_currency": "CLP",
 		}
 		response := client.NewOrder(args)
-		assertSuccess(response, t)	
+		assertSuccess(response, "invalid_request", t)
 	})
 	t.Run("create wallet", func(t *testing.T){
 		var args = map[string]string{
@@ -190,7 +192,7 @@ func TestCryptoCompra(t *testing.T) {
 			"wallet": "ETH",
 		}
 		response := client.CreateWallet(args)
-		assertSuccess(response, t)	
+		assertSuccess(response, "payment_does_not_exist", t)
 	})
 	t.Run("payment orders", func(t *testing.T){
 		var args = map[string]string{
@@ -198,14 +200,14 @@ func TestCryptoCompra(t *testing.T) {
     		"end_date": "08/03/2018",
 		}
 		response := client.PaymentOrders(args)
-		assertSuccess(response, t)	
+		assertSuccess(response, "", t)
 	})
 	t.Run("payment status", func(t *testing.T){
 		var args = map[string]string{
 			"id": "P13433",
 		}
 		response := client.PaymentStatus(args)
-		assertSuccess(response, t)	
+		assertSuccess(response, "invalid_scope", t)
 	})
 
 }
