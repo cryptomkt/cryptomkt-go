@@ -4,7 +4,6 @@ import (
 	"crypto/hmac"
 	"crypto/sha512"
 	"encoding/hex"
-	"errors"
 	"fmt"
 	"net/http"
 	"time"
@@ -17,11 +16,10 @@ type HMACAuth struct {
 
 func NewAuth(apiKey, apiSecret string) (*HMACAuth, error) {
 	if apiKey == "" {
-		return nil, errors.New("api key can't be empty")
-
+		return nil, fmt.Errorf("client: api key can't be empty")
 	}
 	if apiSecret == "" {
-		return nil, errors.New("api secret can't be empty")
+		return nil, fmt.Errorf("client: api secret can't be empty")
 	}
 	auth := &HMACAuth{
 		apiKey:    apiKey,

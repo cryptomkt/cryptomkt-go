@@ -2,13 +2,10 @@ package client
 
 import (
 	"strings"
-
-	//"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/url"
-	"os"
 	"path"
 	"sort"
 )
@@ -20,7 +17,7 @@ type Client struct {
 	httpClient *http.Client
 }
 
-func NewClient(apiKey, apiSecret string) (*Client, error) {
+func New(apiKey, apiSecret string) (*Client, error) {
 	apiVersion := "v1"
 	baseApiUri := "https://api.cryptomkt.com/"
 
@@ -38,20 +35,19 @@ func NewClient(apiKey, apiSecret string) (*Client, error) {
 	return client, nil
 }
 
-func (client *Client) get(endpoint string, argsmap map[string]interface{}) string {
+func (client *Client) get(endpoint string, argsmap map[string]interface{}) (string, error) {
 	args, err := Mapss(argsmap)
-
 	if err != nil {
-		fmt.Println(err)
+		return "", err
 	}
 	u, err := url.Parse(client.baseApiUri)
 	if err != nil {
-		fmt.Println("could not parse the base api uri", client.baseApiUri)
+		return "", fmt.Errorf("client: Error parsing url %s: %v", client.baseApiUri, err)
 	}
 	u.Path = path.Join(u.Path, client.apiVersion, endpoint)
 	req, err := http.NewRequest("GET", u.String(), nil)
 	if err != nil {
-		fmt.Println(err)
+		return "", fmt.Errorf("client: Error building NewRequest struct: %v", err)
 	}
 
 	if len(args) != 0 {
@@ -67,31 +63,29 @@ func (client *Client) get(endpoint string, argsmap map[string]interface{}) strin
 
 	resp, err := client.httpClient.Do(req)
 	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+		return "", fmt.Errorf("client: Error making request: %v", err)
 	}
 	defer resp.Body.Close()
 	respBody, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+		return "", fmt.Errorf("client: Error reading response: %v", err)
 	}
-	return string(respBody)
+	return string(respBody), nil
 }
 
-func (client *Client) post(endpoint string, argsmap map[string]interface{}) string {
+func (client *Client) post(endpoint string, argsmap map[string]interface{}) (string, error) {
+	if len(argsmap) == 0 {
+		return "", fmt.Errorf("client: Must call with arguments")
+	}
 	args, err := Mapss(argsmap)
 	if err != nil {
-		fmt.Println(err)
+		return "", fmt.Errorf("client: Error parsing args as map[string]interface{} to map[string]string: %v", err)
 	}
 	u, err := url.Parse(client.baseApiUri)
 	if err != nil {
-		fmt.Println("could not parse the base api uri", client.baseApiUri)
+		return "", fmt.Errorf("client: Error parsing url %s: %v", client.baseApiUri, err)
 	}
 	u.Path = path.Join(u.Path, client.apiVersion, endpoint)
-	if err != nil {
-		fmt.Println(err)
-	}
 
 	form := url.Values{}
 	for k, v := range args {
@@ -100,38 +94,30 @@ func (client *Client) post(endpoint string, argsmap map[string]interface{}) stri
 
 	req, err := http.NewRequest("POST", u.String(), strings.NewReader(form.Encode()))
 	if err != nil {
-		fmt.Println(err)
+		return "", fmt.Errorf("client: Error building NewRequest struct: %v", err)
 	}
-	if len(args) == 0 {
-		fmt.Println("error, post with no information")
-	}
-	req.Header.Set("Content-Type", "application/x-www-form-urlencoded; param=value")
-
-	var body string
-
+	
 	keys := make([]string, 0, len(args))
 	for k := range args {
 		keys = append(keys, k)
 	}
 	sort.Strings(keys)
+	var body string
 	for _, k := range keys {
 		body = fmt.Sprintf("%s%v", body, args[k])
 	}
 	requestPath := fmt.Sprintf("/%s/%s", client.apiVersion, endpoint)
 	client.auth.SetHeaders(req, requestPath, body)
-	if err != nil {
-		fmt.Println("cannot parse form")
-	}
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded; param=value")
+
 	resp, err := client.httpClient.Do(req)
 	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+		return "", fmt.Errorf("client: Error making Request: %v", err)
 	}
 	defer resp.Body.Close()
 	respBody, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+		return "", fmt.Errorf("client: Error reading response: %v", err)
 	}
-	return string(respBody)
+	return string(respBody), nil
 }
