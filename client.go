@@ -41,36 +41,32 @@ func New(apiKey, apiSecret string) (*Client, error) {
 
 // get comunicates to cryptomarket via the http get method
 // Its the base implementation which the public methods use
-// Arguments are optional
-func (client *Client) get(endpoint string, argsmap map[string]interface{}) (string, error) {
-	args, err := Mapss(argsmap)
-	if err != nil {
-		return "", err
-	}
-
+// Argument are optional
+func (client *Client) get(endpoint string, request *Request) (string, error) {
+	args := request.arguments
 	u, err := url.Parse(client.baseApiUri)
 	if err != nil {
 		return "", fmt.Errorf("client: Error parsing url %s: %v", client.baseApiUri, err)
 	}
 	u.Path = path.Join(u.Path, client.apiVersion, endpoint)
-	req, err := http.NewRequest("GET", u.String(), nil)
+	httpReq, err := http.NewRequest("GET", u.String(), nil)
 	if err != nil {
 		return "", fmt.Errorf("client: Error building NewRequest struct: %v", err)
 	}
-	// query the arguments in the request, if there are arguments
+	// query the Argument in the request, if there are Argument
 	if len(args) != 0 {
-		q := req.URL.Query()
+		q := httpReq.URL.Query()
 		for k, v := range args {
 			q.Add(k, v)
 		}
-		req.URL.RawQuery = q.Encode()
+		httpReq.URL.RawQuery = q.Encode()
 	}
 
 	requestPath := fmt.Sprintf("/%s/%s", client.apiVersion, endpoint)
 
-	client.auth.SetHeaders(req, requestPath, "")
+	client.auth.SetHeaders(httpReq, requestPath, "")
 
-	resp, err := client.httpClient.Do(req)
+	resp, err := client.httpClient.Do(httpReq)
 	if err != nil {
 		return "", fmt.Errorf("client: Error making request: %v", err)
 	}
@@ -84,27 +80,22 @@ func (client *Client) get(endpoint string, argsmap map[string]interface{}) (stri
 
 // post comunicates to cryptomarket via the http post method.
 // Its the base implementation which the public methods use.
-// Arguments are required.
-func (client *Client) post(endpoint string, argsmap map[string]interface{}) (string, error) {
-	if len(argsmap) == 0 {
-		return "", fmt.Errorf("client: Must call with arguments")
-	}
-	args, err := Mapss(argsmap)
-	if err != nil {
-		return "", fmt.Errorf("client: Error parsing args as map[string]interface{} to map[string]string: %v", err)
-	}
+// Argument are required.
+func (client *Client) post(endpoint string, request *Request) (string, error) {
+	args := request.arguments
+	
 	u, err := url.Parse(client.baseApiUri)
 	if err != nil {
 		return "", fmt.Errorf("client: Error parsing url %s: %v", client.baseApiUri, err)
 	}
 	u.Path = path.Join(u.Path, client.apiVersion, endpoint)
 
-	// builds a form from the arguments
+	// builds a form from the Argument
 	form := url.Values{}
 	for k, v := range args {
 		form.Add(k, v)
 	}
-	req, err := http.NewRequest("POST", u.String(), strings.NewReader(form.Encode()))
+	httpReq, err := http.NewRequest("POST", u.String(), strings.NewReader(form.Encode()))
 	if err != nil {
 		return "", fmt.Errorf("client: Error building NewRequest struct: %v", err)
 	}
@@ -119,12 +110,12 @@ func (client *Client) post(endpoint string, argsmap map[string]interface{}) (str
 		body = fmt.Sprintf("%s%v", body, args[k])
 	}
 	requestPath := fmt.Sprintf("/%s/%s", client.apiVersion, endpoint)
-	client.auth.SetHeaders(req, requestPath, body)
+	client.auth.SetHeaders(httpReq, requestPath, body)
 
 	//required header for the reciever to interpret the request as a http form post
-	req.Header.Set("Content-Type", "application/x-www-form-urlencoded; param=value")
+	httpReq.Header.Set("Content-Type", "application/x-www-form-urlencoded; param=value")
 
-	resp, err := client.httpClient.Do(req)
+	resp, err := client.httpClient.Do(httpReq)
 	if err != nil {
 		return "", fmt.Errorf("client: Error making Request: %v", err)
 	}

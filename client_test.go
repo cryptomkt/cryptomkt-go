@@ -23,7 +23,7 @@ func assertSuccess(response string, acceptableError string, t *testing.T) {
 			t.Errorf("unexpected response")
 		}
 	} else {
-		t.Errorf("error in the response")
+		t.Errorf("error in the response: %s", resp)
 	}
 }
 
@@ -58,105 +58,86 @@ func TestAutenticated(t *testing.T) {
 		assertSuccess(response, "", t)
 	})
 	t.Run("transactions", func(t *testing.T) {
-		var args = map[string]interface{}{
-			"currency": "ETH",
-		}
-		response, _ := client.Transactions(args)
+		response, _ := client.Transactions(
+			Currency("ETH"))
 		assertSuccess(response, "", t)
 	})
 	t.Run("active orders=1", func(t *testing.T) {
-		var args = map[string]interface{}{
-			"market": "ETHCLP",
-			"page":   "0",
-		}
-		response, _ := client.ActiveOrders(args)
+		response, _ := client.ActiveOrders(
+			Market("ETHCLP"),
+			Page("0"))
 		assertSuccess(response, "", t)
 	})
 	t.Run("active orders=2", func(t *testing.T) {
-		var args = map[string]interface{}{
-			"market": "ETHARS",
-			"page":   "0",
-		}
-		response, _ := client.ActiveOrders(args)
+		response, _ := client.ActiveOrders(
+			Market("ETHARS"), 
+			Page("1"))
 		assertSuccess(response, "", t)
 	})
 	t.Run("order status", func(t *testing.T) {
-		var args = map[string]interface{}{
-			"id": "M103975",
-		}
-		response, _ := client.OrderStatus(args)
+		response, _ := client.OrderStatus(
+			Id("M103975"))
 		assertSuccess(response, "invalid_scope", t)
 	})
 	t.Run("instant", func(t *testing.T) {
-		var args = map[string]interface{}{
-			"market": "ETHCLP",
-			"type":   "sell",
-			"amount": "159",
-		}
-		response, _ := client.Instant(args)
+		response, _ := client.Instant(
+			Market("ETHCLP"), 
+			Type("sell"), 
+			Amount("159"))
 		assertSuccess(response, "", t)
 	})
 
 	t.Run("executed orders", func(t *testing.T) {
-		var args = map[string]interface{}{
-			"market": "ETHCLP",
-			"page": "0",
-		}
-		response, _ := client.Instant(args)
+		response, _ := client.ExecutedOrders(
+			Market("ETHCLP"), 
+			Page("0"))
 		assertSuccess(response, "invalid_type", t)
 	})
 
 	//test post methods
 	t.Run("create order", func(t *testing.T) {
-		var args = map[string]interface{}{
-			"amount": "0.3",
-			"market": "ETHCLP",
-			"price":  "10000",
-			"type":   "buy",
-		}
-		response, _ := client.CreateOrder(args)
+		response, _ := client.CreateOrder(
+			Amount("0.3"),
+			Market("ETHCLP"),
+			Price("1000"),
+			Type("buy"))
 		assertSuccess(response, "not_enough_balance", t)
 	})
 	t.Run("cancel order", func(t *testing.T) {
-		var args = map[string]interface{}{
-			"id": "M103975",
-		}
-		response, _ := client.CancelOrder(args)
+		response, _ := client.CancelOrder(
+			Id("M103975"),
+		)
 		assertSuccess(response, "invalid_request", t)
 	})
 	t.Run("create instant", func(t *testing.T) {
-		var args = map[string]interface{}{
-			"market": "ETHCLP",
-			"type":   "buy",
-			"amount": "10",
-		}
-		response, _ := client.CreateInstant(args)
+		response, _ := client.CreateInstant(
+			Market("ETHCLP"),
+			Type("buy"),
+			Amount("10"),
+		)
 		assertSuccess(response, "not_enough_balance", t)
 	})
 	t.Run("request deposit", func(t *testing.T) {
-		var args = map[string]interface{}{
-			"bank_account": "213213",
-			"amount":       "10234",
-		}
-		response, _ := client.RequestDeposit(args)
+		response, _ := client.RequestDeposit(
+			BankAccount("213213"),
+			Amount("10234"),
+		)
 		assertSuccess(response, "BankAccount matching query does not exist.", t)
 	})
 	t.Run("request withdrawal", func(t *testing.T) {
-		var args = map[string]interface{}{
-			"amount":       "10234",
-			"bank_account": "213213",
-		}
-		response, _ := client.RequestWithdrawal(args)
+		response, _ := client.RequestWithdrawal(
+			Amount("10234"),
+			BankAccount("213213"),
+		)
 		assertSuccess(response, "BankAccount matching query does not exist.", t)
 	})
 	t.Run("transfer", func(t *testing.T) {
-		var args = map[string]interface{}{
-			"address":  "GDMXNQBJMS3FYI4PFSYCCB4",
-			"amount":   "1200",
-			"currency": "XLM",
-			"memo":     "162354",
-		}
-		response, _ := client.Transfer(args)
+		response, _ := client.Transfer(
+			Address("GDMXNQBJMS3FYI4PFSYCCB4"),
+			Amount("1200"),
+			Currency("XLM"),
+			Memo("162354"),
+		)
 		assertSuccess(response, "max_limit_exceeded", t)
 	})
 }
@@ -182,41 +163,38 @@ func TestCryptoCompra(t *testing.T) {
 	}
 	//test every endpoint
 	t.Run("new order", func(t *testing.T) {
-		var args = map[string]interface{}{
-			"callback_url":        "",
-			"error_url":           "",
-			"external_id":         "ABC123",
-			"payment_receiver":    "user@email.com",
-			"success_url":         "",
-			"to_receive":          "3000",
-			"to_receive_currency": "CLP",
-		}
-		response, _ := client.NewOrder(args)
+		response, _ := client.NewOrder(
+			CallbackUrl(""),
+			ErrorUrl(""),
+			ExternalId("ABC123"),
+			PaymentReceiver("user@email.com"),
+			SuccessUrl(""),
+			ToReceive("3000"),
+			ToReceiveCurrency("CLP"),
+			RefundMail("refund@mail.com"),
+		)
 		assertSuccess(response, "invalid_request", t)
 	})
 	t.Run("create wallet", func(t *testing.T) {
-		var args = map[string]interface{}{
-			"id":     "P2023132",
-			"token":  "xToY232aheSt8F",
-			"wallet": "ETH",
-		}
-		response, _ := client.CreateWallet(args)
+		response, _ := client.CreateWallet(
+			Id("P2023132"),
+			Token("xToY232aheSt8F"),
+			Wallet("ETH"),
+		)
 		assertSuccess(response, "payment_does_not_exist", t)
 	})
 	t.Run("payment orders", func(t *testing.T) {
-		var args = map[string]interface{}{
-			"start_date": "01/03/2018",
-			"end_date":   "08/03/2018",
-		}
-		response, _ := client.PaymentOrders(args)
+		response, _ := client.PaymentOrders(
+			StartDate("01/03/2018"),
+			EndDate("08/03/2018"),
+		)
 		assertSuccess(response, "", t)
 	})
 	t.Run("payment status", func(t *testing.T) {
-		var args = map[string]interface{}{
-			"id": "P13433",
-		}
-		response, _ := client.PaymentStatus(args)
+		response, _ := client.PaymentStatus(
+			Id("P13433"),
+		)
 		assertSuccess(response, "invalid_scope", t)
 	})
-
 }
+
