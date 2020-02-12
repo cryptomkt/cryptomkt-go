@@ -97,6 +97,15 @@ func TestAutenticated(t *testing.T) {
 		assertSuccess(response, "", t)
 	})
 
+	t.Run("executed orders", func(t *testing.T) {
+		var args = map[string]interface{}{
+			"market": "ETHCLP",
+			"page": "0",
+		}
+		response, _ := client.Instant(args)
+		assertSuccess(response, "invalid_type", t)
+	})
+
 	//test post methods
 	t.Run("create order", func(t *testing.T) {
 		var args = map[string]interface{}{
