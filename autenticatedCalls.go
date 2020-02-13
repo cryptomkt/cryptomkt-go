@@ -41,7 +41,7 @@ func (client *Client) Transactions(args ...Argument) (string, error) {
 	return client.get("transactions", req)
 }
 
-// ActiveOrders returns the active orders of the client
+// ActiveOrders returns the list of active orders of the client
 // given a market and an opitonal page number
 // https://developers.cryptomkt.com/es/#ordenes-activas
 func (client *Client) ActiveOrders(args ...Argument) (string, error) {

@@ -2,140 +2,146 @@ package client
 
 type Argument func(*Request)
 
-func Amount(amount string) Argument {
+func Amount(val string) Argument {
 	return func(request *Request) {
-		request.addArgument("amount", amount)
+		request.addArgument("amount", val)
 	}
 }
 
-func Market(market string) Argument {
+func Market(val string) Argument {
 	return func(request *Request) {
-		request.addArgument("market", market)
+		request.addArgument("market", val)
 	}
 }
 
-func Type(atype string) Argument {
+func Type(val string) Argument {
 	return func(request *Request) {
-		request.addArgument("type", atype)
+		request.addArgument("type", val)
 	}
 }
 
-func Page(page string) Argument {
+func Page(val string) Argument {
 	return func(request *Request) {
-		request.addArgument("page", page)
+		request.addArgument("page", val)
 	}
 }
 
-func Limit(limit string) Argument {
+func Limit(val string) Argument {
 	return func(request *Request) {
-		request.addArgument("limit", limit)
+		request.addArgument("limit", val)
 	}
 }
 
-func Price(price string) Argument {
+func Price(val string) Argument {
 	return func(request *Request) {
-		request.addArgument("price", price)
+		request.addArgument("price", val)
 	}
 }
 
-func Currency(currency string) Argument {
+func Currency(val string) Argument {
 	return func(request *Request) {
-		request.addArgument("currency", currency)
+		request.addArgument("currency", val)
 	}
 }
 
-func Id(id string) Argument {
+func Id(val string) Argument {
 	return func(request *Request) {
-		request.addArgument("id", id)
+		request.addArgument("id", val)
 	}
 }
 
-func BankAccount(bankAccount string) Argument {
+func BankAccount(val string) Argument {
 	return func(request *Request) {
-		request.addArgument("bank_account", bankAccount)
+		request.addArgument("bank_account", val)
 	}
 }
 
-func Address(address string) Argument {
+func Address(val string) Argument {
 	return func(request *Request) {
-		request.addArgument("address", address)
+		request.addArgument("address", val)
 	}
 }
 
-func Memo(memo string) Argument {
+func Memo(val string) Argument {
 	return func(request *Request) {
-		request.addArgument("memo", memo)
+		request.addArgument("memo", val)
 	}
 }
 
-func CallbackUrl(callbackUrl string) Argument {
+func CallbackUrl(val string) Argument {
 	return func(request *Request) {
-		request.addArgument("callback_url", callbackUrl)
+		request.addArgument("callback_url", val)
 	}
 }
 
-func ErrorUrl(errorUrl string) Argument {
+func ErrorUrl(val string) Argument {
 	return func(request *Request) {
-		request.addArgument("error_url", errorUrl)
+		request.addArgument("error_url", val)
 	}
 }
 
-func ExternalId(externalId string) Argument {
+func ExternalId(val string) Argument {
 	return func(request *Request) {
-		request.addArgument("external_id", externalId)
+		request.addArgument("external_id", val)
 	}
 }
 
-func PaymentReceiver(paymentReceiver string) Argument {
+func PaymentReceiver(val string) Argument {
 	return func(request *Request) {
-		request.addArgument("payment_receiver", paymentReceiver)
+		request.addArgument("payment_receiver", val)
 	}
 }
 			
-func SuccessUrl(successUrl string) Argument {
+func SuccessUrl(val string) Argument {
 	return func(request *Request) {
-		request.addArgument("success_url", successUrl)
+		request.addArgument("success_url", val)
 	}
 }
 
-func ToReceive(toReceive string) Argument {
+func ToReceive(val string) Argument {
 	return func(request *Request) {
-		request.addArgument("to_receive", toReceive)
+		request.addArgument("to_receive", val)
 	}
 }
 
-func ToReceiveCurrency(toReceiveCurrency string) Argument {
+func ToReceiveCurrency(val string) Argument {
 	return func(request *Request) {
-		request.addArgument("to_receive_currency", toReceiveCurrency)
+		request.addArgument("to_receive_currency", val)
 	}
 }
 
-func Token(token string) Argument {
+func Language(val string) Argument {
 	return func(request *Request) {
-		request.addArgument("token", token)
+		request.addArgument("language", val)
 	}
 }
 
-func Wallet(wallet string) Argument {
+func Token(val string) Argument {
 	return func(request *Request) {
-		request.addArgument("wallet", wallet)
+		request.addArgument("token", val)
 	}
 }
 
-func StartDate(startDate string) Argument {
+func Wallet(val string) Argument {
 	return func(request *Request) {
-		request.addArgument("start_date", startDate)
+		request.addArgument("wallet", val)
 	}
 }
 
-func EndDate(endDate string) Argument {
+func StartDate(val string) Argument {
 	return func(request *Request) {
-		request.addArgument("end_date", endDate)
+		request.addArgument("start_date", val)
 	}
 }
 
-func RefundMail(refundMail string) Argument {
+func EndDate(val string) Argument {
 	return func(request *Request) {
-		request.addArgument("refund_mail", refundMail)
+		request.addArgument("end_date", val)
+	}
+}
+
+func RefundMail(val string) Argument {
+	return func(request *Request) {
+		request.addArgument("refund_email", val)
 	}
 }
