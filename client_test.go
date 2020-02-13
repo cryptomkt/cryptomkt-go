@@ -6,7 +6,35 @@ import (
 	"log"
 	"os"
 	"testing"
+	"fmt"
 )
+
+
+// newDebugClient initializes a client to run request,
+// so its recomendable to not have money in the account for testing
+// reads the first two lines of a file, the first one is the api key,
+// the second one is the api secret
+// **WARNING** DO NOT SHARE YOUR KEYS, KEEP THEM OUT OF THE REPOSITORY
+// (with .gitignore for example)
+func newDebugClient(filePath string) (*Client, error) {
+	file, err := os.Open(filePath)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer file.Close()
+
+	scanner := bufio.NewScanner(file)
+	scanner.Scan()
+	apiKey := scanner.Text()
+	scanner.Scan()
+	apiSecret := scanner.Text()
+
+	client, err := New(apiKey, apiSecret)
+	if err != nil {
+		return nil, fmt.Errorf("error making the testing client. %s if failing", filePath)
+	}
+	return client, nil
+}
 
 func assertSuccess(response string, acceptableError string, t *testing.T) {
 	var resp map[string]interface{}
@@ -28,25 +56,10 @@ func assertSuccess(response string, acceptableError string, t *testing.T) {
 }
 
 func TestAutenticated(t *testing.T) {
-	//load the keys for the connection to crypto market.
-	//apikey first, apisecret after,  every in its own line.
-	file, err := os.Open("keys.txt")
+	client, err := newDebugClient("keys.txt")
 	if err != nil {
-		log.Fatal(err)
+		t.Errorf("%s", err)
 	}
-	defer file.Close()
-
-	scanner := bufio.NewScanner(file)
-	scanner.Scan()
-	apiKey := scanner.Text()
-	scanner.Scan()
-	apiSecret := scanner.Text()
-
-	client, err := New(apiKey, apiSecret)
-	if err != nil {
-		t.Errorf("error making the client")
-	}
-	//test every endpoint
 
 	//test get methods
 	t.Run("account", func(t *testing.T) {
@@ -143,24 +156,11 @@ func TestAutenticated(t *testing.T) {
 }
 
 func TestCryptoCompra(t *testing.T) {
-	//load the keys for the connection to crypto market.
-	//apikey first, apisecret after,  every in its own line.
-	file, err := os.Open("keys.txt")
+	client, err := newDebugClient("keys.txt")
 	if err != nil {
-		log.Fatal(err)
+		t.Errorf("%s", err)
 	}
-	defer file.Close()
 
-	scanner := bufio.NewScanner(file)
-	scanner.Scan()
-	apiKey := scanner.Text()
-	scanner.Scan()
-	apiSecret := scanner.Text()
-
-	client, err := New(apiKey, apiSecret)
-	if err != nil {
-		t.Errorf("error making the client")
-	}
 	//test every endpoint
 	t.Run("new order", func(t *testing.T) {
 		response, _ := client.NewOrder(
@@ -171,7 +171,7 @@ func TestCryptoCompra(t *testing.T) {
 			SuccessUrl(""),
 			ToReceive("3000"),
 			ToReceiveCurrency("CLP"),
-			RefundMail("refund@mail.com"),
+			RefundEmail("refund@mail.com"),
 		)
 		assertSuccess(response, "invalid_request", t)
 	})
@@ -197,31 +197,3 @@ func TestCryptoCompra(t *testing.T) {
 		assertSuccess(response, "invalid_scope", t)
 	})
 }
-/*
-#TODO: cuando se tengan los enpoints no autorizados,
-	   probar los valores que acepta el parametro limit
-	   en el listado de trades, dice que el mínimo es 20 y el 
-	   máximo es 100, pero puede que acepte menos o más que estos
-	   valores, recuerdo haber usado 10 y que me aceptara la request
-	   *Mientras*, limit se restringira a ser mayor a cero y menor a 200.
-func TestLimitArgumentRestrictions(t *testing.T) {
-//load the keys for the connection to crypto market.
-	//apikey first, apisecret after,  every in its own line.
-	file, err := os.Open("keys.txt")
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer file.Close()
-
-	scanner := bufio.NewScanner(file)
-	scanner.Scan()
-	apiKey := scanner.Text()
-	scanner.Scan()
-	apiSecret := scanner.Text()
-
-	client, err := New(apiKey, apiSecret)
-	if err != nil {
-		t.Errorf("error making the client")
-	}
-}
-*/

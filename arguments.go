@@ -2,8 +2,8 @@ package client
 
 import (
 	"errors"
-	"strconv"
 	"fmt"
+	"strconv"
 )
 
 type Argument func(*Request) error
@@ -16,14 +16,14 @@ func assertDayFormat(val, date string) error {
 	if day < 1 || 31 < day {
 		return fmt.Errorf("%s format error: invalid day value", date)
 	}
-	month, err := strconv.Atoi(val[3:5]) 
+	month, err := strconv.Atoi(val[3:5])
 	if err != nil {
 		return fmt.Errorf("%s format error: must be dd/mm/yyyy", date)
 	}
 	if month < 1 || 12 < month {
 		return fmt.Errorf("%s format error: invalid month value", date)
 	}
-	_, err = strconv.Atoi(val[6:10]) 
+	_, err = strconv.Atoi(val[6:10])
 	if err != nil {
 		return fmt.Errorf("%s format error: must be dd/mm/yyyy", date)
 	}
@@ -56,12 +56,11 @@ func Market(val string) Argument {
 	}
 }
 
-
-// Type is an argument of a request, 
+// Type is an argument of a request,
 // accepts either "buy" or "sell"
 func Type(val string) Argument {
 	return func(request *Request) error {
-		if !(val == "buy" ||  val == "sell") {
+		if !(val == "buy" || val == "sell") {
 			return errors.New("type must be either \"buy\" or \"sell\"")
 		}
 		request.addArgument("type", val)
@@ -86,7 +85,6 @@ func Page(val string) Argument {
 	}
 }
 
-
 // Limit is an argument of a request,
 // accepts an integer greater or equal to 0 and lesser or equal to 200.
 // default value is 20.
@@ -96,7 +94,7 @@ func Limit(val string) Argument {
 		if err != nil {
 			return errors.New("limit must be an integer greater or equal to 0 and lesser or equal to 200")
 		}
-		if intval < 0  || intval < 200{
+		if intval < 0 || intval < 200 {
 			return errors.New("limit must be an integer greater or equal to 0 and lesser or equal to 200")
 		}
 		request.addArgument("limit", val)
@@ -292,7 +290,7 @@ func ToReceiveCurrency(val string) Argument {
 // supported languages are "es", "en" and "pt"
 func Language(val string) Argument {
 	return func(request *Request) error {
-		if !(val=="es" || val=="en" || val=="pt") {
+		if !(val == "es" || val == "en" || val == "pt") {
 			return errors.New("language not supported. Supported languages are \"es\", \"en\" and \"pt\"")
 		}
 		request.addArgument("language", val)
@@ -347,7 +345,7 @@ func EndDate(val string) Argument {
 }
 
 // RefundMail is an argument of a request.
-func RefundMail(val string) Argument {
+func RefundEmail(val string) Argument {
 	return func(request *Request) error {
 		request.addArgument("refund_email", val)
 		return nil
