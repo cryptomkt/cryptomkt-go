@@ -1,5 +1,7 @@
 # cryptomkt-go
 
+Golang API of CryptoMarket
+
 ## Installation
 
 `go get cryptomarket`
@@ -15,7 +17,8 @@ If you're writing code for your own CryptoMarket account, [enable an API key](ht
 
 ```golang
 import (
-    "cryptomarket"
+    "github.com/cryptomkt/cryptomkt-go/client"
+    "github.com/cryptomkt/cryptomkt-go/args"
 )
 
 ```
@@ -24,9 +27,9 @@ and then create a ``Client`` object for interacting with the API:
 
 
 ```golang
-Client, err := cryptomarket.NewClient(apiKey, apiSecret)
+Client, err := client.New(apiKey, apiSecret)
 if err != nil{
-    fmt.Errorf("Problems creating the client %s:", err)
+    fmt.Errorf("Problems creating the client: %s", err)
 }
 ```
 
@@ -39,6 +42,9 @@ With a `client`, you can now make API calls. We've included some examples below.
 **Listing available markets**
 
 ```golang
+import (
+    "github.com/cryptomkt/cryptomkt-go/client"
+)
 Client, err := cryptomarket.NewClient(apiKey, apiSecret)
 if err != nil{
     fmt.Errorf("Problems creating the client %s:", err)
@@ -56,6 +62,9 @@ if err != nil {
 **Get account info**
 
 ```golang
+import (
+    "github.com/cryptomkt/cryptomkt-go/client"
+)
 Client, err := NewClient(apiKey, apiSecret)
 if err != nil{
     fmt.Errorf("Problems creating the client %s:", err)
@@ -71,19 +80,24 @@ if err != nil {
 **Create order**
 
 ```golang
+import (
+    "github.com/cryptomkt/cryptomkt-go/client"
+    "github.com/cryptomkt/cryptomkt-go/args"
+)
 Client, err := cryptomarket.NewClient(apiKey, apiSecret)
 if err != nil{
     fmt.Errorf("Problems creating the client %s:", err)
 }
 
 account, err := client.CreateOrder(
-    Amount(0.3),
-    Market("ETHCLP"),
-    Price(1000),
-    Type("buy"),
+    args.Amount(0.3),
+    args.Market("ETHCLP"),
+    args.Price(1000),
+    args.Type("buy"),
 )
 if err != nil {
     fmt.Errorf("Error while creating an order: %s", err)
 }
 // if we are here, then account has the requested data
 ```
+
