@@ -35,13 +35,6 @@ func assertDayFormat(val, date string) error {
 // number format: without thousand separator, and '.' as decimal point
 func Amount(val string) Argument {
 	return func(request *Request) error {
-		numval, err := strconv.ParseFloat(val, 64)
-		if err != nil {
-			return errors.New("Amount must be a positive number")
-		}
-		if numval <= 0.0 {
-			return errors.New("Amount must be a positive number")
-		}
 		request.addArgument("amount", val)
 		return nil
 	}
@@ -71,50 +64,38 @@ func Type(val string) Argument {
 // Page is an argument of a request,
 // accepts an integer greater or equal to 0
 // default value is 0
-func Page(val string) Argument {
+func Page(val int) Argument {
 	return func(request *Request) error {
-		intval, err := strconv.Atoi(val)
-		if err != nil {
+		if val < 0 {
 			return errors.New("page must be an integer greater or equal to 0")
 		}
-		if intval < 0 {
-			return errors.New("page must be an integer greater or equal to 0")
-		}
-		request.addArgument("page", val)
+		request.addArgument("page", string(val))
 		return nil
 	}
 }
 
 // Limit is an argument of a request,
 // accepts an integer greater or equal to 0 and lesser or equal to 200.
-// default value is 20.
-func Limit(val string) Argument {
+// if not given, its default value is 20.
+func Limit(val int) Argument {
 	return func(request *Request) error {
-		intval, err := strconv.Atoi(val)
-		if err != nil {
-			return errors.New("limit must be an integer greater or equal to 0 and lesser or equal to 200")
+		if val < 20 || 100 < val {
+			return errors.New("limit must be an integer greater or equal to 20 and lesser or equal to 100")
 		}
-		if intval < 0 || intval < 200 {
-			return errors.New("limit must be an integer greater or equal to 0 and lesser or equal to 200")
-		}
-		request.addArgument("limit", val)
+		request.addArgument("limit", string(val))
 		return nil
 	}
 }
 
 // Timeframe is an argument of a request,
 // its the lapse between two candles,
-// accepts 1, 5, 15, 60, 240, 1440 or 10080
+// accepts 1, 5, 15, 60, 240, 1440 or 10080 as integers
 func Timeframe(val string) Argument {
 	return func(request *Request) error {
-		intval, err := strconv.Atoi(val)
-		if err != nil {
-			return errors.New("timeframe must be one of the following numbers: 1, 5, 15, 60, 240, 1440 or 10080")
+		if !(val == "1" || val == "5" || val == "15" || val == "60" || val == "240" || val == "1440" || val == "10080") {
+			return errors.New("timeframe must be one of the following numbers: 1, 5, 15, 60, 240, 1440 or 10080, as string")
 		}
-		if !(intval == 1 || intval == 5 || intval == 15 || intval == 60 || intval == 240 || intval == 1440 || intval == 10080) {
-			return errors.New("timeframe must be one of the following numbers: 1, 5, 15, 60, 240, 1440 or 10080")
-		}
-		request.addArgument("limit", val)
+		request.addArgument("limit", string(val))
 		return nil
 	}
 }
@@ -123,19 +104,6 @@ func Timeframe(val string) Argument {
 // must be a positive number
 func Price(val string) Argument {
 	return func(request *Request) error {
-		numval, err := strconv.Atoi(val)
-		if err != nil {
-			numval, err := strconv.ParseFloat(val, 64)
-			if err != nil {
-				return errors.New("Price must be a positive number")
-			}
-			if numval <= 0.0 {
-				return errors.New("Price must be a positive number")
-			}
-		}
-		if numval <= 0 {
-			return errors.New("Price must be a positive number")
-		}
 		request.addArgument("price", val)
 		return nil
 	}
@@ -271,9 +239,9 @@ func SuccessUrl(val string) Argument {
 }
 
 // ToReceive is an argument of a request.
-func ToReceive(val string) Argument {
+func ToReceive(val float64) Argument {
 	return func(request *Request) error {
-		request.addArgument("to_receive", val)
+		request.addArgument("to_receive", strconv.FormatFloat(val, 'f', 2, 64))
 		return nil
 	}
 }

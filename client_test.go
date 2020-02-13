@@ -3,12 +3,11 @@ package client
 import (
 	"bufio"
 	"encoding/json"
+	"fmt"
 	"log"
 	"os"
 	"testing"
-	"fmt"
 )
-
 
 // newDebugClient initializes a client to run request,
 // so its recomendable to not have money in the account for testing
@@ -78,13 +77,13 @@ func TestAutenticated(t *testing.T) {
 	t.Run("active orders=1", func(t *testing.T) {
 		response, _ := client.ActiveOrders(
 			Market("ETHCLP"),
-			Page("0"))
+			Page(0))
 		assertSuccess(response, "", t)
 	})
 	t.Run("active orders=2", func(t *testing.T) {
 		response, _ := client.ActiveOrders(
 			Market("ETHARS"),
-			Page("1"))
+			Page(1))
 		assertSuccess(response, "", t)
 	})
 	t.Run("order status", func(t *testing.T) {
@@ -103,7 +102,7 @@ func TestAutenticated(t *testing.T) {
 	t.Run("executed orders", func(t *testing.T) {
 		response, _ := client.ExecutedOrders(
 			Market("ETHCLP"),
-			Page("0"))
+			Page(0))
 		assertSuccess(response, "invalid_type", t)
 	})
 
@@ -169,7 +168,7 @@ func TestCryptoCompra(t *testing.T) {
 			ExternalId("ABC123"),
 			PaymentReceiver("user@email.com"),
 			SuccessUrl(""),
-			ToReceive("3000"),
+			ToReceive(3000),
 			ToReceiveCurrency("CLP"),
 			RefundEmail("refund@mail.com"),
 		)

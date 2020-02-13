@@ -1,11 +1,9 @@
 package client
 
 import (
-	"testing"
 	"fmt"
+	"testing"
 )
-
-
 
 func TestTransactions(t *testing.T) {
 	client, err := newDebugClient("keys.txt")
@@ -23,19 +21,19 @@ func TestTransactions(t *testing.T) {
 		fmt.Println()
 	})
 	/*
-	fails, currency has no restrictions, although it can be added 
-	to be CLP, ARS, BRL, MXN, EUR, ETH, XLM or BTC.
-	t.Run("unsupported=Currency", func(t *testing.T) {
-		_, err := client.Transactions(
-			Currency("USD"),
-		)
-		if err == nil {
-			t.Errorf("no error rised, should rise not supported currency")
-		}
-		fmt.Println("should inform unsupported currency")
-		fmt.Println(err)
-		fmt.Println()
-	})
+		fails, currency has no restrictions, although it can be added
+		to be CLP, ARS, BRL, MXN, EUR, ETH, XLM or BTC.
+		t.Run("unsupported=Currency", func(t *testing.T) {
+			_, err := client.Transactions(
+				Currency("USD"),
+			)
+			if err == nil {
+				t.Errorf("no error rised, should rise not supported currency")
+			}
+			fmt.Println("should inform unsupported currency")
+			fmt.Println(err)
+			fmt.Println()
+		})
 	*/
 }
 
@@ -89,8 +87,6 @@ func OrderStatus(t *testing.T) {
 		fmt.Println()
 	})
 }
-
-
 
 /*
 #TODO: cuando se tengan los enpoints no autorizados,
