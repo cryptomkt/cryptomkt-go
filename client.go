@@ -3,16 +3,16 @@
 package client
 
 import (
-	"strings"
 	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/url"
 	"path"
 	"sort"
+	"strings"
 )
 
-// Client keep the needed information to 
+// Client keep the needed information to
 type Client struct {
 	apiVersion string
 	baseApiUri string
@@ -83,7 +83,7 @@ func (client *Client) get(endpoint string, request *Request) (string, error) {
 // Argument are required.
 func (client *Client) post(endpoint string, request *Request) (string, error) {
 	args := request.arguments
-	
+
 	u, err := url.Parse(client.baseApiUri)
 	if err != nil {
 		return "", fmt.Errorf("client: Error parsing url %s: %v", client.baseApiUri, err)
@@ -99,7 +99,7 @@ func (client *Client) post(endpoint string, request *Request) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("client: Error building NewRequest struct: %v", err)
 	}
-	
+
 	keys := make([]string, 0, len(args))
 	for k := range args {
 		keys = append(keys, k)

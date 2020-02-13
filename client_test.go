@@ -70,7 +70,7 @@ func TestAutenticated(t *testing.T) {
 	})
 	t.Run("active orders=2", func(t *testing.T) {
 		response, _ := client.ActiveOrders(
-			Market("ETHARS"), 
+			Market("ETHARS"),
 			Page("1"))
 		assertSuccess(response, "", t)
 	})
@@ -81,15 +81,15 @@ func TestAutenticated(t *testing.T) {
 	})
 	t.Run("instant", func(t *testing.T) {
 		response, _ := client.Instant(
-			Market("ETHCLP"), 
-			Type("sell"), 
+			Market("ETHCLP"),
+			Type("sell"),
 			Amount("159"))
 		assertSuccess(response, "", t)
 	})
 
 	t.Run("executed orders", func(t *testing.T) {
 		response, _ := client.ExecutedOrders(
-			Market("ETHCLP"), 
+			Market("ETHCLP"),
 			Page("0"))
 		assertSuccess(response, "invalid_type", t)
 	})
@@ -197,4 +197,31 @@ func TestCryptoCompra(t *testing.T) {
 		assertSuccess(response, "invalid_scope", t)
 	})
 }
+/*
+#TODO: cuando se tengan los enpoints no autorizados,
+	   probar los valores que acepta el parametro limit
+	   en el listado de trades, dice que el mínimo es 20 y el 
+	   máximo es 100, pero puede que acepte menos o más que estos
+	   valores, recuerdo haber usado 10 y que me aceptara la request
+	   *Mientras*, limit se restringira a ser mayor a cero y menor a 200.
+func TestLimitArgumentRestrictions(t *testing.T) {
+//load the keys for the connection to crypto market.
+	//apikey first, apisecret after,  every in its own line.
+	file, err := os.Open("keys.txt")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer file.Close()
 
+	scanner := bufio.NewScanner(file)
+	scanner.Scan()
+	apiKey := scanner.Text()
+	scanner.Scan()
+	apiSecret := scanner.Text()
+
+	client, err := New(apiKey, apiSecret)
+	if err != nil {
+		t.Errorf("error making the client")
+	}
+}
+*/

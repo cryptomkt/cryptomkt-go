@@ -1,11 +1,14 @@
 package client
 
+import (
+	"fmt"
+)
 // Account gives the account information of the client.
 // https://developers.cryptomkt.com/es/#cuenta
 func (client *Client) Account() (string, error) {
 	req := &Request{
 		arguments: make(map[string]string),
-		required: []string{},
+		required:  []string{},
 	}
 	return client.get("account", req)
 }
@@ -15,7 +18,7 @@ func (client *Client) Account() (string, error) {
 func (client *Client) Balance() (string, error) {
 	req := &Request{
 		arguments: make(map[string]string),
-		required: []string{},
+		required:  []string{},
 	}
 	return client.get("balance", req)
 }
@@ -26,17 +29,29 @@ func (client *Client) Wallets() (string, error) {
 	return client.Balance()
 }
 
-func (client *Client) Transactions(args ...Argument) (string, error) {
+func makeReq(required []string, args ...Argument) (*Request, error) {
 	req := &Request{
 		arguments: make(map[string]string),
-		required: []string{"currency"},
+		required:  required,
 	}
 	for _, argument := range args {
-		argument(req)
+		err := argument(req)
+		if err != nil {
+			return nil, fmt.Errorf("argument error: %s", err)
+		}
 	}
 	err := req.assertRequired()
 	if err != nil {
-		return "", err
+		return nil, fmt.Errorf("required arguments not meeted:%s", err)
+	}
+	return req, nil
+}
+
+func (client *Client) Transactions(args ...Argument) (string, error) {
+	required := []string{"currency"}
+	req, err := makeReq(required, args...)
+	if err != nil {
+		return "", fmt.Errorf("Error in transaction: %s",err)
 	}
 	return client.get("transactions", req)
 }
@@ -45,16 +60,10 @@ func (client *Client) Transactions(args ...Argument) (string, error) {
 // given a market and an opitonal page number
 // https://developers.cryptomkt.com/es/#ordenes-activas
 func (client *Client) ActiveOrders(args ...Argument) (string, error) {
-	req := &Request{
-		arguments: make(map[string]string),
-		required: []string{"market"},
-	}
-	for _, argument := range args {
-		argument(req)
-	}
-	err := req.assertRequired()
+	required := []string{"market"}
+	req, err := makeReq(required, args...)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("Error in ActiveOrders: %s",err)
 	}
 	return client.get("orders/active", req)
 }
@@ -63,35 +72,22 @@ func (client *Client) ActiveOrders(args ...Argument) (string, error) {
 // given a market and an optional page
 // https://developers.cryptomkt.com/es/#ordenes-ejecutadas
 func (client *Client) ExecutedOrders(args ...Argument) (string, error) {
-	req := &Request{
-		arguments: make(map[string]string),
-		required: []string{"market"},
-	}
-	for _, argument := range args {
-		argument(req)
-	}
-	err := req.assertRequired()
+	required := []string{"market"}
+	req, err := makeReq(required, args...)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("Error in ExecutedOrders: %s",err)
 	}
 	return client.get("orders/executed", req)
 }
-
 
 // OrderStatus gives the status of an order
 // given the order "id"
 // https://developers.cryptomkt.com/es/#estado-de-orden
 func (client *Client) OrderStatus(args ...Argument) (string, error) {
-	req := &Request{
-		arguments: make(map[string]string),
-		required: []string{"id"},
-	}
-	for _, argument := range args {
-		argument(req)
-	}
-	err := req.assertRequired()
+	required := []string{"id"}
+	req, err := makeReq(required, args...)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("Error in OrderStatus: %s",err)
 	}
 	return client.get("orders/status", req)
 }
@@ -100,16 +96,10 @@ func (client *Client) OrderStatus(args ...Argument) (string, error) {
 // given a "market", a "type" ("buy" or "sell") and an "amount"
 // https://developers.cryptomkt.com/es/#obtener-cantidad
 func (client *Client) Instant(args ...Argument) (string, error) {
-	req := &Request{
-		arguments: make(map[string]string),
-		required: []string{"market", "type", "amount"},
-	}
-	for _, argument := range args {
-		argument(req)
-	}
-	err := req.assertRequired()
+	required := []string{"market", "type", "amount"}
+	req, err := makeReq(required, args...)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("Error in Instant: %s",err)
 	}
 	return client.get("orders/instant/get", req)
 }
@@ -118,16 +108,10 @@ func (client *Client) Instant(args ...Argument) (string, error) {
 // given an "amount", a "market", a "price" and a "type" ("buy" or "sell")
 // https://developers.cryptomkt.com/es/#crear-orden
 func (client *Client) CreateOrder(args ...Argument) (string, error) {
-	req := &Request{
-		arguments: make(map[string]string),
-		required: []string{"amount", "market", "price", "type"},
-	}
-	for _, argument := range args {
-		argument(req)
-	}
-	err := req.assertRequired()
+	required := []string{"amount", "market", "price", "type"}
+	req, err := makeReq(required, args...)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("Error in CreateOrder: %s",err)
 	}
 	return client.post("orders/create", req)
 }
@@ -136,16 +120,10 @@ func (client *Client) CreateOrder(args ...Argument) (string, error) {
 // given the order "id"
 // https://developers.cryptomkt.com/es/#cancelar-una-orden
 func (client *Client) CancelOrder(args ...Argument) (string, error) {
-	req := &Request{
-		arguments: make(map[string]string),
-		required: []string{"id"},
-	}
-	for _, argument := range args {
-		argument(req)
-	}
-	err := req.assertRequired()
+	required := []string{"id"}
+	req, err := makeReq(required, args...)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("Error in CancelOrder: %s",err)
 	}
 	return client.post("orders/cancel", req)
 }
@@ -154,16 +132,10 @@ func (client *Client) CancelOrder(args ...Argument) (string, error) {
 // given a "market", a "type" ("buy" or "sell") and an "amount"
 // https://developers.cryptomkt.com/es/#crear-orden-2
 func (client *Client) CreateInstant(args ...Argument) (string, error) {
-	req := &Request{
-		arguments: make(map[string]string),
-		required: []string{"market", "type", "amount"},
-	}
-	for _, argument := range args {
-		argument(req)
-	}
-	err := req.assertRequired()
+	required := []string{"market", "type", "amount"}
+	req, err := makeReq(required, args...)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("Error in CreateInstant: %s",err)
 	}
 	return client.post("orders/instant/create", req)
 }
@@ -174,16 +146,10 @@ func (client *Client) CreateInstant(args ...Argument) (string, error) {
 // and a "voucher" (for Mexico, Brasil and European Union only)
 // https://developers.cryptomkt.com/es/#notificar-deposito
 func (client *Client) RequestDeposit(args ...Argument) (string, error) {
-	req := &Request{
-		arguments: make(map[string]string),
-		required: []string{"amount", "bank_account"},
-	}
-	for _, argument := range args {
-		argument(req)
-	}
-	err := req.assertRequired()
+	required := []string{"amount", "bank_account"}
+	req, err := makeReq(required, args...)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("Error in RequestDeposit: %s",err)
 	}
 	return client.post("request/deposit", req)
 }
@@ -192,16 +158,10 @@ func (client *Client) RequestDeposit(args ...Argument) (string, error) {
 // given a "bank_account" and an "amount"
 // https://developers.cryptomkt.com/es/#notificar-retiro
 func (client *Client) RequestWithdrawal(args ...Argument) (string, error) {
-	req := &Request{
-		arguments: make(map[string]string),
-		required: []string{"amount", "bank_account"},
-	}
-	for _, argument := range args {
-		argument(req)
-	}
-	err := req.assertRequired()
+	required := []string{"amount", "bank_account"}
+	req, err := makeReq(required, args...)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("Error in RequestWithdrawal: %s",err)
 	}
 	return client.post("request/withdrawal", req)
 }
@@ -212,16 +172,10 @@ func (client *Client) RequestWithdrawal(args ...Argument) (string, error) {
 // and an optional "memo"
 // https://developers.cryptomkt.com/es/#transferir
 func (client *Client) Transfer(args ...Argument) (string, error) {
-	req := &Request{
-		arguments: make(map[string]string),
-		required: []string{"address", "amount", "currency"},
-	}
-	for _, argument := range args {
-		argument(req)
-	}
-	err := req.assertRequired()
+	required := []string{"address", "amount", "currency"}
+	req, err := makeReq(required, args...)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("Error in Transfer: %s",err)
 	}
 	return client.post("transfer", req)
 }
@@ -229,16 +183,10 @@ func (client *Client) Transfer(args ...Argument) (string, error) {
 // NewOrder enables a payment order, and gives a QR and urls
 // https://developers.cryptomkt.com/es/#crear-orden-de-pago
 func (client *Client) NewOrder(args ...Argument) (string, error) {
-	req := &Request{
-		arguments: make(map[string]string),
-		required: []string{"to_receive", "to_receive_currency", "payment_receiver"},
-	}
-	for _, argument := range args {
-		argument(req)
-	}
-	err := req.assertRequired()
+	required := []string{"to_receive", "to_receive_currency", "payment_receiver"}
+	req, err := makeReq(required, args...)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("Error in NewOrder: %s",err)
 	}
 	return client.post("payment/new_order", req)
 }
@@ -246,16 +194,10 @@ func (client *Client) NewOrder(args ...Argument) (string, error) {
 // CreateWallet creates a wallet to pay a payment order
 // https://developers.cryptomkt.com/es/#crear-billetera-de-orden-de-pago
 func (client *Client) CreateWallet(args ...Argument) (string, error) {
-	req := &Request{
-		arguments: make(map[string]string),
-		required: []string{"id", "token", "wallet"},
-	}
-	for _, argument := range args {
-		argument(req)
-	}
-	err := req.assertRequired()
+	required := []string{"id", "token", "wallet"}
+	req, err := makeReq(required, args...)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("Error in CreateWallet: %s",err)
 	}
 	return client.post("payment/create_wallet", req)
 }
@@ -263,16 +205,10 @@ func (client *Client) CreateWallet(args ...Argument) (string, error) {
 // PaymentOrders returns all the generated payment orders
 // https://developers.cryptomkt.com/es/#listado-de-ordenes-de-pago
 func (client *Client) PaymentOrders(args ...Argument) (string, error) {
-	req := &Request{
-		arguments: make(map[string]string),
-		required: []string{"start_date", "end_date"},
-	}
-	for _, argument := range args {
-		argument(req)
-	}
-	err := req.assertRequired()
+	required := []string{"start_date", "end_date"}
+	req, err := makeReq(required, args...)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("Error in PaymentOrders: %s",err)
 	}
 	return client.get("payment/orders", req)
 }
@@ -281,16 +217,10 @@ func (client *Client) PaymentOrders(args ...Argument) (string, error) {
 // given the order "id"
 // https://developers.cryptomkt.com/es/#estado-de-orden-de-pago
 func (client *Client) PaymentStatus(args ...Argument) (string, error) {
-	req := &Request{
-		arguments: make(map[string]string),
-		required: []string{"id"},
-	}
-	for _, argument := range args {
-		argument(req)
-	}
-	err := req.assertRequired()
+	required := []string{"id"}
+	req, err := makeReq(required, args...)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("Error in PaymentStatus: %s",err)
 	}
 	return client.get("payment/status", req)
 }
