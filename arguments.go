@@ -69,7 +69,7 @@ func Page(val int) Argument {
 		if val < 0 {
 			return errors.New("page must be an integer greater or equal to 0")
 		}
-		request.addArgument("page", string(val))
+		request.addArgument("page", strconv.Itoa(val))
 		return nil
 	}
 }
@@ -82,7 +82,7 @@ func Limit(val int) Argument {
 		if val < 20 || 100 < val {
 			return errors.New("limit must be an integer greater or equal to 20 and lesser or equal to 100")
 		}
-		request.addArgument("limit", string(val))
+		request.addArgument("limit", strconv.Itoa(val))
 		return nil
 	}
 }
