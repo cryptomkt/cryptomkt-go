@@ -1,7 +1,8 @@
 package requests
 
 import (
-	"fmt"
+	"errors"
+	"strings"
 )
 
 // A Request holds the arguments for an http request to the server.
@@ -19,23 +20,19 @@ func (req *Request) AddArgument(key, value string) {
 // are meeted, if they arent, an error describing the missings required
 // arguments is returned.
 func (req *Request) AssertRequired() error {
-	errMsg := ""
-	needOptions := false
+	needOptions := make([]string, 0, len(req.required))
 	for _, key := range req.required {
 		if _, ok := req.arguments[key]; !ok {
-			errMsg = fmt.Sprintf("%s %s,", errMsg, key)
-			needOptions = true
+			needOptions = append(needOptions, key)
 		}
 	}
-	if needOptions {
-		return fmt.Errorf("%s", errMsg[:len(errMsg)-1])
+	if len(needOptions) > 0 {
+		return errors.New(strings.Join(needOptions, ", "))
 	}
 	return nil
 }
 
 // GetArguments returns a map with both keys and values as strings.
-// This function is intended to be used after the request has been
-// proven valid by assertRequired.
 func (req *Request) GetArguments() map[string]string {
 	return req.arguments
 }

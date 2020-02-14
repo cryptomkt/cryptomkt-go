@@ -1,5 +1,5 @@
 // package args holds the argument logic for the requests the client
-// will use to comunicate with cryptomarket. Separate package between
+// will use to comunicate with Cryptomarket. Separate package between
 // args and the request is prefered as its crearer for the user to use
 // them if they are called args.AnArgument, instead of request.AnArgument.
 package args

@@ -1,5 +1,5 @@
-// package SDK. sdk for the golang API of cryptomarket,
-// intended to be used as a facility to comunicate with cryptomarket
+// package SDK. sdk for the golang API of Cryptomarket.
+// Intended to be used as a facility to comunicate with Cryptomarket
 // providing an unified an direct way of interacting with it for all
 // the posible calls.
 //
