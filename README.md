@@ -89,7 +89,7 @@ if err != nil{
     fmt.Errorf("Problems creating the client %s:", err)
 }
 
-account, err := client.CreateOrder(
+order, err := client.CreateOrder(
     args.Amount(0.3),
     args.Market("ETHCLP"),
     args.Price(1000),
@@ -97,6 +97,30 @@ account, err := client.CreateOrder(
 )
 if err != nil {
     fmt.Errorf("Error while creating an order: %s", err)
+}
+// if we are here, then account has the requested data
+```
+
+**Create Wallet**
+
+
+```golang
+import (
+    "github.com/cryptomkt/cryptomkt-go/client"
+    "github.com/cryptomkt/cryptomkt-go/args"
+)
+Client, err := cryptomarket.NewClient(apiKey, apiSecret)
+if err != nil{
+    fmt.Errorf("Problems creating the client %s:", err)
+}
+
+walletStatus, err := client.CreateWallet(
+    args.Id("P2023132"),
+    args.Token("xToY232aheSt8F"),
+	args.Wallet("ETH"),
+)
+if err != nil {
+    fmt.Errorf("Error while creating a Wallet: %s", err)
 }
 // if we are here, then account has the requested data
 ```

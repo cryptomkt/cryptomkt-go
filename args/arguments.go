@@ -1,15 +1,25 @@
+// package args holds the argument logic for the requests the client
+// will use to comunicate with cryptomarket. Separate package between
+// args and the request is prefered as its crearer for the user to use
+// them if they are called args.AnArgument, instead of request.AnArgument.
 package args
 
 import (
 	"errors"
 	"fmt"
-	"strconv"
 	"github.com/cryptomkt/cryptomkt-go/requests"
+	"strconv"
 )
 
+// An Argument is a funtion that servers the porpouse of an Arguments for 
+// requests.
+// Has no data as its workaround is by modifying the given request, creating 
+// the corresponding data there.
 type Argument func(*requests.Request) error
 
-func assertDayFormat(val, date string) error {
+// assertDateFormat assert the format dd/mm/yyyy of a date string
+// and returns an error if fails.
+func assertDateFormat(val, date string) error {
 	day, err := strconv.Atoi(val[0:2])
 	if err != nil {
 		return fmt.Errorf("%s format error: must be dd/mm/yyyy", date)
@@ -31,9 +41,9 @@ func assertDayFormat(val, date string) error {
 	return nil
 }
 
-// Amount is an argument of a request
-// accepts positive numbers
-// number format: without thousand separator, and '.' as decimal point
+// Amount is an argument of a request, and only accepts positive numbers.
+//
+// number format: without thousand separator, and . (a dot) as decimal point.
 func Amount(val string) Argument {
 	return func(request *requests.Request) error {
 		request.AddArgument("amount", val)
@@ -41,8 +51,9 @@ func Amount(val string) Argument {
 	}
 }
 
-// Market is an argument of a request,
-// accepts a par of currencies. e.g. "ETHCLP" or "BTCARS"
+// Market is an argument of a request.
+//
+// accepts a par of currencies. e.g. "ETHCLP" or "BTCARS".
 func Market(val string) Argument {
 	return func(request *requests.Request) error {
 		request.AddArgument("market", val)
@@ -50,8 +61,9 @@ func Market(val string) Argument {
 	}
 }
 
-// Type is an argument of a request,
-// accepts either "buy" or "sell"
+// Type is an argument of a request.
+//
+// accepts either "buy" or "sell".
 func Type(val string) Argument {
 	return func(request *requests.Request) error {
 		if !(val == "buy" || val == "sell") {
@@ -62,9 +74,9 @@ func Type(val string) Argument {
 	}
 }
 
-// Page is an argument of a request,
-// accepts an integer greater or equal to 0
-// default value is 0
+// Page is an argument of a request.
+//
+// accepts an integer greater or equal to 0, asumed to be 0 by the server if not given.
 func Page(val int) Argument {
 	return func(request *requests.Request) error {
 		if val < 0 {
@@ -75,9 +87,9 @@ func Page(val int) Argument {
 	}
 }
 
-// Limit is an argument of a request,
-// accepts an integer greater or equal to 0 and lesser or equal to 200.
-// if not given, its default value is 20.
+// Limit is an argument of a request. Accepts an integer greater or equal to 20 and lesser or equal to 100.
+//
+// asumed to be 20 by the server if not given.
 func Limit(val int) Argument {
 	return func(request *requests.Request) error {
 		if val < 20 || 100 < val {
@@ -88,9 +100,9 @@ func Limit(val int) Argument {
 	}
 }
 
-// Timeframe is an argument of a request
-// its the lapse between two candles,
-// accepts 1, 5, 15, 60, 240, 1440 or 10080 as integers
+// Timeframe is an argument of a request. Its the lapse between two candles.
+//
+// accepts 1, 5, 15, 60, 240, 1440 or 10080 as strings.
 func Timeframe(val string) Argument {
 	return func(request *requests.Request) error {
 		if !(val == "1" || val == "5" || val == "15" || val == "60" || val == "240" || val == "1440" || val == "10080") {
@@ -101,8 +113,7 @@ func Timeframe(val string) Argument {
 	}
 }
 
-// Price is an argument of a request
-// must be a positive number
+// Price is an argument of a request.
 func Price(val string) Argument {
 	return func(request *requests.Request) error {
 		request.AddArgument("price", val)
@@ -110,8 +121,7 @@ func Price(val string) Argument {
 	}
 }
 
-// Currency is an argument of a request,
-// its a currency as "EUR" or "XLM"
+// Currency is an argument of a request. Its a currency as "EUR" or "XLM".
 func Currency(val string) Argument {
 	return func(request *requests.Request) error {
 		request.AddArgument("currency", val)
@@ -128,11 +138,13 @@ func Id(val string) Argument {
 }
 
 // Date is an argument of a request.
-// needed in deposit for México
-// date format: dd/mm/yyyy
+//
+// needed in deposits requests for México.
+//
+// date format: dd/mm/yyyy.
 func Date(val string) Argument {
 	return func(request *requests.Request) error {
-		err := assertDayFormat(val, "date")
+		err := assertDateFormat(val, "date")
 		if err != nil {
 			return err
 		}
@@ -141,8 +153,9 @@ func Date(val string) Argument {
 	}
 }
 
-// TrackingCode is an argument of a request
-// its needed in deposits for México
+// TrackingCode is an argument of a request.
+//
+// its needed in deposits request for México.
 func TrackingCode(val string) Argument {
 	return func(request *requests.Request) error {
 		request.AddArgument("tracking_code", val)
@@ -150,8 +163,9 @@ func TrackingCode(val string) Argument {
 	}
 }
 
-// Voucher is an argument of a request
-// its needed in deposits for México, Brasil and European Union.
+// Voucher is an argument of a request.
+//
+// Its needed in deposits request for México, Brasil and European Union.
 func Voucher(val string) Argument {
 	return func(request *requests.Request) error {
 		request.AddArgument("voucher", val)
@@ -159,7 +173,7 @@ func Voucher(val string) Argument {
 	}
 }
 
-// BancAccount is an argument of a request
+// BancAccount is an argument of a request.
 func BankAccount(val string) Argument {
 	return func(request *requests.Request) error {
 		request.AddArgument("bank_account", val)
@@ -167,7 +181,7 @@ func BankAccount(val string) Argument {
 	}
 }
 
-// Address is an argument of a request
+// Address is an argument of a request.
 func Address(val string) Argument {
 	return func(request *requests.Request) error {
 		request.AddArgument("address", val)
@@ -175,7 +189,7 @@ func Address(val string) Argument {
 	}
 }
 
-// Memo is an argument of a request
+// Memo is an argument of a request.
 func Memo(val string) Argument {
 	return func(request *requests.Request) error {
 		request.AddArgument("memo", val)
@@ -183,7 +197,8 @@ func Memo(val string) Argument {
 	}
 }
 
-// CallbackUrl is an argument of a request
+// CallbackUrl is an argument of a request.
+//
 // max 256 caracteres.
 func CallbackUrl(val string) Argument {
 	return func(request *requests.Request) error {
@@ -195,7 +210,8 @@ func CallbackUrl(val string) Argument {
 	}
 }
 
-// ErrorUrl is an argument of a request
+// ErrorUrl is an argument of a request.
+//
 // max 256 caracteres.
 func ErrorUrl(val string) Argument {
 	return func(request *requests.Request) error {
@@ -207,7 +223,8 @@ func ErrorUrl(val string) Argument {
 	}
 }
 
-// ErrorUrl is an argument of a request
+// ErrorUrl is an argument of a request.
+//
 // max 64 caracteres.
 func ExternalId(val string) Argument {
 	return func(request *requests.Request) error {
@@ -219,7 +236,7 @@ func ExternalId(val string) Argument {
 	}
 }
 
-// PaymentReceiver is an argument of a request
+// PaymentReceiver is an argument of a request.
 func PaymentReceiver(val string) Argument {
 	return func(request *requests.Request) error {
 		request.AddArgument("payment_receiver", val)
@@ -227,7 +244,8 @@ func PaymentReceiver(val string) Argument {
 	}
 }
 
-// SuccessUrl is an argument of a request
+// SuccessUrl is an argument of a request.
+//
 // max 256 caracteres
 func SuccessUrl(val string) Argument {
 	return func(request *requests.Request) error {
@@ -256,7 +274,8 @@ func ToReceiveCurrency(val string) Argument {
 }
 
 // Language is an argument of a request.
-// supported languages are "es", "en" and "pt"
+//
+// supported languages are "es", "en" and "pt".
 func Language(val string) Argument {
 	return func(request *requests.Request) error {
 		if !(val == "es" || val == "en" || val == "pt") {
@@ -275,8 +294,7 @@ func Token(val string) Argument {
 	}
 }
 
-// Wallet is an argument of a request.
-// enabled wallets are "ETH", "XLM" and "BTC"
+// Wallet is an argument of a request. Enabled wallets are "ETH", "XLM" and "BTC".
 func Wallet(val string) Argument {
 	return func(request *requests.Request) error {
 		if !(val == "ETH" || val == "XLM" || val == "BTC") {
@@ -288,10 +306,11 @@ func Wallet(val string) Argument {
 }
 
 // StartDate is an argument of a request.
+//
 // date format: dd/mm/yyyy
 func StartDate(val string) Argument {
 	return func(request *requests.Request) error {
-		err := assertDayFormat(val, "start date")
+		err := assertDateFormat(val, "start date")
 		if err != nil {
 			return err
 		}
@@ -301,10 +320,11 @@ func StartDate(val string) Argument {
 }
 
 // EndDate is an argument of a request.
+//
 // date format: dd/mm/yyyy
 func EndDate(val string) Argument {
 	return func(request *requests.Request) error {
-		err := assertDayFormat(val, "end date")
+		err := assertDateFormat(val, "end date")
 		if err != nil {
 			return err
 		}

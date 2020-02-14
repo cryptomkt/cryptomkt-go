@@ -21,7 +21,6 @@ func makeReq(required []string, args ...args.Argument) (*requests.Request, error
 	return req, nil
 }
 
-
 // Account gives the account information of the client.
 // https://developers.cryptomkt.com/es/#cuenta
 func (client *Client) Account() (string, error) {

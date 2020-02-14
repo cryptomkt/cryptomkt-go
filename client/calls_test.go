@@ -2,12 +2,11 @@ package client
 
 import (
 	"fmt"
+	"github.com/cryptomkt/cryptomkt-go/args"
+	"strings"
 	"testing"
 	"time"
-	"strings"
-	"github.com/cryptomkt/cryptomkt-go/args"
 )
-
 
 func TestTransactions(t *testing.T) {
 	client, err := newDebugClient(keyfile)
@@ -20,7 +19,7 @@ func TestTransactions(t *testing.T) {
 		if err == nil {
 			t.Errorf("no error rised, should rise missing Currency arg")
 		}
-		if !strings.Contains(fmt.Sprintf("%v",err), "currency") {
+		if !strings.Contains(fmt.Sprintf("%v", err), "currency") {
 			t.Errorf("should advise the lack of currency argument, got%s", err)
 		}
 	})
@@ -50,7 +49,7 @@ func TestActiveOrders(t *testing.T) {
 		if err == nil {
 			t.Errorf("no error rised, shold rise missing market arg")
 		}
-		if !strings.Contains(fmt.Sprintf("%v",err), "market") {
+		if !strings.Contains(fmt.Sprintf("%v", err), "market") {
 			t.Errorf("should advise the lack of market argument, got%s", err)
 		}
 	})
@@ -67,7 +66,7 @@ func TestExecutedOrders(t *testing.T) {
 		if err == nil {
 			t.Errorf("no error rised, shold rise missing market arg")
 		}
-		if !strings.Contains(fmt.Sprintf("%v",err), "market") {
+		if !strings.Contains(fmt.Sprintf("%v", err), "market") {
 			t.Errorf("should advise the lack of market argument, got%s", err)
 		}
 	})
@@ -84,7 +83,7 @@ func TestOrderStatus(t *testing.T) {
 		if err == nil {
 			t.Errorf("no error rised, shold rise missing id arg")
 		}
-		if !strings.Contains(fmt.Sprintf("%v",err), "id") {
+		if !strings.Contains(fmt.Sprintf("%v", err), "id") {
 			t.Errorf("should advise the lack of id argument, got %s", err)
 		}
 	})
@@ -103,8 +102,8 @@ func TestInstant(t *testing.T) {
 		if err == nil {
 			t.Errorf("no error rised, shold rise missing id arg")
 		}
-		if !strings.Contains(fmt.Sprintf("%v",err), "market") &&
-		   !strings.Contains(fmt.Sprintf("%v",err), "type") {
+		if !strings.Contains(fmt.Sprintf("%v", err), "market") &&
+			!strings.Contains(fmt.Sprintf("%v", err), "type") {
 			t.Errorf("should advise the lack of market and type arguments, got %s", err)
 		}
 	})
@@ -118,8 +117,8 @@ func TestInstant(t *testing.T) {
 		if err == nil {
 			t.Errorf("no error rised, shold rise missing id arg")
 		}
-		if !strings.Contains(fmt.Sprintf("%v",err), "market") &&
-		   !strings.Contains(fmt.Sprintf("%v",err), "type") {
+		if !strings.Contains(fmt.Sprintf("%v", err), "market") &&
+			!strings.Contains(fmt.Sprintf("%v", err), "type") {
 			t.Errorf("should advise the lack of market and type arguments, got %s", err)
 		}
 	})

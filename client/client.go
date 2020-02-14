@@ -4,13 +4,13 @@ package client
 
 import (
 	"fmt"
+	"github.com/cryptomkt/cryptomkt-go/requests"
 	"io/ioutil"
 	"net/http"
 	"net/url"
 	"path"
 	"sort"
 	"strings"
-	"github.com/cryptomkt/cryptomkt-go/requests"
 )
 
 // Client keep the needed information to

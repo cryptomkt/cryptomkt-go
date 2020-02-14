@@ -4,10 +4,10 @@ import (
 	"bufio"
 	"encoding/json"
 	"fmt"
+	"github.com/cryptomkt/cryptomkt-go/args"
 	"log"
 	"os"
 	"testing"
-	"github.com/cryptomkt/cryptomkt-go/args"
 	"time"
 )
 
@@ -109,7 +109,7 @@ func TestAutenticated(t *testing.T) {
 			args.Amount("159"))
 		assertSuccess(response, "", t)
 	})
-	
+
 	time.Sleep(10 * time.Second)
 	t.Run("executed orders", func(t *testing.T) {
 		response, _ := client.ExecutedOrders(
