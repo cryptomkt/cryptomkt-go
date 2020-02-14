@@ -2,6 +2,8 @@ package conn
 
 import (
 	"fmt"
+	"encoding/json"
+
 	"github.com/cryptomkt/cryptomkt-go/args"
 	"github.com/cryptomkt/cryptomkt-go/requests"
 )
@@ -24,15 +26,13 @@ func makeReq(required []string, args ...args.Argument) (*requests.Request, error
 // Account gives the account information of the client.
 // https://developers.cryptomkt.com/es/#cuenta
 func (client *Client) Account() (string, error) {
-	req := requests.NewEmptyReq()
-	return client.get("account", req)
+	return client.get("account", requests.NewEmptyReq())
 }
 
 // Balance returns the actual balance of the wallets of the client in Cryptomarket
 // https://developers.cryptomkt.com/es/#obtener-balance
 func (client *Client) Balance() (string, error) {
-	req := requests.NewEmptyReq()
-	return client.get("balance", req)
+	return client.get("balance", requests.NewEmptyReq())
 }
 
 // Wallets is an alias for Balance
@@ -265,4 +265,154 @@ func (client *Client) PaymentStatus(args ...args.Argument) (string, error) {
 		return "", fmt.Errorf("Error in PaymentStatus: %s", err)
 	}
 	return client.get("payment/status", req)
+}
+
+
+func (client *Client) MarketList(args ...args.Argument) (*MarketStruct, error) {
+	required := []string{"market"}
+	req, err := makeReq(required, args...)
+	if err != nil {
+		return nil,  fmt.Errorf("Error in MakeMarket: %s", err)
+	}
+	resp, err := client.getPublic("market", req)
+	if err != nil {
+		return nil , fmt.Errorf("error at client: %s", err)
+	}
+	// estructuar el output
+	var response map[string]interface{}
+	var respu MarketStruct
+
+	if err := json.Unmarshal([]byte(resp), &response); err != nil {
+		return nil, err
+	} else if response["status"].(string) == "success" {
+		var i int = 0
+		var largo int = len(response["data"].([]interface{}))
+		respu.Data = make([]string, largo)
+		for i < largo {
+			respu.Data[i] = response["data"].([]interface{})[i].(string)
+			i += 1
+		}
+		return &respu, nil
+	} else {
+		panic("Response from server failed")
+	}
+}
+
+func makeArrayMap(respString string, response map[string]interface{}, data []map[string]string) ([]map[string]string, error) {
+	if err := json.Unmarshal([]byte(respString), &response); err != nil {
+		return data, err
+	} else if response["status"].(string) == "success" {
+		var i int = 0
+		var largo int = len(response["data"].([]interface{}))
+		paraConvertir := make([]interface{}, largo)
+		paraConvertir = response["data"].([]interface{})
+		data = make([]map[string]string, len(paraConvertir))
+		for i < largo {
+			data[i] = make(map[string]string)
+			for key, value := range paraConvertir[i].(map[string]interface{}) {
+				data[i][key] = value.(string)
+			}
+			i += 1
+		}
+		return data, nil
+	} else {
+		return data, fmt.Errorf("Response from server failed")
+	}
+}
+
+//generalizar makeArrayMap
+func (client *Client) MakeTicker(args ...args.Argument) (*Ticker, error) {
+	resp, err := client.getPublic("ticker", requests.NewEmptyReq())
+	if err != nil {
+		return nil , fmt.Errorf("error at client: %s", err)
+	}
+
+	var response map[string]interface{}
+	var respu Ticker
+	data, err := makeArrayMap(resp, response, respu.Data)
+	if err == nil {
+		respu.Data = data
+		return &respu, err
+	} else {
+		return nil, fmt.Errorf("Cannot create Ticker object")
+	}
+}
+
+func (client *Client) MakeOrder(args ...args.Argument) (*Order, error) {
+	required := []string{"market", "type"}
+	req, err := makeReq(required, args...)
+	if err != nil {
+		return nil,  fmt.Errorf("Error in MakeMarket: %s", err)
+	}
+	resp, err := client.getPublic("book", req)
+	if err != nil {
+		return nil , fmt.Errorf("error at client: %s", err)
+	}
+	
+	var response map[string]interface{}
+	var respu Order
+	data, err := makeArrayMap(resp, response, respu.Data)
+	if err == nil {
+		respu.Data = data
+		return &respu, nil
+	} else {
+		return nil, fmt.Errorf("Cannot create Order object")
+	}
+}
+
+func (client *Client) MakeTrades(args ...args.Argument) (*Trades, error) {
+	required := []string{"market"}
+	req, err := makeReq(required, args...)
+	if err != nil {
+		return nil,  fmt.Errorf("Error in MakeMarket: %s", err)
+	}
+	resp, err := client.getPublic("trades", req)
+	if err != nil {
+		return nil , fmt.Errorf("error at client: %s", err)
+	}
+
+	
+	var response map[string]interface{}
+	var respu Trades
+	data, err := makeArrayMap(resp, response, respu.Data)
+	if err == nil {
+		respu.Data = data
+		return &respu, nil
+	} else {
+		return nil, fmt.Errorf("Cannot create Trades object")
+	}
+}
+
+func (client *Client) MakePrices(args ...args.Argument) (*Prices, error) {
+	required := []string{"market", "timeframe"}
+	req, err := makeReq(required, args...)
+	if err != nil {
+		return nil,  fmt.Errorf("Error in MakeMarket: %s", err)
+	}
+	resp, err := client.getPublic("prices", req)
+	if err != nil {
+		return nil , fmt.Errorf("error at client: %s", err)
+	}
+
+	var response map[string]interface{}
+	var respu Prices
+	//unmarshal string to response
+	if err := json.Unmarshal([]byte(resp), &response); err != nil {
+		return nil, err
+	}
+
+	//data marshaled to []byte
+	if dataMarsh, err := json.Marshal(response["data"]); err != nil {
+		return nil, err
+	} else {
+		//data unmershaled to struct Prices: map[string][]Field where Field is a struct with
+		//its first field as integer and the others as string. If you wanna get the Candle_id from
+		//ask label from Prices struct you must call as (objectPrice).Data["ask"].Candle_id.
+		//this is because golang doesnt support dict with a value as interger and the rest string.
+		err := json.Unmarshal(dataMarsh, &respu)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return &respu, nil
 }

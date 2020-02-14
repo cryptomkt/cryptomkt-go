@@ -17,7 +17,7 @@ If you're writing code for your own CryptoMarket account, [enable an API key](ht
 
 ```golang
 import (
-    "github.com/cryptomkt/cryptomkt-go/client"
+    "github.com/cryptomkt/cryptomkt-go/conn"
 )
 
 ```
@@ -26,7 +26,7 @@ and then create a ``Client`` struct for interacting with the API:
 
 
 ```golang
-Client := client.New(apiKey, apiSecret)
+client := conn.NewClient(apiKey, apiSecret)
 
 ```
 
@@ -42,7 +42,7 @@ With a `client`, you can now make API calls. We've included some examples below.
 import (
     "github.com/cryptomkt/cryptomkt-go/conn"
 )
-Client := conn.NewClient(apiKey, apiSecret)
+client := conn.NewClient(apiKey, apiSecret)
 
 marketList, err := client.Markets()
 if err != nil {
@@ -56,9 +56,9 @@ if err != nil {
 
 ```golang
 import (
-    "github.com/cryptomkt/cryptomkt-go/client"
+    "github.com/cryptomkt/cryptomkt-go/conn"
 )
-Client := conn.NewClient(apiKey, apiSecret)
+client := conn.NewClient(apiKey, apiSecret)
 
 account, err := client.Account()
 if err != nil {
@@ -70,10 +70,10 @@ if err != nil {
 
 ```golang
 import (
-    "github.com/cryptomkt/cryptomkt-go/client"
+    "github.com/cryptomkt/cryptomkt-go/conn"
     "github.com/cryptomkt/cryptomkt-go/args"
 )
-Client := conn.NewClient(apiKey, apiSecret)
+client := conn.NewClient(apiKey, apiSecret)
 
 order, err := client.CreateOrder(
     args.Amount(0.3),
@@ -91,7 +91,7 @@ if err != nil {
 
 ```golang
 import (
-    "github.com/cryptomkt/cryptomkt-go/client"
+    "github.com/cryptomkt/cryptomkt-go/conn"
     "github.com/cryptomkt/cryptomkt-go/args"
 )
 client := conn.NewClient(apiKey, apiSecret)

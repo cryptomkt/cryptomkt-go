@@ -17,26 +17,56 @@ import (
 // the corresponding data there.
 type Argument func(*requests.Request) error
 
-// assertDateFormat assert the format dd/mm/yyyy of a date string
+// assertDateFormatV2 assert the format yyyy-mm-dd of a date string
 // and returns an error if fails.
-func assertDateFormat(val, date string) error {
-	day, err := strconv.Atoi(val[0:2])
+func assertDateFormatV2(val, caller string) error {
+	if len(val) != 10 {
+		return fmt.Errorf("%s format error: must be yyyy-mm-dd", caller)
+	}
+	day, err := strconv.Atoi(val[8:10])
 	if err != nil {
-		return fmt.Errorf("%s format error: must be dd/mm/yyyy", date)
+		return fmt.Errorf("%s format error: must be yyyy-mm-dd", caller)
 	}
 	if day < 1 || 31 < day {
-		return fmt.Errorf("%s format error: invalid day value", date)
+		return fmt.Errorf("%s format error: invalid day value", caller)
+	}
+	month, err := strconv.Atoi(val[5:7])
+	if err != nil {
+		return fmt.Errorf("%s format error: must be yyyy-mm-dd", caller)
+	}
+	if month < 1 || 12 < month {
+		return fmt.Errorf("%s format error: invalid month value", caller)
+	}
+	_, err = strconv.Atoi(val[0:4])
+	if err != nil {
+		return fmt.Errorf("%s format error: must be yyyy-mm-dd", caller)
+	}
+	return nil
+}
+
+// assertDateFormatV1 assert the format dd/mm/yyyy of a date string
+// and returns an error if fails.
+func assertDateFormatV1(val, caller string) error {
+	if len(val) != 10 {
+		return fmt.Errorf("%s format error: must be dd/mm/yyyy", caller)
+	}
+	day, err := strconv.Atoi(val[0:2])
+	if err != nil {
+		return fmt.Errorf("%s format error: must be dd/mm/yyyy", caller)
+	}
+	if day < 1 || 31 < day {
+		return fmt.Errorf("%s format error: invalid day value", caller)
 	}
 	month, err := strconv.Atoi(val[3:5])
 	if err != nil {
-		return fmt.Errorf("%s format error: must be dd/mm/yyyy", date)
+		return fmt.Errorf("%s format error: must be dd/mm/yyyy", caller)
 	}
 	if month < 1 || 12 < month {
-		return fmt.Errorf("%s format error: invalid month value", date)
+		return fmt.Errorf("%s format error: invalid month value", caller)
 	}
 	_, err = strconv.Atoi(val[6:10])
 	if err != nil {
-		return fmt.Errorf("%s format error: must be dd/mm/yyyy", date)
+		return fmt.Errorf("%s format error: must be dd/mm/yyyy", caller)
 	}
 	return nil
 }
@@ -100,6 +130,28 @@ func Limit(val int) Argument {
 	}
 }
 
+func Start(val string) Argument {
+	return func(request *requests.Request) error {
+		err := assertDateFormatV1(val, "start")
+		if err != nil {
+			return err
+		}
+		request.AddArgument("start", val)
+		return nil
+	}
+}
+
+func End(val string) Argument {
+	return func(request *requests.Request) error {
+		err := assertDateFormatV1(val, "end")
+		if err != nil {
+			return err
+		}
+		request.AddArgument("end", val)
+		return nil
+	}
+}
+
 // Timeframe is an argument of a request. Its the lapse between two candles.
 //
 // accepts 1, 5, 15, 60, 240, 1440 or 10080 as strings.
@@ -144,7 +196,7 @@ func Id(val string) Argument {
 // date format: dd/mm/yyyy.
 func Date(val string) Argument {
 	return func(request *requests.Request) error {
-		err := assertDateFormat(val, "date")
+		err := assertDateFormatV1(val, "date")
 		if err != nil {
 			return err
 		}
@@ -310,7 +362,7 @@ func Wallet(val string) Argument {
 // date format: dd/mm/yyyy
 func StartDate(val string) Argument {
 	return func(request *requests.Request) error {
-		err := assertDateFormat(val, "start date")
+		err := assertDateFormatV1(val, "start date")
 		if err != nil {
 			return err
 		}
@@ -324,7 +376,7 @@ func StartDate(val string) Argument {
 // date format: dd/mm/yyyy
 func EndDate(val string) Argument {
 	return func(request *requests.Request) error {
-		err := assertDateFormat(val, "end date")
+		err := assertDateFormatV1(val, "end date")
 		if err != nil {
 			return err
 		}

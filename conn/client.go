@@ -38,6 +38,34 @@ func NewClient(apiKey, apiSecret string) *Client {
 	return client
 }
 
+func (client *Client) getPublic(endpoint string, request *requests.Request) (string, error) {
+	args := request.GetArguments()
+	u, err := url.Parse(client.baseApiUri)
+	u.Path = path.Join(u.Path, client.apiVersion, endpoint)
+	httpReq, err := http.NewRequest("GET", u.String(), nil)
+	if err != nil {
+		return "", fmt.Errorf("Error building NewRequest struct: %v", err)
+	}
+
+	if len(args) != 0 {
+		q := httpReq.URL.Query()
+		for k, v := range args {
+			q.Add(k, v)
+		}
+		httpReq.URL.RawQuery = q.Encode()
+	}
+	resp, err := client.httpClient.Do(httpReq)
+	if err != nil {
+		return "", fmt.Errorf("Error making request: %v", err)
+	}
+	defer resp.Body.Close()
+	respBody, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return "", fmt.Errorf("Error reading response: %v", err)
+	}
+	return string(respBody), nil
+}
+
 // get comunicates to Cryptomarket via the http get method
 // Its the base implementation which the public methods use.
 func (client *Client) get(endpoint string, request *requests.Request) (string, error) {
@@ -88,7 +116,7 @@ func (client *Client) post(endpoint string, request *requests.Request) (string, 
 	}
 	u.Path = path.Join(u.Path, client.apiVersion, endpoint)
 
-	// builds a form from the Argument
+	// builds a form from the Arguments
 	form := url.Values{}
 	for k, v := range args {
 		form.Add(k, v)
@@ -98,6 +126,7 @@ func (client *Client) post(endpoint string, request *requests.Request) (string, 
 		return "", fmt.Errorf("Error building NewRequest struct: %v", err)
 	}
 
+	//sets the body for the header
 	keys := make([]string, 0, len(args))
 	for k := range args {
 		keys = append(keys, k)
