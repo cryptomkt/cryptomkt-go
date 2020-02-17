@@ -1,8 +1,8 @@
 package conn
 
 import (
-	"fmt"
 	"encoding/json"
+	"fmt"
 
 	"github.com/cryptomkt/cryptomkt-go/args"
 	"github.com/cryptomkt/cryptomkt-go/requests"
@@ -267,16 +267,15 @@ func (client *Client) PaymentStatus(args ...args.Argument) (string, error) {
 	return client.get("payment/status", req)
 }
 
-
-func (client *Client) MarketList(args ...args.Argument) (*MarketStruct, error) {
-	required := []string{"market"}
-	req, err := makeReq(required, args...)
+// MarketList returns a pointer to a MarketStruct with the field "data" given by the api. The data given is
+// an array of strings indicating the markets in cryptomkt. This function returns two values.
+// The first is a reference to the struct created and the second is a error message. It returns (nil, error)
+// when an error is raised.
+// This method does not accept any arguments.
+func (client *Client) GetMarkes() (*MarketStruct, error) {
+	resp, err := client.get("market", requests.NewEmptyReq())
 	if err != nil {
-		return nil,  fmt.Errorf("Error in MakeMarket: %s", err)
-	}
-	resp, err := client.getPublic("market", req)
-	if err != nil {
-		return nil , fmt.Errorf("error at client: %s", err)
+		return nil, fmt.Errorf("error at client: %s", err)
 	}
 	// estructuar el output
 	var response map[string]interface{}
@@ -298,6 +297,9 @@ func (client *Client) MarketList(args ...args.Argument) (*MarketStruct, error) {
 	}
 }
 
+// makeArrayMap is used for transforming the data given by the api in the functions MakeTicker, MakeOrder and MakeTrades.
+// The response given by the api is unmarshaled into the same structure: map[string]interface{}. The data field is
+// originally unmarshaled into []interface{}, and it must be turned into []map[string]string.
 func makeArrayMap(respString string, response map[string]interface{}, data []map[string]string) ([]map[string]string, error) {
 	if err := json.Unmarshal([]byte(respString), &response); err != nil {
 		return data, err
@@ -320,11 +322,17 @@ func makeArrayMap(respString string, response map[string]interface{}, data []map
 	}
 }
 
-//generalizar makeArrayMap
-func (client *Client) MakeTicker(args ...args.Argument) (*Ticker, error) {
+// MakeTicker returns a pointer to a Ticker struct with the data given by the api and an error message. It returns (nil,error)
+//when an error is raised and (*Ticker, nil) when the operation is successful. The data fields are: high, low, ask, bid,
+//last_price, volume, market and  timestamp
+//
+// List of accepted Arguments:
+//
+// 		- optional: Market
+func (client *Client) GetTicker(args ...args.Argument) (*Ticker, error) {
 	resp, err := client.getPublic("ticker", requests.NewEmptyReq())
 	if err != nil {
-		return nil , fmt.Errorf("error at client: %s", err)
+		return nil, fmt.Errorf("error at client: %s", err)
 	}
 
 	var response map[string]interface{}
@@ -338,17 +346,26 @@ func (client *Client) MakeTicker(args ...args.Argument) (*Ticker, error) {
 	}
 }
 
-func (client *Client) MakeOrder(args ...args.Argument) (*Order, error) {
+// MakeOrder returns a pointer to a Order struct with the data given by
+// the api and an error message. It returns (nil, error) when an error
+// is raised and (*Order, nil) when the operation is successful.
+// The data fields are: price, amount and timestamp.
+//
+// List of accepted Arguments:
+//
+// 		- required: Market , Type
+//		- optional: Page, Limit
+func (client *Client) GetOrders(args ...args.Argument) (*Order, error) {
 	required := []string{"market", "type"}
 	req, err := makeReq(required, args...)
 	if err != nil {
-		return nil,  fmt.Errorf("Error in MakeMarket: %s", err)
+		return nil, fmt.Errorf("Error in MakeMarket: %s", err)
 	}
 	resp, err := client.getPublic("book", req)
 	if err != nil {
-		return nil , fmt.Errorf("error at client: %s", err)
+		return nil, fmt.Errorf("error at client: %s", err)
 	}
-	
+
 	var response map[string]interface{}
 	var respu Order
 	data, err := makeArrayMap(resp, response, respu.Data)
@@ -360,18 +377,26 @@ func (client *Client) MakeOrder(args ...args.Argument) (*Order, error) {
 	}
 }
 
-func (client *Client) MakeTrades(args ...args.Argument) (*Trades, error) {
+// MakeTrades returns a pointer to a Trades struct with the data given
+// by the api and an error message. It returns (nil, error) when an error
+// is raised and (*Trades, nil) when the operation is successful.
+// The data fields are market_taker, price, amount, tid, timestamp and market.
+//
+// List of accepted Arguments:
+//
+//		- required: Market
+//		- optional: Start, End, Page, Limit
+func (client *Client) GetTrades(args ...args.Argument) (*Trades, error) {
 	required := []string{"market"}
 	req, err := makeReq(required, args...)
 	if err != nil {
-		return nil,  fmt.Errorf("Error in MakeMarket: %s", err)
+		return nil, fmt.Errorf("Error in MakeMarket: %s", err)
 	}
 	resp, err := client.getPublic("trades", req)
 	if err != nil {
-		return nil , fmt.Errorf("error at client: %s", err)
+		return nil, fmt.Errorf("error at client: %s", err)
 	}
 
-	
 	var response map[string]interface{}
 	var respu Trades
 	data, err := makeArrayMap(resp, response, respu.Data)
@@ -383,15 +408,26 @@ func (client *Client) MakeTrades(args ...args.Argument) (*Trades, error) {
 	}
 }
 
-func (client *Client) MakePrices(args ...args.Argument) (*Prices, error) {
+// MakePrices return a pointer to a Prices struct with the data given by
+// the api and an error message. It returns (nil,error) when an error
+// is raised and (*Prices, nil) when the operation is successful.
+// The data field is a map[string][]Field, where the Field structure contains all the
+// information. To consult these fields you must call *Prices.Data["ask"][index].fieldYouWant or
+// *Prices.Data["bid"][index].fieldYouWant
+//
+// List of accepted Arguments:
+//
+//		- required: Market, TimeFrame
+//		- optional: Page, Limit
+func (client *Client) GetPrices(args ...args.Argument) (*Prices, error) {
 	required := []string{"market", "timeframe"}
 	req, err := makeReq(required, args...)
 	if err != nil {
-		return nil,  fmt.Errorf("Error in MakeMarket: %s", err)
+		return nil, fmt.Errorf("Error in MakeMarket: %s", err)
 	}
 	resp, err := client.getPublic("prices", req)
 	if err != nil {
-		return nil , fmt.Errorf("error at client: %s", err)
+		return nil, fmt.Errorf("error at client: %s", err)
 	}
 
 	var response map[string]interface{}

@@ -7,13 +7,14 @@ package args
 import (
 	"errors"
 	"fmt"
-	"github.com/cryptomkt/cryptomkt-go/requests"
 	"strconv"
+
+	"github.com/cryptomkt/cryptomkt-go/requests"
 )
 
-// An Argument is a funtion that servers the porpouse of an Arguments for 
+// An Argument is a funtion that servers the porpouse of an Arguments for
 // requests.
-// Has no data as its workaround is by modifying the given request, creating 
+// Has no data as its workaround is by modifying the given request, creating
 // the corresponding data there.
 type Argument func(*requests.Request) error
 
@@ -106,7 +107,7 @@ func Type(val string) Argument {
 
 // Page is an argument of a request.
 //
-// accepts an integer greater or equal to 0, asumed to be 0 by the server if not given.
+// Accepts an integer greater or equal to 0, asumed to be 0 by the server if not given.
 func Page(val int) Argument {
 	return func(request *requests.Request) error {
 		if val < 0 {
@@ -117,9 +118,10 @@ func Page(val int) Argument {
 	}
 }
 
-// Limit is an argument of a request. Accepts an integer greater or equal to 20 and lesser or equal to 100.
+// Limit is an argument of a request. It accepts an integer greater
+// or equal to 20 and lesser or equal to 100.
 //
-// asumed to be 20 by the server if not given.
+// Asumed to be 20 by the server if not given.
 func Limit(val int) Argument {
 	return func(request *requests.Request) error {
 		if val < 20 || 100 < val {
@@ -130,6 +132,7 @@ func Limit(val int) Argument {
 	}
 }
 
+// Start is an argument of a request. It only accepts a string with the format date: YYYY-MM-DD
 func Start(val string) Argument {
 	return func(request *requests.Request) error {
 		err := assertDateFormatV1(val, "start")
@@ -141,6 +144,7 @@ func Start(val string) Argument {
 	}
 }
 
+// End is an argument of a request. It only accepts a string with the format date: YYYY-MM-DD
 func End(val string) Argument {
 	return func(request *requests.Request) error {
 		err := assertDateFormatV1(val, "end")
