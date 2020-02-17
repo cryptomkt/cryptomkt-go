@@ -11,9 +11,9 @@ import (
 	"strconv"
 )
 
-// An Argument is a funtion that servers the porpouse of an Arguments for 
+// An Argument is a funtion that servers the porpouse of an Arguments for
 // requests.
-// Has no data as its workaround is by modifying the given request, creating 
+// Has no data as its workaround is by modifying the given request, creating
 // the corresponding data there.
 type Argument func(*requests.Request) error
 

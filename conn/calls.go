@@ -1,8 +1,8 @@
 package conn
 
 import (
-	"fmt"
 	"encoding/json"
+	"fmt"
 
 	"github.com/cryptomkt/cryptomkt-go/args"
 	"github.com/cryptomkt/cryptomkt-go/requests"
@@ -267,16 +267,15 @@ func (client *Client) PaymentStatus(args ...args.Argument) (string, error) {
 	return client.get("payment/status", req)
 }
 
-
 func (client *Client) MarketList(args ...args.Argument) (*MarketStruct, error) {
 	required := []string{"market"}
 	req, err := makeReq(required, args...)
 	if err != nil {
-		return nil,  fmt.Errorf("Error in MakeMarket: %s", err)
+		return nil, fmt.Errorf("Error in MakeMarket: %s", err)
 	}
 	resp, err := client.getPublic("market", req)
 	if err != nil {
-		return nil , fmt.Errorf("error at client: %s", err)
+		return nil, fmt.Errorf("error at client: %s", err)
 	}
 	// estructuar el output
 	var response map[string]interface{}
@@ -324,7 +323,7 @@ func makeArrayMap(respString string, response map[string]interface{}, data []map
 func (client *Client) MakeTicker(args ...args.Argument) (*Ticker, error) {
 	resp, err := client.getPublic("ticker", requests.NewEmptyReq())
 	if err != nil {
-		return nil , fmt.Errorf("error at client: %s", err)
+		return nil, fmt.Errorf("error at client: %s", err)
 	}
 
 	var response map[string]interface{}
@@ -342,13 +341,13 @@ func (client *Client) MakeOrder(args ...args.Argument) (*Order, error) {
 	required := []string{"market", "type"}
 	req, err := makeReq(required, args...)
 	if err != nil {
-		return nil,  fmt.Errorf("Error in MakeMarket: %s", err)
+		return nil, fmt.Errorf("Error in MakeMarket: %s", err)
 	}
 	resp, err := client.getPublic("book", req)
 	if err != nil {
-		return nil , fmt.Errorf("error at client: %s", err)
+		return nil, fmt.Errorf("error at client: %s", err)
 	}
-	
+
 	var response map[string]interface{}
 	var respu Order
 	data, err := makeArrayMap(resp, response, respu.Data)
@@ -364,14 +363,13 @@ func (client *Client) MakeTrades(args ...args.Argument) (*Trades, error) {
 	required := []string{"market"}
 	req, err := makeReq(required, args...)
 	if err != nil {
-		return nil,  fmt.Errorf("Error in MakeMarket: %s", err)
+		return nil, fmt.Errorf("Error in MakeMarket: %s", err)
 	}
 	resp, err := client.getPublic("trades", req)
 	if err != nil {
-		return nil , fmt.Errorf("error at client: %s", err)
+		return nil, fmt.Errorf("error at client: %s", err)
 	}
 
-	
 	var response map[string]interface{}
 	var respu Trades
 	data, err := makeArrayMap(resp, response, respu.Data)
@@ -387,11 +385,11 @@ func (client *Client) MakePrices(args ...args.Argument) (*Prices, error) {
 	required := []string{"market", "timeframe"}
 	req, err := makeReq(required, args...)
 	if err != nil {
-		return nil,  fmt.Errorf("Error in MakeMarket: %s", err)
+		return nil, fmt.Errorf("Error in MakeMarket: %s", err)
 	}
 	resp, err := client.getPublic("prices", req)
 	if err != nil {
-		return nil , fmt.Errorf("error at client: %s", err)
+		return nil, fmt.Errorf("error at client: %s", err)
 	}
 
 	var response map[string]interface{}

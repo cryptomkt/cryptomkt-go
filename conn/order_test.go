@@ -1,8 +1,8 @@
 package conn
 
 import (
-	"testing"
 	"encoding/json"
+	"testing"
 )
 
 func TestUnmarshalingOrderData(t *testing.T) {
@@ -73,7 +73,7 @@ func TestUnmarshalingAnOrder(t *testing.T) {
 		}
 	}`
 	order := &AnOrder{}
-	err:= json.Unmarshal([]byte(dummyJSONOrder), order)
+	err := json.Unmarshal([]byte(dummyJSONOrder), order)
 	if err != nil {
 		t.Errorf("%s", err)
 	}
