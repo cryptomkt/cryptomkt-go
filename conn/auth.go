@@ -4,8 +4,8 @@ import (
 	"crypto/hmac"
 	"crypto/sha512"
 	"encoding/hex"
-	"strconv"
 	"net/http"
+	"strconv"
 	"time"
 )
 
@@ -17,7 +17,7 @@ type HMACAuth struct {
 }
 
 // newAuth creates a new HMACAuth
-func newAuth(apiKey, apiSecret string) (*HMACAuth) {
+func newAuth(apiKey, apiSecret string) *HMACAuth {
 	auth := &HMACAuth{
 		apiKey:    apiKey,
 		apiSecret: apiSecret,

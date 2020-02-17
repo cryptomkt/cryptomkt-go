@@ -3,6 +3,7 @@
 package conn
 
 import (
+	"bytes"
 	"fmt"
 	"github.com/cryptomkt/cryptomkt-go/requests"
 	"io/ioutil"
@@ -11,7 +12,6 @@ import (
 	"path"
 	"sort"
 	"strings"
-	"bytes"
 )
 
 // Client keep the needed information to connect with the asociated CryptoMarket account.
@@ -27,7 +27,7 @@ type Client struct {
 func NewClient(apiKey, apiSecret string) *Client {
 	apiVersion := "v1"
 	baseApiUri := "https://api.cryptomkt.com/"
-	auth:= newAuth(apiKey, apiSecret)
+	auth := newAuth(apiKey, apiSecret)
 
 	client := &Client{
 		baseApiUri: baseApiUri,

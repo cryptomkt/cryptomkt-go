@@ -267,12 +267,16 @@ func (client *Client) PaymentStatus(args ...args.Argument) (string, error) {
 	return client.get("payment/status", req)
 }
 
-// MarketList returns a pointer to a MarketStruct with the field "data" given by the api. The data given is
+// Public Endpoints:
+
+//
+
+// GetMarket returns a pointer to a MarketStruct with the field "data" given by the api. The data given is
 // an array of strings indicating the markets in cryptomkt. This function returns two values.
 // The first is a reference to the struct created and the second is a error message. It returns (nil, error)
 // when an error is raised.
 // This method does not accept any arguments.
-func (client *Client) GetMarkes() (*MarketStruct, error) {
+func (client *Client) GetMarkets() (*MarketStruct, error) {
 	resp, err := client.get("market", requests.NewEmptyReq())
 	if err != nil {
 		return nil, fmt.Errorf("error at client: %s", err)
@@ -322,7 +326,7 @@ func makeArrayMap(respString string, response map[string]interface{}, data []map
 	}
 }
 
-// MakeTicker returns a pointer to a Ticker struct with the data given by the api and an error message. It returns (nil,error)
+// GetTicker returns a pointer to a Ticker struct with the data given by the api and an error message. It returns (nil,error)
 //when an error is raised and (*Ticker, nil) when the operation is successful. The data fields are: high, low, ask, bid,
 //last_price, volume, market and  timestamp
 //
@@ -346,7 +350,7 @@ func (client *Client) GetTicker(args ...args.Argument) (*Ticker, error) {
 	}
 }
 
-// MakeOrder returns a pointer to a Order struct with the data given by
+// GetOrder returns a pointer to a Order struct with the data given by
 // the api and an error message. It returns (nil, error) when an error
 // is raised and (*Order, nil) when the operation is successful.
 // The data fields are: price, amount and timestamp.
@@ -377,7 +381,7 @@ func (client *Client) GetOrders(args ...args.Argument) (*Order, error) {
 	}
 }
 
-// MakeTrades returns a pointer to a Trades struct with the data given
+// GetTrades returns a pointer to a Trades struct with the data given
 // by the api and an error message. It returns (nil, error) when an error
 // is raised and (*Trades, nil) when the operation is successful.
 // The data fields are market_taker, price, amount, tid, timestamp and market.
@@ -408,7 +412,7 @@ func (client *Client) GetTrades(args ...args.Argument) (*Trades, error) {
 	}
 }
 
-// MakePrices return a pointer to a Prices struct with the data given by
+// GetPrices return a pointer to a Prices struct with the data given by
 // the api and an error message. It returns (nil,error) when an error
 // is raised and (*Prices, nil) when the operation is successful.
 // The data field is a map[string][]Field, where the Field structure contains all the
