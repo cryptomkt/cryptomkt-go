@@ -8,13 +8,13 @@ import (
 )
 
 func TestTransactions(t *testing.T) {
-	client, err := newDebugClient(keyfile)
+	client, err := newDebugClient(keysfile)
 	if err != nil {
 		t.Errorf("%s", err)
 	}
 	time.Sleep(6 * time.Second)
 	t.Run("missing=Currency", func(t *testing.T) {
-		_, err := client.Transactions()
+		_, err := client.GetTransactions()
 		if err == nil {
 			t.Errorf("no error rised, should rise missing Currency arg")
 		}
@@ -25,13 +25,13 @@ func TestTransactions(t *testing.T) {
 }
 
 func TestActiveOrders(t *testing.T) {
-	client, err := newDebugClient(keyfile)
+	client, err := newDebugClient(keysfile)
 	if err != nil {
 		t.Errorf("%s", err)
 	}
 	time.Sleep(6 * time.Second)
 	t.Run("missing=market", func(t *testing.T) {
-		_, err := client.ActiveOrders()
+		_, err := client.GetActiveOrders()
 		if err == nil {
 			t.Errorf("no error rised, should rise missing market arg")
 		}
@@ -42,13 +42,13 @@ func TestActiveOrders(t *testing.T) {
 }
 
 func TestExecutedOrders(t *testing.T) {
-	client, err := newDebugClient(keyfile)
+	client, err := newDebugClient(keysfile)
 	if err != nil {
 		t.Errorf("%s", err)
 	}
 	time.Sleep(6 * time.Second)
 	t.Run("missing=market", func(t *testing.T) {
-		_, err := client.ExecutedOrders()
+		_, err := client.GetExecutedOrders()
 		if err == nil {
 			t.Errorf("no error rised, should rise missing market arg")
 		}
@@ -59,13 +59,13 @@ func TestExecutedOrders(t *testing.T) {
 }
 
 func TestOrderStatus(t *testing.T) {
-	client, err := newDebugClient(keyfile)
+	client, err := newDebugClient(keysfile)
 	if err != nil {
 		t.Errorf("%s", err)
 	}
 	time.Sleep(6 * time.Second)
 	t.Run("missing=id", func(t *testing.T) {
-		_, err := client.OrderStatus()
+		_, err := client.GetOrderStatus()
 		if err == nil {
 			t.Errorf("no error rised, should rise missing id arg")
 		}
@@ -76,13 +76,13 @@ func TestOrderStatus(t *testing.T) {
 }
 
 func TestInstant(t *testing.T) {
-	client, err := newDebugClient(keyfile)
+	client, err := newDebugClient(keysfile)
 	if err != nil {
 		t.Errorf("%s", err)
 	}
 	time.Sleep(6 * time.Second)
 	t.Run("missing=market and type", func(t *testing.T) {
-		_, err := client.Instant(
+		_, err := client.GetInstant(
 			args.Amount("123"),
 		)
 		if err == nil {
@@ -95,7 +95,7 @@ func TestInstant(t *testing.T) {
 	})
 	time.Sleep(6 * time.Second)
 	t.Run("unsupported=type", func(t *testing.T) {
-		_, err := client.Instant(
+		_, err := client.GetInstant(
 			args.Price("2020"),
 			args.Amount("123"),
 			args.Type("see"),

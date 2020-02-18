@@ -5,8 +5,8 @@
 //
 // This package its intended to be self contained, providing enough
 // documentation and examples in the tests to let the developer focus
-// in his implementation. Althought, by the vast amount of customization
+// in his implementation. Althought, by the vast amount of posible customization
 // to make comunications with the server, more detailed description of the
-// cumunication with the server is provided in the developers API documentation
+// comunication with the server is provided in the developers API documentation
 // from crytomarket: https://developers.cryptomkt.com/es/#introduccion
 package SDK

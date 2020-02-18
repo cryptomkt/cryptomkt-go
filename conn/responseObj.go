@@ -8,7 +8,7 @@ type Ticker struct {
 	Data []map[string]string
 }
 
-type Order struct {
+type Book struct {
 	Data []map[string]string
 }
 type Trades struct {
