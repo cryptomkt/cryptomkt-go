@@ -23,6 +23,22 @@ func makeReq(required []string, args ...args.Argument) (*requests.Request, error
 	return req, nil
 }
 
+func (client *Client) postReq(endpoint string, caller string, required []string, args ...args.Argument) (string, error) {
+	req, err := makeReq(required, args...)
+	if err != nil {
+		return "", fmt.Errorf("Error in %s: %s", caller, err)
+	}
+	return client.post(endpoint, req)
+}
+
+func (client *Client) getReq(endpoint string, caller string, required []string, args ...args.Argument) (string, error) {
+	req, err := makeReq(required, args...)
+	if err != nil {
+		return "", fmt.Errorf("Error in %s: %s", caller, err)
+	}
+	return client.get(endpoint, req)
+}
+
 // Account gives the account information of the client.
 // https://developers.cryptomkt.com/es/#cuenta
 func (client *Client) GetAccount() (*Account, error) {
@@ -66,12 +82,7 @@ func (client *Client) GetWallets() (*[]Balance, error) {
 //   - optional: Page, Limit
 // https://developers.cryptomkt.com/es/#obtener-movimientos
 func (client *Client) GetTransactions(args ...args.Argument) (*[]Transaction, error) {
-	required := []string{"currency"}
-	req, err := makeReq(required, args...)
-	if err != nil {
-		return nil, fmt.Errorf("Error in Transaction: %s", err)
-	}
-	resp, err := client.get("transactions", req)
+	resp, err := client.getReq("transactions", "GetTransaction", []string{"currency"}, args...)
 	if err != nil {
 		return nil, fmt.Errorf("error while making the request: %s", err)
 	}
@@ -90,12 +101,7 @@ func (client *Client) GetTransactions(args ...args.Argument) (*[]Transaction, er
 //   - optional: Page, Limit
 // https://developers.cryptomkt.com/es/#ordenes-activas
 func (client *Client) GetActiveOrders(args ...args.Argument) (*[]Order, error) {
-	required := []string{"market"}
-	req, err := makeReq(required, args...)
-	if err != nil {
-		return nil, fmt.Errorf("Error in ActiveOrders: %s", err)
-	}
-	resp, err := client.get("orders/active", req)
+	resp, err := client.getReq("orders/active", "GetActiveOrders", []string{"market"}, args...)
 	if err != nil {
 		return nil, fmt.Errorf("error while making the request: %s", err)
 	}
@@ -114,12 +120,7 @@ func (client *Client) GetActiveOrders(args ...args.Argument) (*[]Order, error) {
 //   - optional: Page, Limit
 // https://developers.cryptomkt.com/es/#ordenes-ejecutadas
 func (client *Client) GetExecutedOrders(args ...args.Argument) (*[]Order, error) {
-	required := []string{"market"}
-	req, err := makeReq(required, args...)
-	if err != nil {
-		return nil, fmt.Errorf("Error in ExecutedOrders: %s", err)
-	}
-	resp, err := client.get("orders/executed", req)
+	resp, err := client.getReq("orders/executed", "GetExecutedOrders", []string{"market"}, args...)
 	if err != nil {
 		return nil, fmt.Errorf("error while making the request: %s", err)
 	}
@@ -138,12 +139,7 @@ func (client *Client) GetExecutedOrders(args ...args.Argument) (*[]Order, error)
 //   - optional: none
 // https://developers.cryptomkt.com/es/#estado-de-orden
 func (client *Client) GetOrderStatus(args ...args.Argument) (*[]Order, error) {
-	required := []string{"id"}
-	req, err := makeReq(required, args...)
-	if err != nil {
-		return nil, fmt.Errorf("Error in OrderStatus: %s", err)
-	}
-	resp, err := client.get("orders/status", req)
+	resp, err := client.getReq("orders/status", "GetOrderStatus", []string{"id"}, args...)
 	if err != nil {
 		return nil, fmt.Errorf("error while making the request: %s", err)
 	}
@@ -162,12 +158,7 @@ func (client *Client) GetOrderStatus(args ...args.Argument) (*[]Order, error) {
 //   - optional: none
 // https://developers.cryptomkt.com/es/#obtener-cantidad
 func (client *Client) GetInstant(args ...args.Argument) (*Quantity, error) {
-	required := []string{"market", "type", "amount"}
-	req, err := makeReq(required, args...)
-	if err != nil {
-		return nil, fmt.Errorf("Error in Instant: %s", err)
-	}
-	resp, err := client.get("orders/instant/get", req)
+	resp, err := client.getReq("orders/instant/get", "GetInstant", []string{"market", "type", "amount"}, args...)
 	if err != nil {
 		return nil, fmt.Errorf("error while making the request: %s", err)
 	}
@@ -186,12 +177,7 @@ func (client *Client) GetInstant(args ...args.Argument) (*Quantity, error) {
 //   - optional: none
 // https://developers.cryptomkt.com/es/#crear-orden
 func (client *Client) CreateOrder(args ...args.Argument) (*Order, error) {
-	required := []string{"amount", "market", "price", "type"}
-	req, err := makeReq(required, args...)
-	if err != nil {
-		return nil, fmt.Errorf("Error in CreateOrder: %s", err)
-	}
-	resp, err := client.post("orders/create", req)
+	resp, err := client.postReq("orders/create", "CreateOrder", []string{"amount", "market", "price", "type"}, args...)
 	if err != nil {
 		return nil, fmt.Errorf("error while making the request: %s", err)
 	}
@@ -210,13 +196,7 @@ func (client *Client) CreateOrder(args ...args.Argument) (*Order, error) {
 //   - optional: none
 // https://developers.cryptomkt.com/es/#cancelar-una-orden
 func (client *Client) CancelOrder(args ...args.Argument) (*Order, error) {
-	required := []string{"id"}
-	req, err := makeReq(required, args...)
-	if err != nil {
-		return nil, fmt.Errorf("Error in CancelOrder: %s", err)
-	}
-
-	resp, err := client.post("orders/cancel", req)
+	resp, err := client.postReq("orders/cancel", "CancelOrder", []string{"id"}, args...)
 	if err != nil {
 		return nil, fmt.Errorf("error while making the request: %s", err)
 	}
@@ -235,12 +215,7 @@ func (client *Client) CancelOrder(args ...args.Argument) (*Order, error) {
 //   - optional: none
 // https://developers.cryptomkt.com/es/#crear-orden-2
 func (client *Client) CreateInstant(args ...args.Argument) error {
-	required := []string{"market", "type", "amount"}
-	req, err := makeReq(required, args...)
-	if err != nil {
-		return fmt.Errorf("Error in CreateInstant: %s", err)
-	}
-	resp, err := client.post("orders/instant/create", req)
+	resp, err := client.postReq("orders/instant/create", "CreateInstant", []string{"market", "type", "amount"}, args...)
 	if err != nil {
 		return fmt.Errorf("error while making the request: %s", err)
 	}
@@ -260,12 +235,10 @@ func (client *Client) CreateInstant(args ...args.Argument) error {
 // -only for México: Date, TrackingCode
 // https://developers.cryptomkt.com/es/#notificar-deposito
 func (client *Client) RequestDeposit(args ...args.Argument) error {
-	required := []string{"amount", "bank_account"}
-	req, err := makeReq(required, args...)
+	resp, err := client.postReq("request/deposit", "RequestDeposit", []string{"amount", "bank_account"}, args...)
 	if err != nil {
-		return fmt.Errorf("Error in RequestDeposit: %s", err)
+		return fmt.Errorf("error while making the request: %s", err)
 	}
-	resp, err := client.post("request/deposit", req)
 	var instantResp InstantResponse
 	json.Unmarshal([]byte(resp), &instantResp)
 	if instantResp.Status == "error" {
@@ -281,12 +254,10 @@ func (client *Client) RequestDeposit(args ...args.Argument) error {
 //   - optional: none
 // https://developers.cryptomkt.com/es/#notificar-retiro
 func (client *Client) RequestWithdrawal(args ...args.Argument) error {
-	required := []string{"amount", "bank_account"}
-	req, err := makeReq(required, args...)
+	resp, err := client.postReq("request/withdrawal", "RequestWithdrawal", []string{"amount", "bank_account"}, args...)
 	if err != nil {
-		return fmt.Errorf("Error in RequestWithdrawal: %s", err)
+		return fmt.Errorf("error while making the request: %s", err)
 	}
-	resp, err := client.post("request/withdrawal", req)
 	var instantResp InstantResponse
 	json.Unmarshal([]byte(resp), &instantResp)
 	if instantResp.Status == "error" {
@@ -302,12 +273,10 @@ func (client *Client) RequestWithdrawal(args ...args.Argument) error {
 //   - optional: Memo
 // https://developers.cryptomkt.com/es/#transferir
 func (client *Client) Transfer(args ...args.Argument) error {
-	required := []string{"address", "amount", "currency"}
-	req, err := makeReq(required, args...)
+	resp, err := client.postReq("transfer", "Transfer", []string{"address", "amount", "currency"}, args...)
 	if err != nil {
-		return fmt.Errorf("Error in Transfer: %s", err)
+		return fmt.Errorf("error while making the request: %s", err)
 	}
-	resp, err := client.post("transfer", req)
 	var instantResp InstantResponse
 	json.Unmarshal([]byte(resp), &instantResp)
 	if instantResp.Status == "error" {
@@ -324,12 +293,7 @@ func (client *Client) Transfer(args ...args.Argument) error {
 //   - optional: ExternalId, CallbackUrl, ErrorUrl, SuccessUrl, RefundEmail, Language
 // https://developers.cryptomkt.com/es/#crear-orden-de-pago
 func (client *Client) NewOrder(args ...args.Argument) (*PaymentOrder, error) {
-	required := []string{"to_receive", "to_receive_currency", "payment_receiver"}
-	req, err := makeReq(required, args...)
-	if err != nil {
-		return nil, fmt.Errorf("Error in NewOrder: %s", err)
-	}
-	resp, err := client.post("payment/new_order", req)
+	resp, err := client.postReq("payment/new_order", "NewOrder", []string{"to_receive", "to_receive_currency", "payment_receiver"}, args...)
 	if err != nil {
 		return nil, fmt.Errorf("error while making the request: %s", err)
 	}
@@ -348,12 +312,7 @@ func (client *Client) NewOrder(args ...args.Argument) (*PaymentOrder, error) {
 //   - optional: none
 // https://developers.cryptomkt.com/es/#crear-billetera-de-orden-de-pago
 func (client *Client) CreateWallet(args ...args.Argument) (*PaymentOrder, error) {
-	required := []string{"id", "token", "wallet"}
-	req, err := makeReq(required, args...)
-	if err != nil {
-		return nil, fmt.Errorf("Error in CreateWallet: %s", err)
-	}
-	resp, err := client.post("payment/create_wallet", req)
+	resp, err := client.postReq("payment/create_wallet", "CreateWallet", []string{"id", "token", "wallet"}, args...)
 	if err != nil {
 		return nil, fmt.Errorf("error while making the request: %s", err)
 	}
@@ -372,12 +331,10 @@ func (client *Client) CreateWallet(args ...args.Argument) (*PaymentOrder, error)
 //   - optional: Page, Limit
 // https://developers.cryptomkt.com/es/#listado-de-ordenes-de-pago
 func (client *Client) PaymentOrders(args ...args.Argument) (*[]PaymentOrder, error) {
-	required := []string{"start_date", "end_date"}
-	req, err := makeReq(required, args...)
+	resp, err := client.postReq("payment/orders", "PaymentOrders", []string{"start_date", "end_date"}, args...)
 	if err != nil {
-		return nil, fmt.Errorf("Error in PaymentOrders: %s", err)
+		return nil, fmt.Errorf("error while making the request: %s", err)
 	}
-	resp, err := client.get("payment/orders", req)
 	var paymentOrdsResp PaymentOrdersResponse
 	json.Unmarshal([]byte(resp), &paymentOrdsResp)
 	if paymentOrdsResp.Status == "error" {
@@ -393,12 +350,7 @@ func (client *Client) PaymentOrders(args ...args.Argument) (*[]PaymentOrder, err
 //   - optional: none
 // https://developers.cryptomkt.com/es/#estado-de-orden-de-pago
 func (client *Client) PaymentStatus(args ...args.Argument) (*PaymentOrder, error) {
-	required := []string{"id"}
-	req, err := makeReq(required, args...)
-	if err != nil {
-		return nil, fmt.Errorf("Error in PaymentStatus: %s", err)
-	}
-	resp, err := client.get("payment/status", req)
+	resp, err := client.postReq("payment/status", "PaymentStatus", []string{"id"}, args...)
 	if err != nil {
 		return nil, fmt.Errorf("error while making the request: %s", err)
 	}
