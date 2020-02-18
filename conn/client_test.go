@@ -145,7 +145,7 @@ func TestAutenticated(t *testing.T) {
 	})
 	time.Sleep(6 * time.Second)
 	t.Run("create instant", func(t *testing.T) {
-		_, err := client.CreateInstant(
+		err := client.CreateInstant(
 			args.Market("ETHCLP"),
 			args.Type("buy"),
 			args.Amount("10000"),
@@ -158,7 +158,7 @@ func TestAutenticated(t *testing.T) {
 	})
 	time.Sleep(6 * time.Second)
 	t.Run("request deposit", func(t *testing.T) {
-		_, err := client.RequestDeposit(
+		err := client.RequestDeposit(
 			args.BankAccount("213213"),
 			args.Amount("10234"),
 		)
@@ -170,7 +170,7 @@ func TestAutenticated(t *testing.T) {
 	})
 	time.Sleep(6 * time.Second)
 	t.Run("request withdrawal", func(t *testing.T) {
-		_, err := client.RequestWithdrawal(
+		err := client.RequestWithdrawal(
 			args.Amount("10234"),
 			args.BankAccount("213213"),
 		)
@@ -182,7 +182,7 @@ func TestAutenticated(t *testing.T) {
 	})
 	time.Sleep(6 * time.Second)
 	t.Run("transfer", func(t *testing.T) {
-		_, err := client.Transfer(
+		err := client.Transfer(
 			args.Address("GDMXNQBJMS3FYI4PFSYCCB4"),
 			args.Amount("1200"),
 			args.Currency("XLM"),

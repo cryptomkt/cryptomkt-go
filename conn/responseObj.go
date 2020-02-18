@@ -72,7 +72,7 @@ type PaymentResponse struct {
 	Data    PaymentOrder
 }
 
-type PymentOrdersResponse struct {
+type PaymentOrdersResponse struct {
 	Status     string
 	Message    string
 	Pagination Pagination

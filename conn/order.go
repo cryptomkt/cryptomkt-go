@@ -19,12 +19,19 @@ type Amount struct {
 	Executed  string
 }
 
-type OrderList struct {
+type OrderListResp struct {
 	apiClient  *Client
 	Status     string
+	Message    string
 	Pagination Pagination
 	Warnings   string
 	Data       []Order
+}
+
+type OrderResponse struct {
+	Status  string
+	Message string
+	Data    Order
 }
 
 type Order struct {

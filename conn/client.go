@@ -4,7 +4,6 @@ package conn
 
 import (
 	"bytes"
-	"encoding/json"
 	"fmt"
 	"github.com/cryptomkt/cryptomkt-go/requests"
 	"io/ioutil"
@@ -49,19 +48,7 @@ func (client *Client) runRequest(httpReq *http.Request) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("Error reading response: %v", err)
 	}
-	var responseData map[string]string
-	json.Unmarshal(respBody, &responseData)
-	if val, ok := responseData["status"]; ok {
-		switch val {
-		case "error":
-			msg := responseData["message"]
-			return "", fmt.Errorf("%s", msg)
-
-		case "success":
-			return responseData["data"], nil
-		}
-	}
-	return "", fmt.Errorf("error in the response: %s", string(respBody))
+	return string(respBody), nil
 }
 
 func (client *Client) getPublic(endpoint string, request *requests.Request) (string, error) {

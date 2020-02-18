@@ -108,7 +108,7 @@ func TestUnmarshalingAnOrderList(t *testing.T) {
 		   }
 		]
 	 }`
-	orders := &OrderList{}
+	orders := &OrderListResp{}
 	err := json.Unmarshal([]byte(dummyJSONOrder), orders)
 	if err != nil {
 		t.Errorf("error unmarshling %s", err)
