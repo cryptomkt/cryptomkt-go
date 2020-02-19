@@ -16,12 +16,12 @@ func (client *Client) GetAccount() (*Account, error) {
 	if err != nil {
 		return nil, fmt.Errorf("error while making the request: %s", err)
 	}
-	var accountResp AccountResponse
-	json.Unmarshal([]byte(resp), &accountResp)
-	if accountResp.Status == "error" {
-		return nil, fmt.Errorf("error in the response: %s", accountResp.Message)
+	var aResp AccountResponse
+	json.Unmarshal(resp, &aResp)
+	if aResp.Status == "error" {
+		return nil, fmt.Errorf("error from in the  server side: %s", aResp.Message)
 	}
-	return &accountResp.Data, nil
+	return &aResp.Data, nil
 }
 
 // GetBalance returns the actual balance of the wallets of the client in CryptoMarket
@@ -32,12 +32,12 @@ func (client *Client) GetBalance() (*[]Balance, error) {
 	if err != nil {
 		return nil, fmt.Errorf("error while making the request: %s", err)
 	}
-	var balanceResp BalancesResponse
-	json.Unmarshal([]byte(resp), &balanceResp)
-	if balanceResp.Status == "error" {
-		return nil, fmt.Errorf("error in the response: %s", balanceResp.Message)
+	var bResp BalancesResponse
+	json.Unmarshal(resp, &bResp)
+	if bResp.Status == "error" {
+		return nil, fmt.Errorf("error from in the  server side: %s", bResp.Message)
 	}
-	return &balanceResp.Data, nil
+	return &bResp.Data, nil
 }
 
 // GetWallets is an alias for Balance, returns the actual balance of wallets of the client in CryptoMarket
@@ -58,12 +58,12 @@ func (client *Client) GetTransactions(args ...args.Argument) (*[]Transaction, er
 	if err != nil {
 		return nil, fmt.Errorf("error while making the request: %s", err)
 	}
-	var transactionsResp TransactionsResponse
-	json.Unmarshal([]byte(resp), &transactionsResp)
-	if transactionsResp.Status == "error" {
-		return nil, fmt.Errorf("error in the response: %s", transactionsResp.Message)
+	var tResp TransactionsResponse
+	json.Unmarshal(resp, &tResp)
+	if tResp.Status == "error" {
+		return nil, fmt.Errorf("error from in the  server side: %s", tResp.Message)
 	}
-	return &transactionsResp.Data, nil
+	return &tResp.Data, nil
 }
 
 // GetActiveOrders returns the list of active orders of the client
@@ -77,12 +77,12 @@ func (client *Client) GetActiveOrders(args ...args.Argument) (*[]Order, error) {
 	if err != nil {
 		return nil, fmt.Errorf("error while making the request: %s", err)
 	}
-	var activeOrdersResp OrderListResp
-	json.Unmarshal([]byte(resp), &activeOrdersResp)
-	if activeOrdersResp.Status == "error" {
-		return nil, fmt.Errorf("error in the response: %s", activeOrdersResp.Message)
+	var oListResp OrderListResp
+	json.Unmarshal(resp, &oListResp)
+	if oListResp.Status == "error" {
+		return nil, fmt.Errorf("error from in the  server side: %s", oListResp.Message)
 	}
-	return &activeOrdersResp.Data, nil
+	return &oListResp.Data, nil
 }
 
 // GetExecutedOrders return a list of the executed orders of the client
@@ -96,12 +96,12 @@ func (client *Client) GetExecutedOrders(args ...args.Argument) (*[]Order, error)
 	if err != nil {
 		return nil, fmt.Errorf("error while making the request: %s", err)
 	}
-	var activeOrdersResp OrderListResp
-	json.Unmarshal([]byte(resp), &activeOrdersResp)
-	if activeOrdersResp.Status == "error" {
-		return nil, fmt.Errorf("error in the response: %s", activeOrdersResp.Message)
+	var oListResp OrderListResp
+	json.Unmarshal(resp, &oListResp)
+	if oListResp.Status == "error" {
+		return nil, fmt.Errorf("error from in the  server side: %s", oListResp.Message)
 	}
-	return &activeOrdersResp.Data, nil
+	return &oListResp.Data, nil
 }
 
 // GetOrderStatus gives the status of an order
@@ -115,12 +115,12 @@ func (client *Client) GetOrderStatus(args ...args.Argument) (*Order, error) {
 	if err != nil {
 		return nil, fmt.Errorf("error while making the request: %s", err)
 	}
-	var orderResp OrderResponse
-	json.Unmarshal([]byte(resp), &orderResp)
-	if orderResp.Status == "error" {
-		return nil, fmt.Errorf("error in the response: %s", orderResp.Message)
+	var oResp OrderResponse
+	json.Unmarshal(resp, &oResp)
+	if oResp.Status == "error" {
+		return nil, fmt.Errorf("error from in the  server side: %s", oResp.Message)
 	}
-	return &orderResp.Data, nil
+	return &oResp.Data, nil
 }
 
 // GetInstant emulates an order in the current state of the Instant Exchange of CryptoMarket
@@ -134,12 +134,12 @@ func (client *Client) GetInstant(args ...args.Argument) (*Quantity, error) {
 	if err != nil {
 		return nil, fmt.Errorf("error while making the request: %s", err)
 	}
-	var instantResp InstantResponse
-	json.Unmarshal([]byte(resp), &instantResp)
-	if instantResp.Status == "error" {
-		return nil, fmt.Errorf("error in the response: %s", instantResp.Message)
+	var iResp InstantResponse
+	json.Unmarshal(resp, &iResp)
+	if iResp.Status == "error" {
+		return nil, fmt.Errorf("error from in the  server side: %s", iResp.Message)
 	}
-	return &instantResp.Data, nil
+	return &iResp.Data, nil
 }
 
 // CreateOrder signal to create an order of buy or sell in CryptoMarket
@@ -153,12 +153,12 @@ func (client *Client) CreateOrder(args ...args.Argument) (*Order, error) {
 	if err != nil {
 		return nil, fmt.Errorf("error while making the request: %s", err)
 	}
-	var orderResp OrderResponse
-	json.Unmarshal([]byte(resp), &orderResp)
-	if orderResp.Status == "error" {
-		return nil, fmt.Errorf("error in the response: %s", orderResp.Message)
+	var oResp OrderResponse
+	json.Unmarshal(resp, &oResp)
+	if oResp.Status == "error" {
+		return nil, fmt.Errorf("error from in the  server side: %s", oResp.Message)
 	}
-	return &orderResp.Data, nil
+	return &oResp.Data, nil
 }
 
 // CancelOrder signal to cancel an order in CryptoMarket
@@ -172,12 +172,12 @@ func (client *Client) CancelOrder(args ...args.Argument) (*Order, error) {
 	if err != nil {
 		return nil, fmt.Errorf("error while making the request: %s", err)
 	}
-	var orderResp OrderResponse
-	json.Unmarshal([]byte(resp), &orderResp)
-	if orderResp.Status == "error" {
-		return nil, fmt.Errorf("error in the response: %s", orderResp.Message)
+	var oResp OrderResponse
+	json.Unmarshal(resp, &oResp)
+	if oResp.Status == "error" {
+		return nil, fmt.Errorf("error from in the  server side: %s", oResp.Message)
 	}
-	return &orderResp.Data, nil
+	return &oResp.Data, nil
 }
 
 // CreateInstant makes an order in the Instant Exchange of CryptoMarket
@@ -191,10 +191,10 @@ func (client *Client) CreateInstant(args ...args.Argument) error {
 	if err != nil {
 		return fmt.Errorf("error while making the request: %s", err)
 	}
-	var instantResp InstantResponse
-	json.Unmarshal([]byte(resp), &instantResp)
-	if instantResp.Status == "error" {
-		return fmt.Errorf("error in the response: %s", instantResp.Message)
+	var iResp InstantResponse
+	json.Unmarshal(resp, &iResp)
+	if iResp.Status == "error" {
+		return fmt.Errorf("error from in the  server side: %s", iResp.Message)
 	}
 	return nil
 }
@@ -211,10 +211,10 @@ func (client *Client) RequestDeposit(args ...args.Argument) error {
 	if err != nil {
 		return fmt.Errorf("error while making the request: %s", err)
 	}
-	var instantResp InstantResponse
-	json.Unmarshal([]byte(resp), &instantResp)
-	if instantResp.Status == "error" {
-		return fmt.Errorf("error in the response: %s", instantResp.Message)
+	var iResp InstantResponse
+	json.Unmarshal(resp, &iResp)
+	if iResp.Status == "error" {
+		return fmt.Errorf("error from in the  server side: %s", iResp.Message)
 	}
 	return nil
 }
@@ -230,10 +230,10 @@ func (client *Client) RequestWithdrawal(args ...args.Argument) error {
 	if err != nil {
 		return fmt.Errorf("error while making the request: %s", err)
 	}
-	var instantResp InstantResponse
-	json.Unmarshal([]byte(resp), &instantResp)
-	if instantResp.Status == "error" {
-		return fmt.Errorf("error in the response: %s", instantResp.Message)
+	var iResp InstantResponse
+	json.Unmarshal(resp, &iResp)
+	if iResp.Status == "error" {
+		return fmt.Errorf("error from in the  server side: %s", iResp.Message)
 	}
 	return nil
 }
@@ -249,10 +249,10 @@ func (client *Client) Transfer(args ...args.Argument) error {
 	if err != nil {
 		return fmt.Errorf("error while making the request: %s", err)
 	}
-	var instantResp InstantResponse
-	json.Unmarshal([]byte(resp), &instantResp)
-	if instantResp.Status == "error" {
-		return fmt.Errorf("error in the response: %s", instantResp.Message)
+	var iResp InstantResponse
+	json.Unmarshal(resp, &iResp)
+	if iResp.Status == "error" {
+		return fmt.Errorf("error from in the  server side: %s", iResp.Message)
 	}
 	return nil
 
@@ -269,12 +269,12 @@ func (client *Client) NewOrder(args ...args.Argument) (*PaymentOrder, error) {
 	if err != nil {
 		return nil, fmt.Errorf("error while making the request: %s", err)
 	}
-	var paymentResp PaymentResponse
-	json.Unmarshal([]byte(resp), &paymentResp)
-	if paymentResp.Status == "error" {
-		return nil, fmt.Errorf("error in the response: %s", paymentResp.Message)
+	var poResp PaymentResponse
+	json.Unmarshal(resp, &poResp)
+	if poResp.Status == "error" {
+		return nil, fmt.Errorf("error from in the  server side: %s", poResp.Message)
 	}
-	return &paymentResp.Data, nil
+	return &poResp.Data, nil
 }
 
 // CreateWallet creates a wallet to pay a payment order
@@ -288,12 +288,12 @@ func (client *Client) CreateWallet(args ...args.Argument) (*PaymentOrder, error)
 	if err != nil {
 		return nil, fmt.Errorf("error while making the request: %s", err)
 	}
-	var paymentResp PaymentResponse
-	json.Unmarshal([]byte(resp), &paymentResp)
-	if paymentResp.Status == "error" {
-		return nil, fmt.Errorf("error in the response: %s", paymentResp.Message)
+	var poResp PaymentResponse
+	json.Unmarshal(resp, &poResp)
+	if poResp.Status == "error" {
+		return nil, fmt.Errorf("error from in the  server side: %s", poResp.Message)
 	}
-	return &paymentResp.Data, nil
+	return &poResp.Data, nil
 }
 
 // PaymentOrders returns all the generated payment orders
@@ -307,12 +307,12 @@ func (client *Client) PaymentOrders(args ...args.Argument) (*[]PaymentOrder, err
 	if err != nil {
 		return nil, fmt.Errorf("error while making the request: %s", err)
 	}
-	var paymentOrdsResp PaymentOrdersResponse
-	json.Unmarshal([]byte(resp), &paymentOrdsResp)
-	if paymentOrdsResp.Status == "error" {
-		return nil, fmt.Errorf("error in the response: %s", paymentOrdsResp.Message)
+	var poResp PaymentOrdersResponse
+	json.Unmarshal(resp, &poResp)
+	if poResp.Status == "error" {
+		return nil, fmt.Errorf("error from in the  server side: %s", poResp.Message)
 	}
-	return &paymentOrdsResp.Data, nil
+	return &poResp.Data, nil
 }
 
 // PaymentStatus gives the status of a pyment order
@@ -326,12 +326,12 @@ func (client *Client) PaymentStatus(args ...args.Argument) (*PaymentOrder, error
 	if err != nil {
 		return nil, fmt.Errorf("error while making the request: %s", err)
 	}
-	var paymentResp PaymentResponse
-	json.Unmarshal([]byte(resp), &paymentResp)
-	if paymentResp.Status == "error" {
-		return nil, fmt.Errorf("error in the response: %s", paymentResp.Message)
+	var poResp PaymentResponse
+	json.Unmarshal(resp, &poResp)
+	if poResp.Status == "error" {
+		return nil, fmt.Errorf("error from in the  server side: %s", poResp.Message)
 	}
-	return &paymentResp.Data, nil
+	return &poResp.Data, nil
 }
 
 func (client *Client) MarketList(args ...args.Argument) (*MarketStruct, error) {
@@ -395,7 +395,7 @@ func (client *Client) MakeTicker(args ...args.Argument) (*Ticker, error) {
 
 	var response map[string]interface{}
 	var respu Ticker
-	data, err := makeArrayMap(resp, response, respu.Data)
+	data, err := makeArrayMap(string(resp), response, respu.Data)
 	if err == nil {
 		respu.Data = data
 		return &respu, err
@@ -417,7 +417,7 @@ func (client *Client) getBook(args ...args.Argument) (*Book, error) {
 
 	var response map[string]interface{}
 	var respu Book
-	data, err := makeArrayMap(resp, response, respu.Data)
+	data, err := makeArrayMap(string(resp), response, respu.Data)
 	if err == nil {
 		respu.Data = data
 		return &respu, nil
@@ -439,7 +439,7 @@ func (client *Client) getTrades(args ...args.Argument) (*Trades, error) {
 
 	var response map[string]interface{}
 	var respu Trades
-	data, err := makeArrayMap(resp, response, respu.Data)
+	data, err := makeArrayMap(string(resp), response, respu.Data)
 	if err == nil {
 		respu.Data = data
 		return &respu, nil

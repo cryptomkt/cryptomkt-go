@@ -81,7 +81,7 @@ func assertDateFormatV1(val, caller string) error {
 	return nil
 }
 
-// Amount is an argument of a request. 
+// Amount is an argument of a request.
 // Represents numbers as strings.
 //
 // Number format: without thousand separator, and . (a dot) as decimal point.
@@ -363,8 +363,8 @@ func Token(val string) Argument {
 	}
 }
 
-// Wallet is an argument of a request. 
-// 
+// Wallet is an argument of a request.
+//
 // examples: "ETH", "XLM" or "BTC".
 func Wallet(val string) Argument {
 	return func(request *requests.Request) error {

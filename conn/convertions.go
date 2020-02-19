@@ -26,6 +26,14 @@ func (paymentOrder *PaymentOrder) parseState() string {
 	return "Invalid state"
 }
 
+func cleanMap(aMap *map[string]string) {
+	for k, v := range *aMap {
+		if v == "" {
+			delete(*aMap, k)
+		}
+	}
+}
+
 func OrderToMap(order Order) map[string]string {
 	asMap := make(map[string]string)
 	asMap["id"] = order.Id
@@ -41,6 +49,7 @@ func OrderToMap(order Order) map[string]string {
 	asMap["created_at"] = order.CreatedAt
 	asMap["updated_at"] = order.UpdatedAt
 	asMap["executed_at"] = order.ExecutedAt
+	cleanMap(&asMap)
 	return asMap
 }
 
@@ -66,6 +75,7 @@ func PaymentOrderToMap(payment PaymentOrder) map[string]string {
 	asMap["created_at"] = payment.CreatedAt
 	asMap["updated_at"] = payment.UpdatedAt
 	asMap["server_at"] = payment.ServerAt
+	cleanMap(&asMap)
 	return asMap
 }
 
@@ -81,6 +91,7 @@ func TransactionToMap(transaction Transaction) map[string]string {
 	asMap["hash"] = transaction.Hash
 	asMap["address"] = transaction.Address
 	asMap["memo"] = transaction.Memo
+	cleanMap(&asMap)
 	return asMap
 }
 
@@ -88,6 +99,7 @@ func QuantityToMap(instant Quantity) map[string]string {
 	asMap := make(map[string]string)
 	asMap["obtained"] = instant.Obtained
 	asMap["required"] = instant.Required
+	cleanMap(&asMap)
 	return asMap
 }
 
