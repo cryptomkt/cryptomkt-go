@@ -4,27 +4,97 @@ type MarketStruct struct {
 	Data []string
 }
 
+type DataTicker struct {
+	High      string
+	Volume    string
+	Low       string
+	Ask       string
+	Timestamp string
+	Bid       string
+	LastPrice string `json:"last_price"`
+	Market    string
+}
+
+type TemporalTicker struct {
+	Status string
+	Data   []DataTicker
+}
+
 type Ticker struct {
-	Data []map[string]string
+	Data []DataTicker
 }
 
-type Order struct {
-	Data []map[string]string
+type BookData struct {
+	Price     string
+	Amount    string
+	Timestamp string
 }
+
+type TemporalBook struct {
+	Status     string
+	Pagination Pagination
+	Data       []BookData
+}
+
+type Book struct {
+	args       map[string]string
+	pagination Pagination
+	client     *Client
+	Data       []BookData
+}
+
+type TradesData struct {
+	MarketTaker string `json:"market_taker"`
+	Price       string
+	Amount      string
+	Tid         string
+	Timestamp   string
+	Market      string
+}
+type TemporalTrades struct {
+	Status     string
+	Pagination Pagination
+	Data       []TradesData
+}
+
 type Trades struct {
-	Data []map[string]string
-}
-type Prices struct {
-	Data map[string][]Field
+	args       map[string]string
+	pagination Pagination
+	client     *Client
+	Data       []TradesData
 }
 
-type Field struct {
-	Candle_id   int
-	Open_price  string
-	Hight_price string
-	Close_price string
-	Low_price   string
-	Volume_sum  string
-	Candle_date string
-	Tick_count  string
+type TemporalPrices struct {
+	Status     string
+	Pagination Pagination
+	Data       DataPrices1
+}
+
+type Prices struct {
+	args       map[string]string
+	pagination Pagination
+	client     *Client
+	Data       DataPrices1
+}
+
+type DataPrices1 struct {
+	Ask []DataPrices2
+	Bid []DataPrices2
+}
+
+type DataPrices2 struct {
+	CandleId   int    `json:"candle_id"`
+	OpenPrice  string `json:"open_price"`
+	HightPrice string `json:"hight_price"`
+	ClosePrice string `json:"close_price"`
+	LowPrice   string `json:"low_price"`
+	VolumeSum  string `json:"volume_sum"`
+	CandleDate string `json:"candle_date"`
+	TickCount  string `json:"tick_count"`
+}
+type Pagination struct {
+	Previous interface{}
+	Limit    int
+	Page     int
+	Next     interface{}
 }

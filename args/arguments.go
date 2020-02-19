@@ -159,7 +159,7 @@ func End(val string) Argument {
 // Timeframe is an argument of a request. Its the lapse between two candles.
 //
 // accepts 1, 5, 15, 60, 240, 1440 or 10080 as strings.
-func Timeframe(val string) Argument {
+func TimeFrame(val string) Argument {
 	return func(request *requests.Request) error {
 		if !(val == "1" || val == "5" || val == "15" || val == "60" || val == "240" || val == "1440" || val == "10080") {
 			return errors.New("timeframe must be one of the following numbers: 1, 5, 15, 60, 240, 1440 or 10080, as string")
