@@ -5,6 +5,7 @@ package conn
 import (
 	"bytes"
 	"fmt"
+	"github.com/cryptomkt/cryptomkt-go/args"
 	"github.com/cryptomkt/cryptomkt-go/requests"
 	"io/ioutil"
 	"net/http"
@@ -140,4 +141,41 @@ func (client *Client) post(endpoint string, request *requests.Request) (string, 
 	//required header for the reciever to interpret the request as a http form post
 	httpReq.Header.Set("Content-Type", "application/x-www-form-urlencoded; param=value")
 	return client.runRequest(httpReq)
+}
+
+// makeReq builds a request to ensure the presence of required arguments, stores the
+// arguments in its string form.
+func makeReq(required []string, args ...args.Argument) (*requests.Request, error) {
+	req := requests.NewReq(required)
+	for _, argument := range args {
+		err := argument(req)
+		if err != nil {
+			return nil, fmt.Errorf("argument error: %s", err)
+		}
+	}
+	err := req.AssertRequired()
+	if err != nil {
+		return nil, fmt.Errorf("required arguments not meeted:%s", err)
+	}
+	return req, nil
+}
+
+// postReq builds a post request and send it to CryptoMarket.
+// Returns a string with the response
+func (client *Client) postReq(endpoint string, caller string, required []string, args ...args.Argument) (string, error) {
+	req, err := makeReq(required, args...)
+	if err != nil {
+		return "", fmt.Errorf("Error in %s: %s", caller, err)
+	}
+	return client.post(endpoint, req)
+}
+
+// postReq builds a getReq request and send it to CryptoMarket.
+// Returns a string with the response
+func (client *Client) getReq(endpoint string, caller string, required []string, args ...args.Argument) (string, error) {
+	req, err := makeReq(required, args...)
+	if err != nil {
+		return "", fmt.Errorf("Error in %s: %s", caller, err)
+	}
+	return client.get(endpoint, req)
 }

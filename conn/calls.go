@@ -8,38 +8,7 @@ import (
 	"github.com/cryptomkt/cryptomkt-go/requests"
 )
 
-func makeReq(required []string, args ...args.Argument) (*requests.Request, error) {
-	req := requests.NewReq(required)
-	for _, argument := range args {
-		err := argument(req)
-		if err != nil {
-			return nil, fmt.Errorf("argument error: %s", err)
-		}
-	}
-	err := req.AssertRequired()
-	if err != nil {
-		return nil, fmt.Errorf("required arguments not meeted:%s", err)
-	}
-	return req, nil
-}
-
-func (client *Client) postReq(endpoint string, caller string, required []string, args ...args.Argument) (string, error) {
-	req, err := makeReq(required, args...)
-	if err != nil {
-		return "", fmt.Errorf("Error in %s: %s", caller, err)
-	}
-	return client.post(endpoint, req)
-}
-
-func (client *Client) getReq(endpoint string, caller string, required []string, args ...args.Argument) (string, error) {
-	req, err := makeReq(required, args...)
-	if err != nil {
-		return "", fmt.Errorf("Error in %s: %s", caller, err)
-	}
-	return client.get(endpoint, req)
-}
-
-// Account gives the account information of the client.
+// GetAccount gives the account information of the client.
 // https://developers.cryptomkt.com/es/#cuenta
 func (client *Client) GetAccount() (*Account, error) {
 	resp, err := client.get("account", requests.NewEmptyReq())
@@ -54,7 +23,7 @@ func (client *Client) GetAccount() (*Account, error) {
 	return &accountResp.Data, nil
 }
 
-// Balance returns the actual balance of the wallets of the client in Cryptomarket
+// GetBalance returns the actual balance of the wallets of the client in Cryptomarket
 // https://developers.cryptomkt.com/es/#obtener-balance
 func (client *Client) GetBalance() (*[]Balance, error) {
 	resp, err := client.get("balance", requests.NewEmptyReq())
@@ -69,13 +38,13 @@ func (client *Client) GetBalance() (*[]Balance, error) {
 	return &balanceResp.Data, nil
 }
 
-// Wallets is an alias for Balance
+// GetWallets is an alias for Balance
 // https://developers.cryptomkt.com/es/#obtener-balance
 func (client *Client) GetWallets() (*[]Balance, error) {
 	return client.GetBalance()
 }
 
-// Transactions returns the movements of the wallets of the client.
+// GetTransactions returns the movements of the wallets of the client.
 //
 // List of accepted Arguments:
 //   - required: Currency
@@ -94,7 +63,7 @@ func (client *Client) GetTransactions(args ...args.Argument) (*[]Transaction, er
 	return &transactionsResp.Data, nil
 }
 
-// ActiveOrders returns the list of active orders of the client
+// GetActiveOrders returns the list of active orders of the client
 //
 // List of accepted Arguments:
 //   - required: Market
@@ -113,7 +82,7 @@ func (client *Client) GetActiveOrders(args ...args.Argument) (*[]Order, error) {
 	return &activeOrdersResp.Data, nil
 }
 
-// ExecutedOrders return a list of the executed orders of the client
+// GetExecutedOrders return a list of the executed orders of the client
 //
 // List of accepted Arguments:
 //   - required: Market
@@ -132,26 +101,26 @@ func (client *Client) GetExecutedOrders(args ...args.Argument) (*[]Order, error)
 	return &activeOrdersResp.Data, nil
 }
 
-// OrderStatus gives the status of an order
+// GetOrderStatus gives the status of an order
 //
 // List of accepted Arguments:
 //   - required: Id
 //   - optional: none
 // https://developers.cryptomkt.com/es/#estado-de-orden
-func (client *Client) GetOrderStatus(args ...args.Argument) (*[]Order, error) {
+func (client *Client) GetOrderStatus(args ...args.Argument) (*Order, error) {
 	resp, err := client.getReq("orders/status", "GetOrderStatus", []string{"id"}, args...)
 	if err != nil {
 		return nil, fmt.Errorf("error while making the request: %s", err)
 	}
-	var activeOrdersResp OrderListResp
-	json.Unmarshal([]byte(resp), &activeOrdersResp)
-	if activeOrdersResp.Status == "error" {
-		return nil, fmt.Errorf("error in the response: %s", activeOrdersResp.Message)
+	var orderResp OrderResponse
+	json.Unmarshal([]byte(resp), &orderResp)
+	if orderResp.Status == "error" {
+		return nil, fmt.Errorf("error in the response: %s", orderResp.Message)
 	}
-	return &activeOrdersResp.Data, nil
+	return &orderResp.Data, nil
 }
 
-// Instant emulates an order in the current state of the Instant Exchange of CryptoMarket
+// GetInstant emulates an order in the current state of the Instant Exchange of CryptoMarket
 //
 // List of accepted Arguments:
 //   - required: Market, Type, Amount
@@ -247,7 +216,7 @@ func (client *Client) RequestDeposit(args ...args.Argument) error {
 	return nil
 }
 
-// Request withdrawal notifies a withdrawal from a bank account of the client
+// RequestWithdrawal notifies a withdrawal from a bank account of the client
 //
 // List of accepted Arguments:
 //   - required: Amount, BankAccount

@@ -45,7 +45,7 @@ type BalancesResponse struct {
 
 type PaymentOrder struct {
 	Id                string
-	ExtenalId         string `json:"external_id"`
+	ExternalId        string `json:"external_id"`
 	Status            int
 	ToReceive         string `json:"to_receive"`
 	ToReceiveCurrency string `json:"to_receive_currency"`
@@ -134,26 +134,4 @@ type TransactionsResponse struct {
 	Message    string
 	Pagination Pagination
 	Data       []Transaction
-}
-
-func (paymentOrder *PaymentOrder) parseState() string {
-	switch paymentOrder.Status {
-	case -4:
-		return "Pago Múltiple"
-	case -3:
-		return "Monto pagado no concuerda"
-	case -2:
-		return "Falló conversión"
-	case -1:
-		return "Expiró orden de pago"
-	case 0:
-		return "Esperando pago"
-	case 1:
-		return "Esperando bloque"
-	case 2:
-		return "Esperando procesamiento"
-	case 3:
-		return "Pago exitoso"
-	}
-	return "Invalid state"
 }
