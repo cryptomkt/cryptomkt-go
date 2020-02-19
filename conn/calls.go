@@ -26,20 +26,20 @@ func makeReq(required []string, args ...args.Argument) (*requests.Request, error
 
 // Account gives the account information of the client.
 // https://developers.cryptomkt.com/es/#cuenta
-func (client *Client) Account() (string, error) {
+func (client *Client) GetAccount() (string, error) {
 	return client.get("account", requests.NewEmptyReq())
 }
 
 // Balance returns the actual balance of the wallets of the client in Cryptomarket
 // https://developers.cryptomkt.com/es/#obtener-balance
-func (client *Client) Balance() (string, error) {
+func (client *Client) GetBalance() (string, error) {
 	return client.get("balance", requests.NewEmptyReq())
 }
 
 // Wallets is an alias for Balance
 // https://developers.cryptomkt.com/es/#obtener-balance
-func (client *Client) Wallets() (string, error) {
-	return client.Balance()
+func (client *Client) GetWallets() (string, error) {
+	return client.GetBalance()
 }
 
 // Transactions returns the movements of the wallets of the client.
@@ -48,7 +48,7 @@ func (client *Client) Wallets() (string, error) {
 //   - required: Currency
 //   - optional: Page, Limit
 // https://developers.cryptomkt.com/es/#obtener-movimientos
-func (client *Client) Transactions(args ...args.Argument) (string, error) {
+func (client *Client) GetTransactions(args ...args.Argument) (string, error) {
 	required := []string{"currency"}
 	req, err := makeReq(required, args...)
 	if err != nil {
@@ -63,7 +63,7 @@ func (client *Client) Transactions(args ...args.Argument) (string, error) {
 //   - required: Market
 //   - optional: Page, Limit
 // https://developers.cryptomkt.com/es/#ordenes-activas
-func (client *Client) ActiveOrders(args ...args.Argument) (string, error) {
+func (client *Client) GetActiveOrders(args ...args.Argument) (string, error) {
 	required := []string{"market"}
 	req, err := makeReq(required, args...)
 	if err != nil {
@@ -78,7 +78,7 @@ func (client *Client) ActiveOrders(args ...args.Argument) (string, error) {
 //   - required: Market
 //   - optional: Page, Limit
 // https://developers.cryptomkt.com/es/#ordenes-ejecutadas
-func (client *Client) ExecutedOrders(args ...args.Argument) (string, error) {
+func (client *Client) GetExecutedOrders(args ...args.Argument) (string, error) {
 	required := []string{"market"}
 	req, err := makeReq(required, args...)
 	if err != nil {
@@ -93,7 +93,7 @@ func (client *Client) ExecutedOrders(args ...args.Argument) (string, error) {
 //   - required: Id
 //   - optional: none
 // https://developers.cryptomkt.com/es/#estado-de-orden
-func (client *Client) OrderStatus(args ...args.Argument) (string, error) {
+func (client *Client) GetOrderStatus(args ...args.Argument) (string, error) {
 	required := []string{"id"}
 	req, err := makeReq(required, args...)
 	if err != nil {
@@ -108,7 +108,7 @@ func (client *Client) OrderStatus(args ...args.Argument) (string, error) {
 //   - required: Market, Type, Amount
 //   - optional: none
 // https://developers.cryptomkt.com/es/#obtener-cantidad
-func (client *Client) Instant(args ...args.Argument) (string, error) {
+func (client *Client) GetInstant(args ...args.Argument) (string, error) {
 	required := []string{"market", "type", "amount"}
 	req, err := makeReq(required, args...)
 	if err != nil {
@@ -123,13 +123,20 @@ func (client *Client) Instant(args ...args.Argument) (string, error) {
 //   - required: Amount, Market, Price, Type
 //   - optional: none
 // https://developers.cryptomkt.com/es/#crear-orden
-func (client *Client) CreateOrder(args ...args.Argument) (string, error) {
+func (client *Client) CreateOrder(args ...args.Argument) (*Order, error) {
 	required := []string{"amount", "market", "price", "type"}
 	req, err := makeReq(required, args...)
 	if err != nil {
-		return "", fmt.Errorf("Error in CreateOrder: %s", err)
+		return nil, fmt.Errorf("Error in CreateOrder: %s", err)
 	}
-	return client.post("orders/create", req)
+	orderString, err := client.post("orders/create", req)
+	if err != nil {
+		return nil, fmt.Errorf("Error creating the order : %s", err)
+	}
+	var order Order
+	json.Unmarshal([]byte(orderString), &order)
+	return &order, nil
+
 }
 
 // CancelOrder signal to cancel an order in CryptoMarket
@@ -332,6 +339,7 @@ func (client *Client) GetTicker(args ...args.Argument) (*Ticker, error) {
 	}
 }
 
+<<<<<<< HEAD
 // GetBook returns a pointer to a Book struct with the data given by
 // the api and an error message. It returns (nil, error) when an error
 // is raised and (*Book, nil) when the operation is successful.
@@ -342,6 +350,9 @@ func (client *Client) GetTicker(args ...args.Argument) (*Ticker, error) {
 // 		- required: Market , Type
 //		- optional: Page, Limit
 func (client *Client) GetBook(args ...args.Argument) (*Book, error) {
+=======
+func (client *Client) getBook(args ...args.Argument) (*Book, error) {
+>>>>>>> 77cc5aa8f6445fba169e90a878e8bc0b3c0734e4
 	required := []string{"market", "type"}
 	req, err := makeReq(required, args...)
 	if err != nil {
@@ -352,10 +363,19 @@ func (client *Client) GetBook(args ...args.Argument) (*Book, error) {
 		return nil, fmt.Errorf("error at client: %s", err)
 	}
 
+<<<<<<< HEAD
 	var response TemporalBook
 	err = json.Unmarshal([]byte(resp), &response)
 	if err != nil {
 		return nil, err
+=======
+	var response map[string]interface{}
+	var respu Book
+	data, err := makeArrayMap(resp, response, respu.Data)
+	if err == nil {
+		respu.Data = data
+		return &respu, nil
+>>>>>>> 77cc5aa8f6445fba169e90a878e8bc0b3c0734e4
 	} else {
 		var resp Book
 
@@ -371,6 +391,7 @@ func (client *Client) GetBook(args ...args.Argument) (*Book, error) {
 	}
 }
 
+<<<<<<< HEAD
 // Here you have methods to interact with the Book's pagination
 
 func (b *Book) GetPrevious() (*Book, error) {
@@ -430,6 +451,9 @@ func (b *Book) GetLimit() int {
 //		- required: Market
 //		- optional: Start, End, Page, Limit
 func (client *Client) GetTrades(args ...args.Argument) (*Trades, error) {
+=======
+func (client *Client) getTrades(args ...args.Argument) (*Trades, error) {
+>>>>>>> 77cc5aa8f6445fba169e90a878e8bc0b3c0734e4
 	required := []string{"market"}
 	req, err := makeReq(required, args...)
 	if err != nil {
@@ -561,6 +585,7 @@ func (t *Trades) GetPage() int {
 	return t.pagination.Page
 }
 
+<<<<<<< HEAD
 func (t *Trades) GetLimit() int {
 	return t.pagination.Limit
 }
@@ -577,6 +602,9 @@ func (t *Trades) GetLimit() int {
 //		- required: Market, TimeFrame
 //		- optional: Page, Limit
 func (client *Client) GetPrices(args ...args.Argument) (*Prices, error) {
+=======
+func (client *Client) getPrices(args ...args.Argument) (*Prices, error) {
+>>>>>>> 77cc5aa8f6445fba169e90a878e8bc0b3c0734e4
 	required := []string{"market", "timeframe"}
 	req, err := makeReq(required, args...)
 	if err != nil {

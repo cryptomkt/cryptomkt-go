@@ -2,10 +2,10 @@ package conn
 
 import (
 	"bufio"
-	"encoding/json"
 	"github.com/cryptomkt/cryptomkt-go/args"
 	"log"
 	"os"
+	"strings"
 	"testing"
 	"time"
 )
@@ -33,29 +33,10 @@ func newDebugClient(filePath string) (*Client, error) {
 	return client, nil
 }
 
-var keyfile = "../keys.txt"
-
-func assertSuccess(response string, acceptableError string, t *testing.T) {
-	var resp map[string]interface{}
-	json.Unmarshal([]byte(response), &resp)
-	if val, ok := resp["status"]; ok {
-		switch val {
-		case "error":
-			if val, ok := resp["message"]; !(ok && val == acceptableError) {
-				t.Errorf(response)
-			}
-		case "success":
-			//all good
-		default:
-			t.Errorf("unexpected response")
-		}
-	} else {
-		t.Errorf("error in the response: %s", resp)
-	}
-}
+var keysfile = "../keys.txt"
 
 func TestAutenticated(t *testing.T) {
-	client, err := newDebugClient(keyfile)
+	client, err := newDebugClient(keysfile)
 	if err != nil {
 		t.Errorf("%s", err)
 	}
@@ -63,113 +44,160 @@ func TestAutenticated(t *testing.T) {
 	//test get methods
 	time.Sleep(6 * time.Second)
 	t.Run("account", func(t *testing.T) {
-		response, _ := client.Account()
-		assertSuccess(response, "", t)
+		_, err := client.GetAccount()
+		if err != nil {
+			t.Error(err)
+		}
 	})
 	time.Sleep(6 * time.Second)
 	t.Run("wallet", func(t *testing.T) {
-		response, _ := client.Balance()
-		assertSuccess(response, "", t)
+		_, err := client.GetBalance()
+		if err != nil {
+			t.Error(err)
+		}
 	})
 	time.Sleep(6 * time.Second)
 	t.Run("transactions", func(t *testing.T) {
-		response, _ := client.Transactions(
+		_, err := client.GetTransactions(
 			args.Currency("ETH"))
-		assertSuccess(response, "", t)
+		if err != nil {
+			t.Error(err)
+		}
 	})
 	time.Sleep(6 * time.Second)
 	t.Run("active orders=1", func(t *testing.T) {
-		response, _ := client.ActiveOrders(
+		_, err := client.GetActiveOrders(
 			args.Market("ETHCLP"),
 			args.Page(0))
-		assertSuccess(response, "", t)
+		if err != nil {
+			t.Error(err)
+		}
 	})
 	time.Sleep(6 * time.Second)
 	t.Run("active orders=2", func(t *testing.T) {
-		response, _ := client.ActiveOrders(
+		_, err := client.GetActiveOrders(
 			args.Market("ETHARS"),
 			args.Page(1))
-		assertSuccess(response, "", t)
+		if err != nil {
+			t.Error(err)
+		}
 	})
 	time.Sleep(6 * time.Second)
 	t.Run("order status", func(t *testing.T) {
-		response, _ := client.OrderStatus(
+		_, err := client.GetOrderStatus(
 			args.Id("M103975"))
-		assertSuccess(response, "invalid_scope", t)
+		if err != nil {
+			if !strings.Contains(err.Error(), "invalid_scope") {
+				t.Error(err)
+			}
+		}
 	})
 	time.Sleep(6 * time.Second)
 	t.Run("instant", func(t *testing.T) {
-		response, _ := client.Instant(
+		_, err := client.GetInstant(
 			args.Market("ETHCLP"),
 			args.Type("sell"),
-			args.Amount("159"))
-		assertSuccess(response, "", t)
+			args.Amount("19000"))
+		if err != nil {
+			if !strings.Contains(err.Error(), "invalid_request") {
+				t.Error(err)
+			}
+		}
 	})
 
 	time.Sleep(6 * time.Second)
 	t.Run("executed orders", func(t *testing.T) {
-		response, _ := client.ExecutedOrders(
+		_, err := client.GetExecutedOrders(
 			args.Market("ETHCLP"),
 			args.Page(0))
-		assertSuccess(response, "invalid_type", t)
+		if err != nil {
+			if !strings.Contains(err.Error(), "invalid_type") {
+				t.Error(err)
+			}
+		}
 	})
 
 	//test post methods
 	time.Sleep(6 * time.Second)
 	t.Run("create order", func(t *testing.T) {
-		response, _ := client.CreateOrder(
+		_, err := client.CreateOrder(
 			args.Amount("0.3"),
 			args.Market("ETHCLP"),
 			args.Price("1000"),
 			args.Type("buy"))
-		assertSuccess(response, "not_enough_balance", t)
+		if err != nil {
+			if !strings.Contains(err.Error(), "not_enough_balance") {
+				t.Error(err)
+			}
+		}
+
 	})
 	time.Sleep(6 * time.Second)
 	t.Run("cancel order", func(t *testing.T) {
-		response, _ := client.CancelOrder(
+		_, err := client.CancelOrder(
 			args.Id("M103975"),
 		)
-		assertSuccess(response, "invalid_request", t)
+		if err != nil {
+			if !strings.Contains(err.Error(), "invalid_scope") {
+				t.Error(err)
+			}
+		}
 	})
 	time.Sleep(6 * time.Second)
 	t.Run("create instant", func(t *testing.T) {
-		response, _ := client.CreateInstant(
+		_, err := client.CreateInstant(
 			args.Market("ETHCLP"),
 			args.Type("buy"),
-			args.Amount("10"),
+			args.Amount("10000"),
 		)
-		assertSuccess(response, "not_enough_balance", t)
+		if err != nil {
+			if !strings.Contains(err.Error(), "not_enough_balance") {
+				t.Error(err)
+			}
+		}
 	})
 	time.Sleep(6 * time.Second)
 	t.Run("request deposit", func(t *testing.T) {
-		response, _ := client.RequestDeposit(
+		_, err := client.RequestDeposit(
 			args.BankAccount("213213"),
 			args.Amount("10234"),
 		)
-		assertSuccess(response, "BankAccount matching query does not exist.", t)
+		if err != nil {
+			if !strings.Contains(err.Error(), "Bank account does not exist") {
+				t.Error(err)
+			}
+		}
 	})
 	time.Sleep(6 * time.Second)
 	t.Run("request withdrawal", func(t *testing.T) {
-		response, _ := client.RequestWithdrawal(
+		_, err := client.RequestWithdrawal(
 			args.Amount("10234"),
 			args.BankAccount("213213"),
 		)
-		assertSuccess(response, "BankAccount matching query does not exist.", t)
+		if err != nil {
+			if !strings.Contains(err.Error(), "Bank account does not exist") {
+				t.Error(err)
+			}
+		}
 	})
 	time.Sleep(6 * time.Second)
 	t.Run("transfer", func(t *testing.T) {
-		response, _ := client.Transfer(
+		_, err := client.Transfer(
 			args.Address("GDMXNQBJMS3FYI4PFSYCCB4"),
 			args.Amount("1200"),
 			args.Currency("XLM"),
 			args.Memo("162354"),
 		)
-		assertSuccess(response, "max_limit_exceeded", t)
+		if err != nil {
+			if !strings.Contains(err.Error(), "max_limit_exceeded") {
+				t.Error(err)
+			}
+		}
 	})
 }
 
 func TestCryptoCompra(t *testing.T) {
-	client, err := newDebugClient(keyfile)
+	client, err := newDebugClient(keysfile)
 	if err != nil {
 		t.Errorf("%s", err)
 	}
@@ -177,7 +205,7 @@ func TestCryptoCompra(t *testing.T) {
 	//test every endpoint
 	time.Sleep(6 * time.Second)
 	t.Run("new order", func(t *testing.T) {
-		response, _ := client.NewOrder(
+		_, err := client.NewOrder(
 			args.CallbackUrl(""),
 			args.ErrorUrl(""),
 			args.ExternalId("ABC123"),
@@ -187,30 +215,44 @@ func TestCryptoCompra(t *testing.T) {
 			args.ToReceiveCurrency("CLP"),
 			args.RefundEmail("refund@mail.com"),
 		)
-		assertSuccess(response, "invalid_request", t)
+		if err != nil {
+			if !strings.Contains(err.Error(), "temporarily disabled") {
+				t.Error(err)
+			}
+		}
 	})
 	time.Sleep(6 * time.Second)
 	t.Run("create wallet", func(t *testing.T) {
-		response, _ := client.CreateWallet(
+		_, err := client.CreateWallet(
 			args.Id("P2023132"),
 			args.Token("xToY232aheSt8F"),
 			args.Wallet("ETH"),
 		)
-		assertSuccess(response, "payment_does_not_exist", t)
+		if err != nil {
+			if !strings.Contains(err.Error(), "Petición inválida") {
+				t.Error(err)
+			}
+		}
 	})
 	time.Sleep(6 * time.Second)
 	t.Run("payment orders", func(t *testing.T) {
-		response, _ := client.PaymentOrders(
+		_, err := client.PaymentOrders(
 			args.StartDate("01/03/2018"),
 			args.EndDate("08/03/2018"),
 		)
-		assertSuccess(response, "", t)
+		if err != nil {
+			t.Error(err)
+		}
 	})
 	time.Sleep(6 * time.Second)
 	t.Run("payment status", func(t *testing.T) {
-		response, _ := client.PaymentStatus(
+		_, err := client.PaymentStatus(
 			args.Id("P13433"),
 		)
-		assertSuccess(response, "invalid_scope", t)
+		if err != nil {
+			if !strings.Contains(err.Error(), "invalid_request") {
+				t.Error(err)
+			}
+		}
 	})
 }

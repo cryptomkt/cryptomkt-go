@@ -4,6 +4,7 @@ package conn
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"github.com/cryptomkt/cryptomkt-go/requests"
 	"io/ioutil"
@@ -38,22 +39,7 @@ func NewClient(apiKey, apiSecret string) *Client {
 	return client
 }
 
-func (client *Client) getPublic(endpoint string, request *requests.Request) (string, error) {
-	args := request.GetArguments()
-	u, err := url.Parse(client.baseApiUri)
-	u.Path = path.Join(u.Path, client.apiVersion, endpoint)
-	httpReq, err := http.NewRequest("GET", u.String(), nil)
-	if err != nil {
-		return "", fmt.Errorf("Error building NewRequest struct: %v", err)
-	}
-
-	if len(args) != 0 {
-		q := httpReq.URL.Query()
-		for k, v := range args {
-			q.Add(k, v)
-		}
-		httpReq.URL.RawQuery = q.Encode()
-	}
+func (client *Client) runRequest(httpReq *http.Request) (string, error) {
 	resp, err := client.httpClient.Do(httpReq)
 	if err != nil {
 		return "", fmt.Errorf("Error making request: %v", err)
@@ -63,7 +49,40 @@ func (client *Client) getPublic(endpoint string, request *requests.Request) (str
 	if err != nil {
 		return "", fmt.Errorf("Error reading response: %v", err)
 	}
-	return string(respBody), nil
+	var responseData map[string]string
+	json.Unmarshal(respBody, &responseData)
+	if val, ok := responseData["status"]; ok {
+		switch val {
+		case "error":
+			msg := responseData["message"]
+			return "", fmt.Errorf("%s", msg)
+
+		case "success":
+			return responseData["data"], nil
+		}
+	}
+	return "", fmt.Errorf("error in the response: %s", string(respBody))
+}
+
+func (client *Client) getPublic(endpoint string, request *requests.Request) (string, error) {
+	args := request.GetArguments()
+	u, err := url.Parse(client.baseApiUri)
+	if err != nil {
+		return "", fmt.Errorf("Error parsing url %s: %v", client.baseApiUri, err)
+	}
+	u.Path = path.Join(u.Path, client.apiVersion, endpoint)
+	httpReq, err := http.NewRequest("GET", u.String(), nil)
+	if err != nil {
+		return "", fmt.Errorf("Error building NewRequest struct: %v", err)
+	}
+	if len(args) != 0 {
+		q := httpReq.URL.Query()
+		for k, v := range args {
+			q.Add(k, v)
+		}
+		httpReq.URL.RawQuery = q.Encode()
+	}
+	return client.runRequest(httpReq)
 }
 
 // get comunicates to Cryptomarket via the http get method
@@ -89,19 +108,9 @@ func (client *Client) get(endpoint string, request *requests.Request) (string, e
 	}
 
 	requestPath := "/" + client.apiVersion + "/" + endpoint
-
 	client.auth.setHeaders(httpReq, requestPath, "")
 
-	resp, err := client.httpClient.Do(httpReq)
-	if err != nil {
-		return "", fmt.Errorf("Error making request: %v", err)
-	}
-	defer resp.Body.Close()
-	respBody, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return "", fmt.Errorf("Error reading response: %v", err)
-	}
-	return string(respBody), nil
+	return client.runRequest(httpReq)
 }
 
 // post comunicates to Cryptomarket via the http post method.
@@ -143,15 +152,5 @@ func (client *Client) post(endpoint string, request *requests.Request) (string, 
 
 	//required header for the reciever to interpret the request as a http form post
 	httpReq.Header.Set("Content-Type", "application/x-www-form-urlencoded; param=value")
-
-	resp, err := client.httpClient.Do(httpReq)
-	if err != nil {
-		return "", fmt.Errorf("Error making Request: %v", err)
-	}
-	defer resp.Body.Close()
-	respBody, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return "", fmt.Errorf("Error reading response: %v", err)
-	}
-	return string(respBody), nil
+	return client.runRequest(httpReq)
 }

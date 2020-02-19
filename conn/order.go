@@ -1,14 +1,16 @@
 package conn
 
 import (
-	"github.com/cryptomkt/cryptomkt-go/args"
+"github.com/cryptomkt/cryptomkt-go/args"
 )
 
 type Pagination struct {
-	previous int
-	next     int
-	limit    int
-	page     int
+	PreviousHolder interface{} `json:"previous"`
+	NextHolder     interface{} `json:"next"`
+	Previous       int
+	Next           int
+	Limit          int
+	Page           int
 }
 
 type Amount struct {
@@ -17,14 +19,16 @@ type Amount struct {
 	Executed  string
 }
 
-type AnOrder struct {
+type OrderList struct {
 	apiClient  *Client
-	status     string
-	pagination Pagination
-	warnings   string
-	data       OrderData
+	Status     string
+	Pagination Pagination
+	Warnings   string
+	Data       []Order
 }
-type OrderData struct {
+
+type Order struct {
+	apiClient         *Client
 	Id                string
 	Status            string
 	Type              string
@@ -38,12 +42,14 @@ type OrderData struct {
 	ExecutedAt        string `json:"executed_at"`
 }
 
-func (order *AnOrder) Refresh() {
-	order.apiClient.OrderStatus(
-		args.Id(order.data.Id))
+
+func (order *Order) Refresh() {
+	order.apiClient.GetOrderStatus(
+		args.Id(order.Id))
 }
 
-func (order *AnOrder) Cancel() {
+func (order *Order) Close() {
 	order.apiClient.CancelOrder(
-		args.Id(order.data.Id))
+		args.Id(order.Id))
 }
+
