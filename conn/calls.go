@@ -9,6 +9,7 @@ import (
 )
 
 // GetAccount gives the account information of the client.
+//
 // https://developers.cryptomkt.com/es/#cuenta
 func (client *Client) GetAccount() (*Account, error) {
 	resp, err := client.get("account", requests.NewEmptyReq())
@@ -23,7 +24,8 @@ func (client *Client) GetAccount() (*Account, error) {
 	return &accountResp.Data, nil
 }
 
-// GetBalance returns the actual balance of the wallets of the client in Cryptomarket
+// GetBalance returns the actual balance of the wallets of the client in CryptoMarket
+//
 // https://developers.cryptomkt.com/es/#obtener-balance
 func (client *Client) GetBalance() (*[]Balance, error) {
 	resp, err := client.get("balance", requests.NewEmptyReq())
@@ -38,7 +40,8 @@ func (client *Client) GetBalance() (*[]Balance, error) {
 	return &balanceResp.Data, nil
 }
 
-// GetWallets is an alias for Balance
+// GetWallets is an alias for Balance, returns the actual balance of wallets of the client in CryptoMarket
+//
 // https://developers.cryptomkt.com/es/#obtener-balance
 func (client *Client) GetWallets() (*[]Balance, error) {
 	return client.GetBalance()
