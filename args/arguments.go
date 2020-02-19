@@ -132,11 +132,7 @@ func Page(val int) Argument {
 // Limit is an argument of a request. It accepts an integer greater
 // or equal to 20 and lesser or equal to 100.
 //
-<<<<<<< HEAD
 // Asumed to be 20 by the server if not given.
-=======
-// asumed to be 20 by the server if the argument is not given.
->>>>>>> 77cc5aa8f6445fba169e90a878e8bc0b3c0734e4
 func Limit(val int) Argument {
 	return func(request *requests.Request) error {
 		if val < 20 || 100 < val {
@@ -147,13 +143,7 @@ func Limit(val int) Argument {
 	}
 }
 
-<<<<<<< HEAD
 // Start is an argument of a request. It only accepts a string with the format date: YYYY-MM-DD
-=======
-// Start is an argument of a request.
-//
-// date format: dd/mm/yyyy.
->>>>>>> 77cc5aa8f6445fba169e90a878e8bc0b3c0734e4
 func Start(val string) Argument {
 	return func(request *requests.Request) error {
 		err := assertDateFormatV1(val, "Start")
@@ -165,13 +155,7 @@ func Start(val string) Argument {
 	}
 }
 
-<<<<<<< HEAD
 // End is an argument of a request. It only accepts a string with the format date: YYYY-MM-DD
-=======
-// End is an argument of a request.
-//
-// date format: dd/mm/yyyy.
->>>>>>> 77cc5aa8f6445fba169e90a878e8bc0b3c0734e4
 func End(val string) Argument {
 	return func(request *requests.Request) error {
 		err := assertDateFormatV1(val, "End")

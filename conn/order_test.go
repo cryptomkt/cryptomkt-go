@@ -61,7 +61,7 @@ func TestUnmarshalingAnOrderList(t *testing.T) {
 			"previous": 3,
 			"limit": 20,
 			"page": 0,
-			"next": "null"		   
+			"next": "null"
 		},
 		"data": [
 		   {
@@ -125,7 +125,6 @@ func TestUnmarshalingAnOrderList(t *testing.T) {
 		orders.Pagination.Previous = int(orders.Pagination.PreviousHolder.(float64))
 	}
 
-
 	if orders.Status != "success" {
 		t.Errorf("status %v", orders)
 	}
@@ -145,6 +144,6 @@ func TestOrderFlow(t *testing.T) {
 	if err != nil {
 		t.Errorf("%s", err)
 	}
-	
+
 }
 */

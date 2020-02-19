@@ -123,20 +123,13 @@ func (client *Client) GetInstant(args ...args.Argument) (string, error) {
 //   - required: Amount, Market, Price, Type
 //   - optional: none
 // https://developers.cryptomkt.com/es/#crear-orden
-func (client *Client) CreateOrder(args ...args.Argument) (*Order, error) {
+func (client *Client) CreateOrder(args ...args.Argument) (string, error) {
 	required := []string{"amount", "market", "price", "type"}
 	req, err := makeReq(required, args...)
 	if err != nil {
-		return nil, fmt.Errorf("Error in CreateOrder: %s", err)
+		return "", fmt.Errorf("Error in CreateOrder: %s", err)
 	}
-	orderString, err := client.post("orders/create", req)
-	if err != nil {
-		return nil, fmt.Errorf("Error creating the order : %s", err)
-	}
-	var order Order
-	json.Unmarshal([]byte(orderString), &order)
-	return &order, nil
-
+	return client.post("orders/create", req)
 }
 
 // CancelOrder signal to cancel an order in CryptoMarket
@@ -251,7 +244,7 @@ func (client *Client) CreateWallet(args ...args.Argument) (string, error) {
 //   - required: StartDate, EndDate
 //   - optional: Page, Limit
 // https://developers.cryptomkt.com/es/#listado-de-ordenes-de-pago
-func (client *Client) PaymentOrders(args ...args.Argument) (string, error) {
+func (client *Client) GetPaymentOrders(args ...args.Argument) (string, error) {
 	required := []string{"start_date", "end_date"}
 	req, err := makeReq(required, args...)
 	if err != nil {
@@ -266,7 +259,7 @@ func (client *Client) PaymentOrders(args ...args.Argument) (string, error) {
 //   - required: Id
 //   - optional: none
 // https://developers.cryptomkt.com/es/#estado-de-orden-de-pago
-func (client *Client) PaymentStatus(args ...args.Argument) (string, error) {
+func (client *Client) GetPaymentStatus(args ...args.Argument) (string, error) {
 	required := []string{"id"}
 	req, err := makeReq(required, args...)
 	if err != nil {
@@ -339,7 +332,6 @@ func (client *Client) GetTicker(args ...args.Argument) (*Ticker, error) {
 	}
 }
 
-<<<<<<< HEAD
 // GetBook returns a pointer to a Book struct with the data given by
 // the api and an error message. It returns (nil, error) when an error
 // is raised and (*Book, nil) when the operation is successful.
@@ -350,9 +342,6 @@ func (client *Client) GetTicker(args ...args.Argument) (*Ticker, error) {
 // 		- required: Market , Type
 //		- optional: Page, Limit
 func (client *Client) GetBook(args ...args.Argument) (*Book, error) {
-=======
-func (client *Client) getBook(args ...args.Argument) (*Book, error) {
->>>>>>> 77cc5aa8f6445fba169e90a878e8bc0b3c0734e4
 	required := []string{"market", "type"}
 	req, err := makeReq(required, args...)
 	if err != nil {
@@ -363,19 +352,10 @@ func (client *Client) getBook(args ...args.Argument) (*Book, error) {
 		return nil, fmt.Errorf("error at client: %s", err)
 	}
 
-<<<<<<< HEAD
 	var response TemporalBook
 	err = json.Unmarshal([]byte(resp), &response)
 	if err != nil {
 		return nil, err
-=======
-	var response map[string]interface{}
-	var respu Book
-	data, err := makeArrayMap(resp, response, respu.Data)
-	if err == nil {
-		respu.Data = data
-		return &respu, nil
->>>>>>> 77cc5aa8f6445fba169e90a878e8bc0b3c0734e4
 	} else {
 		var resp Book
 
@@ -391,9 +371,10 @@ func (client *Client) getBook(args ...args.Argument) (*Book, error) {
 	}
 }
 
-<<<<<<< HEAD
 // Here you have methods to interact with the Book's pagination
 
+// GetPrevious lets you go to the previous page if it exists, returns (*Book, nil) if
+// it is successfull and (nil, error) otherwise
 func (b *Book) GetPrevious() (*Book, error) {
 	if b.pagination.Previous != nil {
 		_, okPage := b.args["page"]
@@ -414,6 +395,8 @@ func (b *Book) GetPrevious() (*Book, error) {
 	}
 }
 
+// GetNext lets you go to the next page if it exists, returns (*Book, nil) if
+// it is successfull and (nil, error) otherwise
 func (b *Book) GetNext() (*Book, error) {
 	if b.pagination.Next != nil {
 		_, okPage := b.args["page"]
@@ -434,9 +417,12 @@ func (b *Book) GetNext() (*Book, error) {
 	}
 }
 
+// GetPage returns the page you have
 func (b *Book) GetPage() int {
 	return b.pagination.Page
 }
+
+// GetLimit returns the limit you have provided, but if you have not, it provides the default
 func (b *Book) GetLimit() int {
 	return b.pagination.Limit
 }
@@ -451,9 +437,6 @@ func (b *Book) GetLimit() int {
 //		- required: Market
 //		- optional: Start, End, Page, Limit
 func (client *Client) GetTrades(args ...args.Argument) (*Trades, error) {
-=======
-func (client *Client) getTrades(args ...args.Argument) (*Trades, error) {
->>>>>>> 77cc5aa8f6445fba169e90a878e8bc0b3c0734e4
 	required := []string{"market"}
 	req, err := makeReq(required, args...)
 	if err != nil {
@@ -484,6 +467,8 @@ func (client *Client) getTrades(args ...args.Argument) (*Trades, error) {
 
 // Here you find methods to interact with the Trades's pagination
 
+// GetPrevious lets you go to the previous page if it exists, returns (*Trades, nil) if
+// it is successfull and (nil, error) otherwise
 func (t *Trades) GetPrevious() (*Trades, error) {
 	if t.pagination.Previous != nil {
 		var newArgs []args.Argument = make([]args.Argument, len(t.args))
@@ -534,6 +519,8 @@ func (t *Trades) GetPrevious() (*Trades, error) {
 	return nil, fmt.Errorf("Cannot go to previous page, because it does not exist")
 }
 
+// GetNext lets you go to the next page if it exists, returns (*Trades, nil) if
+// it is successfull and (nil, error) otherwise
 func (t *Trades) GetNext() (*Trades, error) {
 	if t.pagination.Next != nil {
 		var newArgs []args.Argument = make([]args.Argument, len(t.args))
@@ -581,11 +568,13 @@ func (t *Trades) GetNext() (*Trades, error) {
 	}
 	return nil, fmt.Errorf("Cannot go to the next page because it does not exist")
 }
+
+// GetPage returns the page you have
 func (t *Trades) GetPage() int {
 	return t.pagination.Page
 }
 
-<<<<<<< HEAD
+// GetLimit returns the limit you have provided, but if you have not, it provides the default
 func (t *Trades) GetLimit() int {
 	return t.pagination.Limit
 }
@@ -602,9 +591,6 @@ func (t *Trades) GetLimit() int {
 //		- required: Market, TimeFrame
 //		- optional: Page, Limit
 func (client *Client) GetPrices(args ...args.Argument) (*Prices, error) {
-=======
-func (client *Client) getPrices(args ...args.Argument) (*Prices, error) {
->>>>>>> 77cc5aa8f6445fba169e90a878e8bc0b3c0734e4
 	required := []string{"market", "timeframe"}
 	req, err := makeReq(required, args...)
 	if err != nil {
@@ -636,6 +622,8 @@ func (client *Client) getPrices(args ...args.Argument) (*Prices, error) {
 
 // Here you have methods to interact with Prices's pagination
 
+// GetPrevious lets you go to the previous page if it exists, returns (*Prices, nil) if
+// it is successfull and (nil, error) otherwise
 func (p *Prices) GetPrevious() (*Prices, error) {
 	if p.pagination.Next != nil {
 		_, okPage := p.args["page"]
@@ -656,6 +644,8 @@ func (p *Prices) GetPrevious() (*Prices, error) {
 	}
 }
 
+// GetNext lets you go to the next page if it exists, returns (*Prices, nil) if
+// it is successfull and (nil, error) otherwise
 func (p *Prices) GetNext() (*Prices, error) {
 	if p.pagination.Next != nil {
 		_, okPage := p.args["page"]
@@ -675,9 +665,13 @@ func (p *Prices) GetNext() (*Prices, error) {
 		return nil, fmt.Errorf("Cannot go to the next page, because it does not exist")
 	}
 }
+
+// GetPage returns the page you have
 func (p *Prices) GetPage() int {
 	return p.pagination.Page
 }
+
+// GetLimit returns the limit you have provided, but if you have not, it provides the default
 func (p *Prices) GetLimit() int {
 	return p.pagination.Limit
 }

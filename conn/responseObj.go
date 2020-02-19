@@ -43,7 +43,6 @@ type Book struct {
 	Data       []BookData
 }
 
-<<<<<<< HEAD
 type TradesData struct {
 	MarketTaker string `json:"market_taker"`
 	Price       string
@@ -51,10 +50,6 @@ type TradesData struct {
 	Tid         string
 	Timestamp   string
 	Market      string
-=======
-type Book struct {
-	Data []map[string]string
->>>>>>> 77cc5aa8f6445fba169e90a878e8bc0b3c0734e4
 }
 type TemporalTrades struct {
 	Status     string
@@ -97,6 +92,7 @@ type DataPrices2 struct {
 	CandleDate string `json:"candle_date"`
 	TickCount  string `json:"tick_count"`
 }
+
 type Pagination struct {
 	Previous interface{}
 	Limit    int

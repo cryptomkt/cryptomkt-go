@@ -1,9 +1,5 @@
 package conn
 
-import (
-"github.com/cryptomkt/cryptomkt-go/args"
-)
-
 type Pagination struct {
 	PreviousHolder interface{} `json:"previous"`
 	NextHolder     interface{} `json:"next"`
@@ -42,7 +38,6 @@ type Order struct {
 	ExecutedAt        string `json:"executed_at"`
 }
 
-
 func (order *Order) Refresh() {
 	order.apiClient.GetOrderStatus(
 		args.Id(order.Id))
@@ -52,4 +47,3 @@ func (order *Order) Close() {
 	order.apiClient.CancelOrder(
 		args.Id(order.Id))
 }
-

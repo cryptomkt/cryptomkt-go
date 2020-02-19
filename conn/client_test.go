@@ -236,7 +236,7 @@ func TestCryptoCompra(t *testing.T) {
 	})
 	time.Sleep(6 * time.Second)
 	t.Run("payment orders", func(t *testing.T) {
-		_, err := client.PaymentOrders(
+		_, err := client.GetPaymentOrders(
 			args.StartDate("01/03/2018"),
 			args.EndDate("08/03/2018"),
 		)
@@ -246,7 +246,7 @@ func TestCryptoCompra(t *testing.T) {
 	})
 	time.Sleep(6 * time.Second)
 	t.Run("payment status", func(t *testing.T) {
-		_, err := client.PaymentStatus(
+		_, err := client.GetPaymentStatus(
 			args.Id("P13433"),
 		)
 		if err != nil {
