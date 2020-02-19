@@ -246,7 +246,7 @@ func TestCryptoCompra(t *testing.T) {
 	})
 	time.Sleep(6 * time.Second)
 	t.Run("payment status", func(t *testing.T) {
-		_, err := client.PaymentStatus(
+		_, err := client.GetPaymentStatus(
 			args.Id("P13433"),
 		)
 		if err != nil {

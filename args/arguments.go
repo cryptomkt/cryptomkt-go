@@ -7,8 +7,9 @@ package args
 import (
 	"errors"
 	"fmt"
-	"github.com/cryptomkt/cryptomkt-go/requests"
 	"strconv"
+
+	"github.com/cryptomkt/cryptomkt-go/requests"
 )
 
 type DateError struct {
@@ -128,7 +129,8 @@ func Page(val int) Argument {
 	}
 }
 
-// Limit is an argument of a request. Accepts an integer greater or equal to 20 and lesser or equal to 100.
+// Limit is an argument of a request. It accepts an integer greater
+// or equal to 20 and lesser or equal to 100.
 //
 // Asumed to be 20 by the server if the argument is not given.
 func Limit(val int) Argument {

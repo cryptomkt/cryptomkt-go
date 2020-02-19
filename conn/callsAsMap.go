@@ -178,8 +178,8 @@ func (client *Client) PaymentOrdersAsMapList(args ...args.Argument) ([]map[strin
 //   - required: Id
 //   - optional: none
 // https://developers.cryptomkt.com/es/#estado-de-orden-de-pago
-func (client *Client) PaymentStatusAsMap(args ...args.Argument) (map[string]string, error) {
-	payment, err := client.PaymentStatus(args...)
+func (client *Client) GetPaymentStatusAsMap(args ...args.Argument) (map[string]string, error) {
+	payment, err := client.GetPaymentStatus(args...)
 	if err != nil {
 		return nil, err
 	}

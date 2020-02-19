@@ -1,24 +1,6 @@
 package conn
 
-type MarketStruct struct {
-	Data []string
-}
-
-type Ticker struct {
-	Data []map[string]string
-}
-
-type Book struct {
-	Data []map[string]string
-}
-type Trades struct {
-	Data []map[string]string
-}
-type PricesResponse struct {
-	status  string
-	Message string
-	data    []Prices
-}
+/*
 
 type Prices struct {
 	CandleId   int    `json:"candle_id"`
@@ -30,6 +12,7 @@ type Prices struct {
 	CandleDate string `json:"candle_date"`
 	TickCount  string `json:"tick_count"`
 }
+*/
 
 type Balance struct {
 	Wallet    string
@@ -138,15 +121,6 @@ type TransactionsResponse struct {
 	Data       []Transaction
 }
 
-type Pagination struct {
-	PreviousHolder interface{} `json:"previous"`
-	NextHolder     interface{} `json:"next"`
-	Previous       int
-	Next           int
-	Limit          int
-	Page           int
-}
-
 type Amount struct {
 	Original  string
 	Remaining string
@@ -166,19 +140,4 @@ type OrderResponse struct {
 	Status  string
 	Message string
 	Data    Order
-}
-
-type Order struct {
-	client         *Client
-	Id                string
-	Status            string
-	Type              string
-	Price             string
-	Amount            Amount
-	ExecutionPrice    string `json:"execution_price"`
-	AvgExecutionPrice int    `json:"avg_execution_price"`
-	Market            string
-	CreatedAt         string `json:"created_at"`
-	UpdatedAt         string `json:"updated_at"`
-	ExecutedAt        string `json:"executed_at"`
 }

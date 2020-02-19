@@ -1,15 +1,33 @@
 package conn
 
-import (
-	"github.com/cryptomkt/cryptomkt-go/args"
-)
-
-func (order *Order) Refresh() error {
-	_, err := order.client.GetOrderStatus(args.Id(order.Id))
-	return err
+type PaginationO struct {
+	PreviousHolder interface{} `json:"previous"`
+	NextHolder     interface{} `json:"next"`
+	Previous       int
+	Next           int
+	Limit          int
+	Page           int
 }
 
-func (order *Order) Close() error {
-	_, err := order.client.CancelOrder(args.Id(order.Id))
-	return err
+type OrderList struct {
+	apiClient  *Client
+	Status     string
+	Pagination PaginationO
+	Warnings   string
+	Data       []Order
+}
+
+type Order struct {
+	apiClient         *Client
+	Id                string
+	Status            string
+	Type              string
+	Price             string
+	Amount            Amount
+	ExecutionPrice    string `json:"execution_price"`
+	AvgExecutionPrice int    `json:"avg_execution_price"`
+	Market            string
+	CreatedAt         string `json:"created_at"`
+	UpdatedAt         string `json:"updated_at"`
+	ExecutedAt        string `json:"executed_at"`
 }
