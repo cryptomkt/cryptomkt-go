@@ -1,5 +1,7 @@
 package conn
 
+import "github.com/cryptomkt/cryptomkt-go/args"
+
 type Pagination struct {
 	PreviousHolder interface{} `json:"previous"`
 	NextHolder     interface{} `json:"next"`
