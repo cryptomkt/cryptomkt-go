@@ -85,9 +85,7 @@ if err != nil {
 
 The calls that returns maps end with 'AsMap' or 'AsMapList' in contrast with the ones that return structs, that have the same name, but without the suffix.
 
-The advantage of the map format is its simplicity and ease of use, while using structs gives aditional functionality over the recieved data. 
-
-For example, if we want to go over a long range of trade data of a market, we can call `client.GetTrades` to get a list of `Trades`, this list can be one page of many, so once we read the data on the page, to get the rest of the pages, we can call over and over `GetNext()` over the struct, until an `Cannot go to the next page because it does not exist`error is raised. Replace `GetObject` with the appropriate method. The structs that support this functionality so far are Trades, Book and Prices. Here is in code:
+The advantage of the map format is its simplicity and ease of use, while using structs gives aditional functionality over the recieved data. For example, if we want to go over a long range of trade data of a market, we can call `client.GetTrades` to get a list of `Trades`, this list can be one page of many, so once we read the data on the page, to get the rest of the pages, we can call over and over `GetNext()` over the struct, until an `Cannot go to the next page because it does not exist` error is raised. Replace `GetObject` with the appropriate method. The structs that support this functionality so far are Trades, Book and Prices. Here is in code:
 
 ```golang
 import (
