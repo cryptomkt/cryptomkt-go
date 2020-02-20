@@ -392,4 +392,4 @@ if err != nil {
     fmt.Errorf("Error creating the Wallet: %s", err)
 }
 ```
-**
+

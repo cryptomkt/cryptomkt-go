@@ -16,7 +16,6 @@ var argus [8]args.Argument = [8]args.Argument{args.Market("ETHCLP"), args.Type("
 func find(slice []int, value int) bool {
 	for i := 0; i < len(slice); i++ {
 		if value == slice[i] {
-			time.Sleep(time.Second)
 			return true
 		}
 	}
