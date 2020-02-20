@@ -11,7 +11,7 @@ import (
 
 var client *Client = NewClient("RandomKey", "RandomSecret")
 
-var argus [8]args.Argument = [8]args.Argument{args.Market("ETHCLP"), args.Type("buy"), args.Type("sell"), args.Page(0), args.Limit(50), args.Start("2017-03-03"), args.End("2018-03-03"), args.TimeFrame("60")}
+var argus [8]args.Argument = [8]args.Argument{args.Market("ETHCLP"), args.Type("buy"), args.Type("sell"), args.Page(0), args.Limit(50), args.Start("2017-03-03"), args.End("2018-03-03"), args.Timeframe("60")}
 
 func find(slice []int, value int) bool {
 	for i := 0; i < len(slice); i++ {
@@ -157,7 +157,7 @@ func TestPrevious(t *testing.T) {
 	} else {
 		t.Errorf("Error Trades: %s", err)
 	}
-	_, err3 := client.GetPrices(args.Market("ETHCLP"), args.TimeFrame("60"), args.Page(1), args.Limit(40))
+	_, err3 := client.GetPrices(args.Market("ETHCLP"), args.Timeframe("60"), args.Page(1), args.Limit(40))
 	if err3 == nil {
 		_, err3 = trades.GetPrevious()
 		if err3 != nil {
@@ -185,7 +185,7 @@ func TestNext(t *testing.T) {
 	} else {
 		t.Errorf("Error Trades: %s", err)
 	}
-	_, err3 := client.GetPrices(args.Market("ETHCLP"), args.TimeFrame("10080"), args.Page(0), args.Limit(40))
+	_, err3 := client.GetPrices(args.Market("ETHCLP"), args.Timeframe("10080"), args.Page(0), args.Limit(40))
 	if err3 == nil {
 		_, err3 = trades.GetNext()
 		if err3 != nil {

@@ -1,8 +1,6 @@
 package conn
 
-import "github.com/cryptomkt/cryptomkt-go/args"
-
-type Pagination struct {
+type PaginationO struct {
 	PreviousHolder interface{} `json:"previous"`
 	NextHolder     interface{} `json:"next"`
 	Previous       int
@@ -11,16 +9,10 @@ type Pagination struct {
 	Page           int
 }
 
-type Amount struct {
-	Original  string
-	Remaining string
-	Executed  string
-}
-
 type OrderList struct {
 	apiClient  *Client
 	Status     string
-	Pagination Pagination
+	Pagination PaginationO
 	Warnings   string
 	Data       []Order
 }
@@ -38,14 +30,4 @@ type Order struct {
 	CreatedAt         string `json:"created_at"`
 	UpdatedAt         string `json:"updated_at"`
 	ExecutedAt        string `json:"executed_at"`
-}
-
-func (order *Order) Refresh() {
-	order.apiClient.GetOrderStatus(
-		args.Id(order.Id))
-}
-
-func (order *Order) Close() {
-	order.apiClient.CancelOrder(
-		args.Id(order.Id))
 }

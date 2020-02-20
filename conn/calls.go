@@ -9,112 +9,138 @@ import (
 	"github.com/cryptomkt/cryptomkt-go/requests"
 )
 
-func makeReq(required []string, args ...args.Argument) (*requests.Request, error) {
-	req := requests.NewReq(required)
-	for _, argument := range args {
-		err := argument(req)
-		if err != nil {
-			return nil, fmt.Errorf("argument error: %s", err)
-		}
-	}
-	err := req.AssertRequired()
-	if err != nil {
-		return nil, fmt.Errorf("required arguments not meeted:%s", err)
-	}
-	return req, nil
-}
-
-// Account gives the account information of the client.
+// GetAccount gives the account information of the client.
+//
 // https://developers.cryptomkt.com/es/#cuenta
-func (client *Client) GetAccount() (string, error) {
-	return client.get("account", requests.NewEmptyReq())
+func (client *Client) GetAccount() (*Account, error) {
+	resp, err := client.get("account", requests.NewEmptyReq())
+	if err != nil {
+		return nil, fmt.Errorf("error while making the request: %s", err)
+	}
+	var aResp AccountResponse
+	json.Unmarshal(resp, &aResp)
+	if aResp.Status == "error" {
+		return nil, fmt.Errorf("error from in the  server side: %s", aResp.Message)
+	}
+	return &aResp.Data, nil
 }
 
-// Balance returns the actual balance of the wallets of the client in Cryptomarket
+// GetBalance returns the actual balance of the wallets of the client in CryptoMarket
+//
 // https://developers.cryptomkt.com/es/#obtener-balance
-func (client *Client) GetBalance() (string, error) {
-	return client.get("balance", requests.NewEmptyReq())
+func (client *Client) GetBalance() (*[]Balance, error) {
+	resp, err := client.get("balance", requests.NewEmptyReq())
+	if err != nil {
+		return nil, fmt.Errorf("error while making the request: %s", err)
+	}
+	var bResp BalancesResponse
+	json.Unmarshal(resp, &bResp)
+	if bResp.Status == "error" {
+		return nil, fmt.Errorf("error from in the  server side: %s", bResp.Message)
+	}
+	return &bResp.Data, nil
 }
 
-// Wallets is an alias for Balance
+// GetWallets is an alias for Balance, returns the actual balance of wallets of the client in CryptoMarket
+//
 // https://developers.cryptomkt.com/es/#obtener-balance
-func (client *Client) GetWallets() (string, error) {
+func (client *Client) GetWallets() (*[]Balance, error) {
 	return client.GetBalance()
 }
 
-// Transactions returns the movements of the wallets of the client.
+// GetTransactions returns the movements of the wallets of the client.
 //
 // List of accepted Arguments:
 //   - required: Currency
 //   - optional: Page, Limit
 // https://developers.cryptomkt.com/es/#obtener-movimientos
-func (client *Client) GetTransactions(args ...args.Argument) (string, error) {
-	required := []string{"currency"}
-	req, err := makeReq(required, args...)
+func (client *Client) GetTransactions(args ...args.Argument) (*[]Transaction, error) {
+	resp, err := client.getReq("transactions", "GetTransaction", []string{"currency"}, args...)
 	if err != nil {
-		return "", fmt.Errorf("Error in Transaction: %s", err)
+		return nil, fmt.Errorf("error while making the request: %s", err)
 	}
-	return client.get("transactions", req)
+	var tResp TransactionsResponse
+	json.Unmarshal(resp, &tResp)
+	if tResp.Status == "error" {
+		return nil, fmt.Errorf("error from in the  server side: %s", tResp.Message)
+	}
+	return &tResp.Data, nil
 }
 
-// ActiveOrders returns the list of active orders of the client
+// GetActiveOrders returns the list of active orders of the client
 //
 // List of accepted Arguments:
 //   - required: Market
 //   - optional: Page, Limit
 // https://developers.cryptomkt.com/es/#ordenes-activas
-func (client *Client) GetActiveOrders(args ...args.Argument) (string, error) {
-	required := []string{"market"}
-	req, err := makeReq(required, args...)
+func (client *Client) GetActiveOrders(args ...args.Argument) (*[]Order, error) {
+	resp, err := client.getReq("orders/active", "GetActiveOrders", []string{"market"}, args...)
 	if err != nil {
-		return "", fmt.Errorf("Error in ActiveOrders: %s", err)
+		return nil, fmt.Errorf("error while making the request: %s", err)
 	}
-	return client.get("orders/active", req)
+	var oListResp OrderListResp
+	json.Unmarshal(resp, &oListResp)
+	if oListResp.Status == "error" {
+		return nil, fmt.Errorf("error from in the  server side: %s", oListResp.Message)
+	}
+	return &oListResp.Data, nil
 }
 
-// ExecutedOrders return a list of the executed orders of the client
+// GetExecutedOrders return a list of the executed orders of the client
 //
 // List of accepted Arguments:
 //   - required: Market
 //   - optional: Page, Limit
 // https://developers.cryptomkt.com/es/#ordenes-ejecutadas
-func (client *Client) GetExecutedOrders(args ...args.Argument) (string, error) {
-	required := []string{"market"}
-	req, err := makeReq(required, args...)
+func (client *Client) GetExecutedOrders(args ...args.Argument) (*[]Order, error) {
+	resp, err := client.getReq("orders/executed", "GetExecutedOrders", []string{"market"}, args...)
 	if err != nil {
-		return "", fmt.Errorf("Error in ExecutedOrders: %s", err)
+		return nil, fmt.Errorf("error while making the request: %s", err)
 	}
-	return client.get("orders/executed", req)
+	var oListResp OrderListResp
+	json.Unmarshal(resp, &oListResp)
+	if oListResp.Status == "error" {
+		return nil, fmt.Errorf("error from in the  server side: %s", oListResp.Message)
+	}
+	return &oListResp.Data, nil
 }
 
-// OrderStatus gives the status of an order
+// GetOrderStatus gives the status of an order
 //
 // List of accepted Arguments:
 //   - required: Id
 //   - optional: none
 // https://developers.cryptomkt.com/es/#estado-de-orden
-func (client *Client) GetOrderStatus(args ...args.Argument) (string, error) {
-	required := []string{"id"}
-	req, err := makeReq(required, args...)
+func (client *Client) GetOrderStatus(args ...args.Argument) (*Order, error) {
+	resp, err := client.getReq("orders/status", "GetOrderStatus", []string{"id"}, args...)
 	if err != nil {
-		return "", fmt.Errorf("Error in OrderStatus: %s", err)
+		return nil, fmt.Errorf("error while making the request: %s", err)
 	}
-	return client.get("orders/status", req)
+	var oResp OrderResponse
+	json.Unmarshal(resp, &oResp)
+	if oResp.Status == "error" {
+		return nil, fmt.Errorf("error from in the  server side: %s", oResp.Message)
+	}
+	return &oResp.Data, nil
 }
 
-// Instant emulates an order in the current state of the Instant Exchange of CryptoMarket
+// GetInstant emulates an order in the current state of the Instant Exchange of CryptoMarket
 //
 // List of accepted Arguments:
 //   - required: Market, Type, Amount
 //   - optional: none
 // https://developers.cryptomkt.com/es/#obtener-cantidad
-func (client *Client) GetInstant(args ...args.Argument) (string, error) {
-	required := []string{"market", "type", "amount"}
-	req, err := makeReq(required, args...)
+func (client *Client) GetInstant(args ...args.Argument) (*Quantity, error) {
+	resp, err := client.getReq("orders/instant/get", "GetInstant", []string{"market", "type", "amount"}, args...)
 	if err != nil {
-		return "", fmt.Errorf("Error in Instant: %s", err)
+		return nil, fmt.Errorf("error while making the request: %s", err)
 	}
-	return client.get("orders/instant/get", req)
+	var iResp InstantResponse
+	json.Unmarshal(resp, &iResp)
+	if iResp.Status == "error" {
+		return nil, fmt.Errorf("error from in the  server side: %s", iResp.Message)
+	}
+	return &iResp.Data, nil
 }
 
 // CreateOrder signal to create an order of buy or sell in CryptoMarket
@@ -123,13 +149,17 @@ func (client *Client) GetInstant(args ...args.Argument) (string, error) {
 //   - required: Amount, Market, Price, Type
 //   - optional: none
 // https://developers.cryptomkt.com/es/#crear-orden
-func (client *Client) CreateOrder(args ...args.Argument) (string, error) {
-	required := []string{"amount", "market", "price", "type"}
-	req, err := makeReq(required, args...)
+func (client *Client) CreateOrder(args ...args.Argument) (*Order, error) {
+	resp, err := client.postReq("orders/create", "CreateOrder", []string{"amount", "market", "price", "type"}, args...)
 	if err != nil {
-		return "", fmt.Errorf("Error in CreateOrder: %s", err)
+		return nil, fmt.Errorf("error while making the request: %s", err)
 	}
-	return client.post("orders/create", req)
+	var oResp OrderResponse
+	json.Unmarshal(resp, &oResp)
+	if oResp.Status == "error" {
+		return nil, fmt.Errorf("error from in the  server side: %s", oResp.Message)
+	}
+	return &oResp.Data, nil
 }
 
 // CancelOrder signal to cancel an order in CryptoMarket
@@ -138,13 +168,17 @@ func (client *Client) CreateOrder(args ...args.Argument) (string, error) {
 //   - required: Id
 //   - optional: none
 // https://developers.cryptomkt.com/es/#cancelar-una-orden
-func (client *Client) CancelOrder(args ...args.Argument) (string, error) {
-	required := []string{"id"}
-	req, err := makeReq(required, args...)
+func (client *Client) CancelOrder(args ...args.Argument) (*Order, error) {
+	resp, err := client.postReq("orders/cancel", "CancelOrder", []string{"id"}, args...)
 	if err != nil {
-		return "", fmt.Errorf("Error in CancelOrder: %s", err)
+		return nil, fmt.Errorf("error while making the request: %s", err)
 	}
-	return client.post("orders/cancel", req)
+	var oResp OrderResponse
+	json.Unmarshal(resp, &oResp)
+	if oResp.Status == "error" {
+		return nil, fmt.Errorf("error from in the  server side: %s", oResp.Message)
+	}
+	return &oResp.Data, nil
 }
 
 // CreateInstant makes an order in the Instant Exchange of CryptoMarket
@@ -153,13 +187,17 @@ func (client *Client) CancelOrder(args ...args.Argument) (string, error) {
 //   - required: Market, Type, Amount
 //   - optional: none
 // https://developers.cryptomkt.com/es/#crear-orden-2
-func (client *Client) CreateInstant(args ...args.Argument) (string, error) {
-	required := []string{"market", "type", "amount"}
-	req, err := makeReq(required, args...)
+func (client *Client) CreateInstant(args ...args.Argument) error {
+	resp, err := client.postReq("orders/instant/create", "CreateInstant", []string{"market", "type", "amount"}, args...)
 	if err != nil {
-		return "", fmt.Errorf("Error in CreateInstant: %s", err)
+		return fmt.Errorf("error while making the request: %s", err)
 	}
-	return client.post("orders/instant/create", req)
+	var iResp InstantResponse
+	json.Unmarshal(resp, &iResp)
+	if iResp.Status == "error" {
+		return fmt.Errorf("error from in the  server side: %s", iResp.Message)
+	}
+	return nil
 }
 
 // RequestDeposit notifies a deposit to a wallet of local currency
@@ -169,28 +207,36 @@ func (client *Client) CreateInstant(args ...args.Argument) (string, error) {
 // -only for México, Brasil and European Union: Voucher
 // -only for México: Date, TrackingCode
 // https://developers.cryptomkt.com/es/#notificar-deposito
-func (client *Client) RequestDeposit(args ...args.Argument) (string, error) {
-	required := []string{"amount", "bank_account"}
-	req, err := makeReq(required, args...)
+func (client *Client) RequestDeposit(args ...args.Argument) error {
+	resp, err := client.postReq("request/deposit", "RequestDeposit", []string{"amount", "bank_account"}, args...)
 	if err != nil {
-		return "", fmt.Errorf("Error in RequestDeposit: %s", err)
+		return fmt.Errorf("error while making the request: %s", err)
 	}
-	return client.post("request/deposit", req)
+	var iResp InstantResponse
+	json.Unmarshal(resp, &iResp)
+	if iResp.Status == "error" {
+		return fmt.Errorf("error from in the  server side: %s", iResp.Message)
+	}
+	return nil
 }
 
-// Request withdrawal notifies a withdrawal from a bank account of the client
+// RequestWithdrawal notifies a withdrawal from a bank account of the client
 //
 // List of accepted Arguments:
 //   - required: Amount, BankAccount
 //   - optional: none
 // https://developers.cryptomkt.com/es/#notificar-retiro
-func (client *Client) RequestWithdrawal(args ...args.Argument) (string, error) {
-	required := []string{"amount", "bank_account"}
-	req, err := makeReq(required, args...)
+func (client *Client) RequestWithdrawal(args ...args.Argument) error {
+	resp, err := client.postReq("request/withdrawal", "RequestWithdrawal", []string{"amount", "bank_account"}, args...)
 	if err != nil {
-		return "", fmt.Errorf("Error in RequestWithdrawal: %s", err)
+		return fmt.Errorf("error while making the request: %s", err)
 	}
-	return client.post("request/withdrawal", req)
+	var iResp InstantResponse
+	json.Unmarshal(resp, &iResp)
+	if iResp.Status == "error" {
+		return fmt.Errorf("error from in the  server side: %s", iResp.Message)
+	}
+	return nil
 }
 
 // Transfer move crypto between wallets
@@ -199,13 +245,18 @@ func (client *Client) RequestWithdrawal(args ...args.Argument) (string, error) {
 //   - required: Address, Amount, Currency
 //   - optional: Memo
 // https://developers.cryptomkt.com/es/#transferir
-func (client *Client) Transfer(args ...args.Argument) (string, error) {
-	required := []string{"address", "amount", "currency"}
-	req, err := makeReq(required, args...)
+func (client *Client) Transfer(args ...args.Argument) error {
+	resp, err := client.postReq("transfer", "Transfer", []string{"address", "amount", "currency"}, args...)
 	if err != nil {
-		return "", fmt.Errorf("Error in Transfer: %s", err)
+		return fmt.Errorf("error while making the request: %s", err)
 	}
-	return client.post("transfer", req)
+	var iResp InstantResponse
+	json.Unmarshal(resp, &iResp)
+	if iResp.Status == "error" {
+		return fmt.Errorf("error from in the  server side: %s", iResp.Message)
+	}
+	return nil
+
 }
 
 // NewOrder enables a payment order, and gives a QR and urls
@@ -214,13 +265,17 @@ func (client *Client) Transfer(args ...args.Argument) (string, error) {
 //   - required: ToReceive, ToReceiveCurrency, PaymentReceiver
 //   - optional: ExternalId, CallbackUrl, ErrorUrl, SuccessUrl, RefundEmail, Language
 // https://developers.cryptomkt.com/es/#crear-orden-de-pago
-func (client *Client) NewOrder(args ...args.Argument) (string, error) {
-	required := []string{"to_receive", "to_receive_currency", "payment_receiver"}
-	req, err := makeReq(required, args...)
+func (client *Client) NewOrder(args ...args.Argument) (*PaymentOrder, error) {
+	resp, err := client.postReq("payment/new_order", "NewOrder", []string{"to_receive", "to_receive_currency", "payment_receiver"}, args...)
 	if err != nil {
-		return "", fmt.Errorf("Error in NewOrder: %s", err)
+		return nil, fmt.Errorf("error while making the request: %s", err)
 	}
-	return client.post("payment/new_order", req)
+	var poResp PaymentResponse
+	json.Unmarshal(resp, &poResp)
+	if poResp.Status == "error" {
+		return nil, fmt.Errorf("error from in the  server side: %s", poResp.Message)
+	}
+	return &poResp.Data, nil
 }
 
 // CreateWallet creates a wallet to pay a payment order
@@ -229,13 +284,17 @@ func (client *Client) NewOrder(args ...args.Argument) (string, error) {
 //   - required: Id, Token, Wallet
 //   - optional: none
 // https://developers.cryptomkt.com/es/#crear-billetera-de-orden-de-pago
-func (client *Client) CreateWallet(args ...args.Argument) (string, error) {
-	required := []string{"id", "token", "wallet"}
-	req, err := makeReq(required, args...)
+func (client *Client) CreateWallet(args ...args.Argument) (*PaymentOrder, error) {
+	resp, err := client.postReq("payment/create_wallet", "CreateWallet", []string{"id", "token", "wallet"}, args...)
 	if err != nil {
-		return "", fmt.Errorf("Error in CreateWallet: %s", err)
+		return nil, fmt.Errorf("error while making the request: %s", err)
 	}
-	return client.post("payment/create_wallet", req)
+	var poResp PaymentResponse
+	json.Unmarshal(resp, &poResp)
+	if poResp.Status == "error" {
+		return nil, fmt.Errorf("error from in the  server side: %s", poResp.Message)
+	}
+	return &poResp.Data, nil
 }
 
 // PaymentOrders returns all the generated payment orders
@@ -244,28 +303,36 @@ func (client *Client) CreateWallet(args ...args.Argument) (string, error) {
 //   - required: StartDate, EndDate
 //   - optional: Page, Limit
 // https://developers.cryptomkt.com/es/#listado-de-ordenes-de-pago
-func (client *Client) GetPaymentOrders(args ...args.Argument) (string, error) {
-	required := []string{"start_date", "end_date"}
-	req, err := makeReq(required, args...)
+func (client *Client) PaymentOrders(args ...args.Argument) (*[]PaymentOrder, error) {
+	resp, err := client.postReq("payment/orders", "PaymentOrders", []string{"start_date", "end_date"}, args...)
 	if err != nil {
-		return "", fmt.Errorf("Error in PaymentOrders: %s", err)
+		return nil, fmt.Errorf("error while making the request: %s", err)
 	}
-	return client.get("payment/orders", req)
+	var poResp PaymentOrdersResponse
+	json.Unmarshal(resp, &poResp)
+	if poResp.Status == "error" {
+		return nil, fmt.Errorf("error from in the  server side: %s", poResp.Message)
+	}
+	return &poResp.Data, nil
 }
 
-// PaymentStatus gives the status of a pyment order
+// GetPaymentStatus gives the status of a pyment order
 //
 // List of accepted Arguments:
 //   - required: Id
 //   - optional: none
 // https://developers.cryptomkt.com/es/#estado-de-orden-de-pago
-func (client *Client) GetPaymentStatus(args ...args.Argument) (string, error) {
-	required := []string{"id"}
-	req, err := makeReq(required, args...)
+func (client *Client) GetPaymentStatus(args ...args.Argument) (*PaymentOrder, error) {
+	resp, err := client.postReq("payment/status", "PaymentStatus", []string{"id"}, args...)
 	if err != nil {
-		return "", fmt.Errorf("Error in PaymentStatus: %s", err)
+		return nil, fmt.Errorf("error while making the request: %s", err)
 	}
-	return client.get("payment/status", req)
+	var poResp PaymentResponse
+	json.Unmarshal(resp, &poResp)
+	if poResp.Status == "error" {
+		return nil, fmt.Errorf("error from in the  server side: %s", poResp.Message)
+	}
+	return &poResp.Data, nil
 }
 
 // Public Endpoints:
@@ -588,7 +655,7 @@ func (t *Trades) GetLimit() int {
 //
 // List of accepted Arguments:
 //
-//		- required: Market, TimeFrame
+//		- required: Market, Timeframe
 //		- optional: Page, Limit
 func (client *Client) GetPrices(args ...args.Argument) (*Prices, error) {
 	required := []string{"market", "timeframe"}
@@ -631,13 +698,13 @@ func (p *Prices) GetPrevious() (*Prices, error) {
 		limit, _ := strconv.Atoi(p.args["limit"])
 		pageToPut := int(p.pagination.Page - 1)
 		if okPage && !okLimit {
-			return p.client.GetPrices(args.Market(p.args["market"]), args.TimeFrame(p.args["timeframe"]), args.Page(pageToPut))
+			return p.client.GetPrices(args.Market(p.args["market"]), args.Timeframe(p.args["timeframe"]), args.Page(pageToPut))
 		} else if !okPage && okLimit {
-			return p.client.GetPrices(args.Market(p.args["market"]), args.TimeFrame(p.args["timeframe"]), args.Page(pageToPut), args.Limit(limit))
+			return p.client.GetPrices(args.Market(p.args["market"]), args.Timeframe(p.args["timeframe"]), args.Page(pageToPut), args.Limit(limit))
 		} else if okPage && okLimit {
-			return p.client.GetPrices(args.Market(p.args["market"]), args.TimeFrame(p.args["timeframe"]), args.Page(pageToPut), args.Limit(limit))
+			return p.client.GetPrices(args.Market(p.args["market"]), args.Timeframe(p.args["timeframe"]), args.Page(pageToPut), args.Limit(limit))
 		} else {
-			return p.client.GetPrices(args.Market(p.args["market"]), args.TimeFrame(p.args["timeframe"]))
+			return p.client.GetPrices(args.Market(p.args["market"]), args.Timeframe(p.args["timeframe"]))
 		}
 	} else {
 		return nil, fmt.Errorf("Cannot go to the next page, because it does not exist")
@@ -653,13 +720,13 @@ func (p *Prices) GetNext() (*Prices, error) {
 		limit, _ := strconv.Atoi(p.args["limit"])
 		pageToPut := int(p.pagination.Page + 1)
 		if okPage && !okLimit {
-			return p.client.GetPrices(args.Market(p.args["market"]), args.TimeFrame(p.args["timeframe"]), args.Page(pageToPut))
+			return p.client.GetPrices(args.Market(p.args["market"]), args.Timeframe(p.args["timeframe"]), args.Page(pageToPut))
 		} else if !okPage && okLimit {
-			return p.client.GetPrices(args.Market(p.args["market"]), args.TimeFrame(p.args["timeframe"]), args.Page(pageToPut), args.Limit(limit))
+			return p.client.GetPrices(args.Market(p.args["market"]), args.Timeframe(p.args["timeframe"]), args.Page(pageToPut), args.Limit(limit))
 		} else if okPage && okLimit {
-			return p.client.GetPrices(args.Market(p.args["market"]), args.TimeFrame(p.args["timeframe"]), args.Page(pageToPut), args.Limit(limit))
+			return p.client.GetPrices(args.Market(p.args["market"]), args.Timeframe(p.args["timeframe"]), args.Page(pageToPut), args.Limit(limit))
 		} else {
-			return p.client.GetPrices(args.Market(p.args["market"]), args.TimeFrame(p.args["timeframe"]))
+			return p.client.GetPrices(args.Market(p.args["market"]), args.Timeframe(p.args["timeframe"]))
 		}
 	} else {
 		return nil, fmt.Errorf("Cannot go to the next page, because it does not exist")
