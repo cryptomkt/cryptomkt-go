@@ -114,29 +114,29 @@ func TestUnmarshalingAnOrderList(t *testing.T) {
 		t.Errorf("error unmarshling %s", err)
 	}
 	/*
-	if orders.Pagination.NextHolder == "null" {
-		orders.Pagination.Next = -1
-	} else {
-		orders.Pagination.Next = int(orders.Pagination.NextHolder.(float64))
-	}
+		if orders.Pagination.NextHolder == "null" {
+			orders.Pagination.Next = -1
+		} else {
+			orders.Pagination.Next = int(orders.Pagination.NextHolder.(float64))
+		}
 
-	if orders.Pagination.PreviousHolder == "null" {
-		orders.Pagination.Previous = -1
-	} else {
-		orders.Pagination.Previous = int(orders.Pagination.PreviousHolder.(float64))
-	}
+		if orders.Pagination.PreviousHolder == "null" {
+			orders.Pagination.Previous = -1
+		} else {
+			orders.Pagination.Previous = int(orders.Pagination.PreviousHolder.(float64))
+		}
 
-	if orders.Status != "success" {
-		t.Errorf("status %v", orders)
-	}
+		if orders.Status != "success" {
+			t.Errorf("status %v", orders)
+		}
 
-	if orders.Pagination.Previous != 3 {
-		t.Errorf("previous page should be 3 %v", orders)
-	}
+		if orders.Pagination.Previous != 3 {
+			t.Errorf("previous page should be 3 %v", orders)
+		}
 
-	if orders.Pagination.Next != -1 {
-		t.Errorf("next page should be -1 %v", orders)
-	}
+		if orders.Pagination.Next != -1 {
+			t.Errorf("next page should be -1 %v", orders)
+		}
 	*/
 }
 

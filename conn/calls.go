@@ -3,7 +3,6 @@ package conn
 import (
 	"encoding/json"
 	"fmt"
-	"strconv"
 
 	"github.com/cryptomkt/cryptomkt-go/args"
 	"github.com/cryptomkt/cryptomkt-go/requests"
@@ -15,12 +14,12 @@ import (
 func (client *Client) GetAccount() (*Account, error) {
 	resp, err := client.get("account", requests.NewEmptyReq())
 	if err != nil {
-		return nil, fmt.Errorf("error while making the request: %s", err)
+		return nil, fmt.Errorf("error making the request: %s", err)
 	}
 	var aResp AccountResponse
 	json.Unmarshal(resp, &aResp)
 	if aResp.Status == "error" {
-		return nil, fmt.Errorf("error from in the  server side: %s", aResp.Message)
+		return nil, fmt.Errorf("error from the server side: %s", aResp.Message)
 	}
 	return &aResp.Data, nil
 }
@@ -31,12 +30,12 @@ func (client *Client) GetAccount() (*Account, error) {
 func (client *Client) GetBalance() (*[]Balance, error) {
 	resp, err := client.get("balance", requests.NewEmptyReq())
 	if err != nil {
-		return nil, fmt.Errorf("error while making the request: %s", err)
+		return nil, fmt.Errorf("error making the request: %s", err)
 	}
 	var bResp BalancesResponse
 	json.Unmarshal(resp, &bResp)
 	if bResp.Status == "error" {
-		return nil, fmt.Errorf("error from in the  server side: %s", bResp.Message)
+		return nil, fmt.Errorf("error from the server side: %s", bResp.Message)
 	}
 	return &bResp.Data, nil
 }
@@ -57,12 +56,12 @@ func (client *Client) GetWallets() (*[]Balance, error) {
 func (client *Client) GetTransactions(args ...args.Argument) (*[]Transaction, error) {
 	resp, err := client.getReq("transactions", "GetTransaction", []string{"currency"}, args...)
 	if err != nil {
-		return nil, fmt.Errorf("error while making the request: %s", err)
+		return nil, fmt.Errorf("error making the request: %s", err)
 	}
 	var tResp TransactionsResponse
 	json.Unmarshal(resp, &tResp)
 	if tResp.Status == "error" {
-		return nil, fmt.Errorf("error from in the  server side: %s", tResp.Message)
+		return nil, fmt.Errorf("error from the server side: %s", tResp.Message)
 	}
 	return &tResp.Data, nil
 }
@@ -73,17 +72,28 @@ func (client *Client) GetTransactions(args ...args.Argument) (*[]Transaction, er
 //   - required: Market
 //   - optional: Page, Limit
 // https://developers.cryptomkt.com/es/#ordenes-activas
-func (client *Client) GetActiveOrders(args ...args.Argument) (*[]Order, error) {
-	resp, err := client.getReq("orders/active", "GetActiveOrders", []string{"market"}, args...)
+func (client *Client) GetActiveOrders(args ...args.Argument) (*OrderList, error) {
+	req, err := makeReq([]string{"market"}, args...)
 	if err != nil {
-		return nil, fmt.Errorf("error while making the request: %s", err)
+		return nil, fmt.Errorf("Error in GetActiveOrders: %s", err)
+	}
+	resp, err := client.post("orders/active", req)
+	if err != nil {
+		return nil, fmt.Errorf("error making the request: %s", err)
 	}
 	var oListResp OrderListResp
 	json.Unmarshal(resp, &oListResp)
 	if oListResp.Status == "error" {
-		return nil, fmt.Errorf("error from in the  server side: %s", oListResp.Message)
+		return nil, fmt.Errorf("error from the server side: %s", oListResp.Message)
 	}
-	return &oListResp.Data, nil
+	orderList := OrderList{
+		pagination: oListResp.Pagination,
+		client:     client,
+		Data:       oListResp.Data,
+		caller:     "active_orders",
+		market:     req.GetArguments()["market"],
+	}
+	return &orderList, nil
 }
 
 // GetExecutedOrders return a list of the executed orders of the client
@@ -92,17 +102,29 @@ func (client *Client) GetActiveOrders(args ...args.Argument) (*[]Order, error) {
 //   - required: Market
 //   - optional: Page, Limit
 // https://developers.cryptomkt.com/es/#ordenes-ejecutadas
-func (client *Client) GetExecutedOrders(args ...args.Argument) (*[]Order, error) {
-	resp, err := client.getReq("orders/executed", "GetExecutedOrders", []string{"market"}, args...)
+func (client *Client) GetExecutedOrders(args ...args.Argument) (*OrderList, error) {
+	req, err := makeReq([]string{"market"}, args...)
 	if err != nil {
-		return nil, fmt.Errorf("error while making the request: %s", err)
+		return nil, fmt.Errorf("Error in GetExecutedOrders: %s", err)
+	}
+	resp, err := client.post("orders/executed", req)
+	if err != nil {
+		return nil, fmt.Errorf("error making the request: %s", err)
 	}
 	var oListResp OrderListResp
 	json.Unmarshal(resp, &oListResp)
 	if oListResp.Status == "error" {
-		return nil, fmt.Errorf("error from in the  server side: %s", oListResp.Message)
+		return nil, fmt.Errorf("error from the server side: %s", oListResp.Message)
 	}
-	return &oListResp.Data, nil
+
+	orderList := OrderList{
+		pagination: oListResp.Pagination,
+		client:     client,
+		Data:       oListResp.Data,
+		caller:     "executed_orders",
+		market:     req.GetArguments()["market"],
+	}
+	return &orderList, nil
 }
 
 // GetOrderStatus gives the status of an order
@@ -114,13 +136,14 @@ func (client *Client) GetExecutedOrders(args ...args.Argument) (*[]Order, error)
 func (client *Client) GetOrderStatus(args ...args.Argument) (*Order, error) {
 	resp, err := client.getReq("orders/status", "GetOrderStatus", []string{"id"}, args...)
 	if err != nil {
-		return nil, fmt.Errorf("error while making the request: %s", err)
+		return nil, fmt.Errorf("error making the request: %s", err)
 	}
 	var oResp OrderResponse
 	json.Unmarshal(resp, &oResp)
 	if oResp.Status == "error" {
-		return nil, fmt.Errorf("error from in the  server side: %s", oResp.Message)
+		return nil, fmt.Errorf("error from the server side: %s", oResp.Message)
 	}
+	oResp.Data.client = client
 	return &oResp.Data, nil
 }
 
@@ -133,12 +156,12 @@ func (client *Client) GetOrderStatus(args ...args.Argument) (*Order, error) {
 func (client *Client) GetInstant(args ...args.Argument) (*Quantity, error) {
 	resp, err := client.getReq("orders/instant/get", "GetInstant", []string{"market", "type", "amount"}, args...)
 	if err != nil {
-		return nil, fmt.Errorf("error while making the request: %s", err)
+		return nil, fmt.Errorf("error making the request: %s", err)
 	}
 	var iResp InstantResponse
 	json.Unmarshal(resp, &iResp)
 	if iResp.Status == "error" {
-		return nil, fmt.Errorf("error from in the  server side: %s", iResp.Message)
+		return nil, fmt.Errorf("error from the server side: %s", iResp.Message)
 	}
 	return &iResp.Data, nil
 }
@@ -152,13 +175,14 @@ func (client *Client) GetInstant(args ...args.Argument) (*Quantity, error) {
 func (client *Client) CreateOrder(args ...args.Argument) (*Order, error) {
 	resp, err := client.postReq("orders/create", "CreateOrder", []string{"amount", "market", "price", "type"}, args...)
 	if err != nil {
-		return nil, fmt.Errorf("error while making the request: %s", err)
+		return nil, fmt.Errorf("error making the request: %s", err)
 	}
 	var oResp OrderResponse
 	json.Unmarshal(resp, &oResp)
 	if oResp.Status == "error" {
-		return nil, fmt.Errorf("error from in the  server side: %s", oResp.Message)
+		return nil, fmt.Errorf("error from the server side: %s", oResp.Message)
 	}
+	oResp.Data.client = client
 	return &oResp.Data, nil
 }
 
@@ -171,13 +195,14 @@ func (client *Client) CreateOrder(args ...args.Argument) (*Order, error) {
 func (client *Client) CancelOrder(args ...args.Argument) (*Order, error) {
 	resp, err := client.postReq("orders/cancel", "CancelOrder", []string{"id"}, args...)
 	if err != nil {
-		return nil, fmt.Errorf("error while making the request: %s", err)
+		return nil, fmt.Errorf("error making the request: %s", err)
 	}
 	var oResp OrderResponse
 	json.Unmarshal(resp, &oResp)
 	if oResp.Status == "error" {
-		return nil, fmt.Errorf("error from in the  server side: %s", oResp.Message)
+		return nil, fmt.Errorf("error from the server side: %s", oResp.Message)
 	}
+	oResp.Data.client = client
 	return &oResp.Data, nil
 }
 
@@ -190,12 +215,12 @@ func (client *Client) CancelOrder(args ...args.Argument) (*Order, error) {
 func (client *Client) CreateInstant(args ...args.Argument) error {
 	resp, err := client.postReq("orders/instant/create", "CreateInstant", []string{"market", "type", "amount"}, args...)
 	if err != nil {
-		return fmt.Errorf("error while making the request: %s", err)
+		return fmt.Errorf("error making the request: %s", err)
 	}
 	var iResp InstantResponse
 	json.Unmarshal(resp, &iResp)
 	if iResp.Status == "error" {
-		return fmt.Errorf("error from in the  server side: %s", iResp.Message)
+		return fmt.Errorf("error from the server side: %s", iResp.Message)
 	}
 	return nil
 }
@@ -204,18 +229,18 @@ func (client *Client) CreateInstant(args ...args.Argument) error {
 //
 // List of accepted Arguments:
 //   - required: Amount, BankAccount
-// -only for México, Brasil and European Union: Voucher
-// -only for México: Date, TrackingCode
+//   - required only for México, Brasil and European Union: Voucher
+//   - required only for México: Date, TrackingCode
 // https://developers.cryptomkt.com/es/#notificar-deposito
 func (client *Client) RequestDeposit(args ...args.Argument) error {
 	resp, err := client.postReq("request/deposit", "RequestDeposit", []string{"amount", "bank_account"}, args...)
 	if err != nil {
-		return fmt.Errorf("error while making the request: %s", err)
+		return fmt.Errorf("error making the request: %s", err)
 	}
 	var iResp InstantResponse
 	json.Unmarshal(resp, &iResp)
 	if iResp.Status == "error" {
-		return fmt.Errorf("error from in the  server side: %s", iResp.Message)
+		return fmt.Errorf("error from the server side: %s", iResp.Message)
 	}
 	return nil
 }
@@ -229,12 +254,12 @@ func (client *Client) RequestDeposit(args ...args.Argument) error {
 func (client *Client) RequestWithdrawal(args ...args.Argument) error {
 	resp, err := client.postReq("request/withdrawal", "RequestWithdrawal", []string{"amount", "bank_account"}, args...)
 	if err != nil {
-		return fmt.Errorf("error while making the request: %s", err)
+		return fmt.Errorf("error making the request: %s", err)
 	}
 	var iResp InstantResponse
 	json.Unmarshal(resp, &iResp)
 	if iResp.Status == "error" {
-		return fmt.Errorf("error from in the  server side: %s", iResp.Message)
+		return fmt.Errorf("error from the server side: %s", iResp.Message)
 	}
 	return nil
 }
@@ -248,12 +273,12 @@ func (client *Client) RequestWithdrawal(args ...args.Argument) error {
 func (client *Client) Transfer(args ...args.Argument) error {
 	resp, err := client.postReq("transfer", "Transfer", []string{"address", "amount", "currency"}, args...)
 	if err != nil {
-		return fmt.Errorf("error while making the request: %s", err)
+		return fmt.Errorf("error making the request: %s", err)
 	}
 	var iResp InstantResponse
 	json.Unmarshal(resp, &iResp)
 	if iResp.Status == "error" {
-		return fmt.Errorf("error from in the  server side: %s", iResp.Message)
+		return fmt.Errorf("error from the server side: %s", iResp.Message)
 	}
 	return nil
 
@@ -268,12 +293,12 @@ func (client *Client) Transfer(args ...args.Argument) error {
 func (client *Client) NewOrder(args ...args.Argument) (*PaymentOrder, error) {
 	resp, err := client.postReq("payment/new_order", "NewOrder", []string{"to_receive", "to_receive_currency", "payment_receiver"}, args...)
 	if err != nil {
-		return nil, fmt.Errorf("error while making the request: %s", err)
+		return nil, fmt.Errorf("error making the request: %s", err)
 	}
 	var poResp PaymentResponse
 	json.Unmarshal(resp, &poResp)
 	if poResp.Status == "error" {
-		return nil, fmt.Errorf("error from in the  server side: %s", poResp.Message)
+		return nil, fmt.Errorf("error from the server side: %s", poResp.Message)
 	}
 	return &poResp.Data, nil
 }
@@ -287,12 +312,12 @@ func (client *Client) NewOrder(args ...args.Argument) (*PaymentOrder, error) {
 func (client *Client) CreateWallet(args ...args.Argument) (*PaymentOrder, error) {
 	resp, err := client.postReq("payment/create_wallet", "CreateWallet", []string{"id", "token", "wallet"}, args...)
 	if err != nil {
-		return nil, fmt.Errorf("error while making the request: %s", err)
+		return nil, fmt.Errorf("error making the request: %s", err)
 	}
 	var poResp PaymentResponse
 	json.Unmarshal(resp, &poResp)
 	if poResp.Status == "error" {
-		return nil, fmt.Errorf("error from in the  server side: %s", poResp.Message)
+		return nil, fmt.Errorf("error from the server side: %s", poResp.Message)
 	}
 	return &poResp.Data, nil
 }
@@ -303,17 +328,29 @@ func (client *Client) CreateWallet(args ...args.Argument) (*PaymentOrder, error)
 //   - required: StartDate, EndDate
 //   - optional: Page, Limit
 // https://developers.cryptomkt.com/es/#listado-de-ordenes-de-pago
-func (client *Client) PaymentOrders(args ...args.Argument) (*[]PaymentOrder, error) {
-	resp, err := client.postReq("payment/orders", "PaymentOrders", []string{"start_date", "end_date"}, args...)
+func (client *Client) PaymentOrders(args ...args.Argument) (*PaymentOrderList, error) {
+	req, err := makeReq([]string{"start_date", "end_date"}, args...)
 	if err != nil {
-		return nil, fmt.Errorf("error while making the request: %s", err)
+		return nil, fmt.Errorf("Error in PaymentOrders: %s", err)
+	}
+	resp, err := client.post("payment/orders", req)
+	if err != nil {
+		return nil, fmt.Errorf("error making the request: %s", err)
 	}
 	var poResp PaymentOrdersResponse
 	json.Unmarshal(resp, &poResp)
 	if poResp.Status == "error" {
-		return nil, fmt.Errorf("error from in the  server side: %s", poResp.Message)
+		return nil, fmt.Errorf("error from the server side: %s", poResp.Message)
 	}
-	return &poResp.Data, nil
+	argMap := req.GetArguments()
+	paymentOrderList := PaymentOrderList{
+		startDate:argMap["start_date"],
+		endDate:argMap["end_date"],
+		client:client,
+		pagination:poResp.Pagination,
+		Data:poResp.Data,
+	}
+	return &paymentOrderList, nil
 }
 
 // GetPaymentStatus gives the status of a pyment order
@@ -325,12 +362,12 @@ func (client *Client) PaymentOrders(args ...args.Argument) (*[]PaymentOrder, err
 func (client *Client) GetPaymentStatus(args ...args.Argument) (*PaymentOrder, error) {
 	resp, err := client.postReq("payment/status", "PaymentStatus", []string{"id"}, args...)
 	if err != nil {
-		return nil, fmt.Errorf("error while making the request: %s", err)
+		return nil, fmt.Errorf("error making the request: %s", err)
 	}
 	var poResp PaymentResponse
 	json.Unmarshal(resp, &poResp)
 	if poResp.Status == "error" {
-		return nil, fmt.Errorf("error from in the  server side: %s", poResp.Message)
+		return nil, fmt.Errorf("error from the server side: %s", poResp.Message)
 	}
 	return &poResp.Data, nil
 }
@@ -344,29 +381,18 @@ func (client *Client) GetPaymentStatus(args ...args.Argument) (*PaymentOrder, er
 // The first is a reference to the struct created and the second is a error message. It returns (nil, error)
 // when an error is raised.
 // This method does not accept any arguments.
-func (client *Client) GetMarkets() (*MarketStruct, error) {
+func (client *Client) GetMarkets() ([]string, error) {
 	resp, err := client.get("market", requests.NewEmptyReq())
 	if err != nil {
-		return nil, fmt.Errorf("error at client: %s", err)
+		return nil, fmt.Errorf("error making the request: %s", err)
 	}
-	// estructuar el output
-	var response map[string]interface{}
-	var respu MarketStruct
 
-	if err := json.Unmarshal([]byte(resp), &response); err != nil {
-		return nil, err
-	} else if response["status"].(string) == "success" {
-		var i int = 0
-		var largo int = len(response["data"].([]interface{}))
-		respu.Data = make([]string, largo)
-		for i < largo {
-			respu.Data[i] = response["data"].([]interface{})[i].(string)
-			i += 1
-		}
-		return &respu, nil
-	} else {
-		panic("Response from server failed")
+	var mResp MarketListResponse
+	json.Unmarshal(resp, &mResp)
+	if mResp.Status == "error" {
+		return nil, fmt.Errorf("error from the server side: %s", mResp.Message)
 	}
+	return mResp.Data, nil
 }
 
 // GetTicker returns a pointer to a Ticker struct with the data given by the api and an error message. It returns (nil,error)
@@ -374,29 +400,19 @@ func (client *Client) GetMarkets() (*MarketStruct, error) {
 //LastPrice, Volume, Market and Timestamp
 //
 // List of accepted Arguments:
-//
-// 		- optional: Market
-func (client *Client) GetTicker(args ...args.Argument) (*Ticker, error) {
-	resp, err := client.getPublic("ticker", requests.NewEmptyReq())
+//   - required: none
+//   - optional: Market
+func (client *Client) GetTicker(args ...args.Argument) (*[]Ticker, error) {
+	resp, err := client.getReq("ticker", "GetTicker", []string{}, args...)
 	if err != nil {
-		return nil, fmt.Errorf("error at client: %s", err)
+		return nil, fmt.Errorf("error making the request: %s", err)
 	}
-
-	var tempTicker TemporalTicker
-
-	err = json.Unmarshal([]byte(resp), &tempTicker)
-	if err != nil {
-		return nil, fmt.Errorf("Unable to make data")
+	var tResp TickerResponse
+	json.Unmarshal(resp, &tResp)
+	if tResp.Status == "error" {
+		return nil, fmt.Errorf("error from the server side: %s", tResp.Message)
 	}
-
-	var ticker Ticker
-
-	if tempTicker.Status == "success" {
-		ticker.Data = tempTicker.Data
-		return &ticker, nil
-	} else {
-		return nil, fmt.Errorf("Response from server failed")
-	}
+	return &tResp.Data, nil
 }
 
 // GetBook returns a pointer to a Book struct with the data given by
@@ -405,93 +421,29 @@ func (client *Client) GetTicker(args ...args.Argument) (*Ticker, error) {
 // The data fields are: price, amount and timestamp.
 //
 // List of accepted Arguments:
-//
-// 		- required: Market , Type
-//		- optional: Page, Limit
+//   - required: Market, Type
+//   - optional: Page, Limit
 func (client *Client) GetBook(args ...args.Argument) (*Book, error) {
-	required := []string{"market", "type"}
-	req, err := makeReq(required, args...)
+	req, err := makeReq([]string{"market", "type"}, args...)
 	if err != nil {
-		return nil, fmt.Errorf("Error in MakeMarket: %s", err)
+		return nil, fmt.Errorf("Error in GetBook: %s", err)
 	}
 	resp, err := client.getPublic("book", req)
 	if err != nil {
-		return nil, fmt.Errorf("error at client: %s", err)
+		return nil, fmt.Errorf("error making the request: %s", err)
 	}
-
-	var response TemporalBook
-	err = json.Unmarshal([]byte(resp), &response)
-	if err != nil {
-		return nil, err
-	} else {
-		var resp Book
-
-		if response.Status == "success" {
-			resp.args = req.GetArguments()
-			resp.pagination = response.Pagination
-			resp.client = client
-			resp.Data = response.Data
-			return &resp, nil
-		} else {
-			return nil, fmt.Errorf("Response from server failed")
-		}
+	var bResp BookResponse
+	json.Unmarshal(resp, &bResp)
+	if bResp.Status == "error" {
+		return nil, fmt.Errorf("error from the server side: %s", bResp.Message)
 	}
-}
-
-// Here you have methods to interact with the Book's pagination
-
-// GetPrevious lets you go to the previous page if it exists, returns (*Book, nil) if
-// it is successfull and (nil, error) otherwise
-func (b *Book) GetPrevious() (*Book, error) {
-	if b.pagination.Previous != nil {
-		_, okPage := b.args["page"]
-		_, okLimit := b.args["limit"]
-		limit, _ := strconv.Atoi(b.args["limit"])
-		pageToPut := int(b.pagination.Page - 1)
-		if okPage && !okLimit {
-			return b.client.GetBook(args.Market(b.args["market"]), args.Type(b.args["type"]), args.Page(pageToPut))
-		} else if !okPage && okLimit {
-			return b.client.GetBook(args.Market(b.args["market"]), args.Type(b.args["type"]), args.Page(pageToPut), args.Limit(limit))
-		} else if okPage && okLimit {
-			return b.client.GetBook(args.Market(b.args["market"]), args.Type(b.args["type"]), args.Page(pageToPut), args.Limit(limit))
-		} else {
-			return b.client.GetBook(args.Market(b.args["market"]), args.Type(b.args["type"]), args.Page(pageToPut))
-		}
-	} else {
-		return nil, fmt.Errorf("Cannot go to the previous page because it does not exist")
+	book := Book{
+		args:       req.GetArguments(),
+		pagination: bResp.Pagination,
+		client:     client,
+		Data:       bResp.Data,
 	}
-}
-
-// GetNext lets you go to the next page if it exists, returns (*Book, nil) if
-// it is successfull and (nil, error) otherwise
-func (b *Book) GetNext() (*Book, error) {
-	if b.pagination.Next != nil {
-		_, okPage := b.args["page"]
-		_, okLimit := b.args["limit"]
-		limit, _ := strconv.Atoi(b.args["limit"])
-		pageToPut := int(b.pagination.Page + 1)
-		if okPage && !okLimit {
-			return b.client.GetBook(args.Market(b.args["market"]), args.Type(b.args["type"]), args.Page(pageToPut))
-		} else if !okPage && okLimit {
-			return b.client.GetBook(args.Market(b.args["market"]), args.Type(b.args["type"]), args.Page(pageToPut), args.Limit(limit))
-		} else if okPage && okLimit {
-			return b.client.GetBook(args.Market(b.args["market"]), args.Type(b.args["type"]), args.Page(pageToPut), args.Limit(limit))
-		} else {
-			return b.client.GetBook(args.Market(b.args["market"]), args.Type(b.args["type"]))
-		}
-	} else {
-		return nil, fmt.Errorf("Cannot go to the next page, because it does not exist")
-	}
-}
-
-// GetPage returns the page you have
-func (b *Book) GetPage() int {
-	return b.pagination.Page
-}
-
-// GetLimit returns the limit you have provided, but if you have not, it provides the default
-func (b *Book) GetLimit() int {
-	return b.pagination.Limit
+	return &book, nil
 }
 
 // GetTrades returns a pointer to a Trades struct with the data given
@@ -500,150 +452,29 @@ func (b *Book) GetLimit() int {
 // The data fields are market_taker, price, amount, tid, timestamp and market.
 //
 // List of accepted Arguments:
-//
-//		- required: Market
-//		- optional: Start, End, Page, Limit
+//   - required: Market
+//   - optional: Start, End, Page, Limit
 func (client *Client) GetTrades(args ...args.Argument) (*Trades, error) {
-	required := []string{"market"}
-	req, err := makeReq(required, args...)
+	req, err := makeReq([]string{"market"}, args...)
 	if err != nil {
-		return nil, fmt.Errorf("Error in MakeMarket: %s", err)
+		return nil, fmt.Errorf("Error in GetTrades: %s", err)
 	}
 	resp, err := client.getPublic("trades", req)
 	if err != nil {
-		return nil, fmt.Errorf("error at client: %s", err)
+		return nil, fmt.Errorf("error making the request: %s", err)
 	}
-
-	var response TemporalTrades
-	err = json.Unmarshal([]byte(resp), &response)
-	if err != nil {
-		return nil, err
-	} else {
-		var resp Trades
-		if response.Status == "success" {
-			resp.args = req.GetArguments()
-			resp.pagination = response.Pagination
-			resp.client = client
-			resp.Data = response.Data
-			return &resp, nil
-		} else {
-			return nil, fmt.Errorf("Response from server failed")
-		}
+	var tResp TradesResponse
+	json.Unmarshal(resp, &tResp)
+	if tResp.Status == "error" {
+		return nil, fmt.Errorf("error from the server side: %s", tResp.Message)
 	}
-}
-
-// Here you find methods to interact with the Trades's pagination
-
-// GetPrevious lets you go to the previous page if it exists, returns (*Trades, nil) if
-// it is successfull and (nil, error) otherwise
-func (t *Trades) GetPrevious() (*Trades, error) {
-	if t.pagination.Previous != nil {
-		var newArgs []args.Argument = make([]args.Argument, len(t.args))
-		var i int = 0
-		for k, v := range t.args {
-			switch k {
-			case "start":
-				newArgs[i] = args.Start(v)
-			case "end":
-				newArgs[i] = args.End(v)
-			case "page":
-				page, err := strconv.Atoi(v)
-				if err == nil {
-					newArgs[i] = args.Page(int(page - 1))
-				} else {
-					return nil, fmt.Errorf("Cannot convert page to int")
-				}
-			case "limit":
-				limit, err := strconv.Atoi(v)
-				if err == nil {
-					newArgs[i] = args.Limit(int(limit))
-				} else {
-					return nil, fmt.Errorf("Cannot convert limit to int")
-				}
-			case "market":
-				newArgs[i] = args.Market(v)
-			default:
-				return nil, fmt.Errorf("Unknown argument")
-			}
-			i++
-		}
-		//You have the optional args so far.
-		switch len(newArgs) {
-		case 1:
-			return t.client.GetTrades(newArgs[0])
-		case 2:
-			return t.client.GetTrades(newArgs[0], newArgs[1])
-		case 3:
-			return t.client.GetTrades(newArgs[0], newArgs[1], newArgs[2])
-		case 4:
-			return t.client.GetTrades(newArgs[0], newArgs[1], newArgs[2], newArgs[3])
-		case 5:
-			return t.client.GetTrades(newArgs[0], newArgs[1], newArgs[2], newArgs[3], newArgs[4])
-		default:
-			return nil, fmt.Errorf("Need one to five args")
-		}
+	trades := Trades{
+		args:       req.GetArguments(),
+		pagination: tResp.Pagination,
+		client:     client,
+		Data:       tResp.Data,
 	}
-	return nil, fmt.Errorf("Cannot go to previous page, because it does not exist")
-}
-
-// GetNext lets you go to the next page if it exists, returns (*Trades, nil) if
-// it is successfull and (nil, error) otherwise
-func (t *Trades) GetNext() (*Trades, error) {
-	if t.pagination.Next != nil {
-		var newArgs []args.Argument = make([]args.Argument, len(t.args))
-		var i int = 0
-		for k, v := range t.args {
-			switch k {
-			case "start":
-				newArgs[i] = args.Start(v)
-			case "end":
-				newArgs[i] = args.End(v)
-			case "page":
-				page, err := strconv.Atoi(v)
-				if err == nil {
-					newArgs[i] = args.Page(int(page + 1))
-				} else {
-					return nil, fmt.Errorf("Cannot convert page to int")
-				}
-			case "limit":
-				limit, err := strconv.Atoi(v)
-				if err == nil {
-					newArgs[i] = args.Limit(int(limit))
-				} else {
-					return nil, fmt.Errorf("Cannot convert limit to int")
-				}
-			case "market":
-				newArgs[i] = args.Market(v)
-			default:
-				return nil, fmt.Errorf("Unknown argument")
-			}
-			i++
-		}
-		//You have the optional args so far.
-		switch len(newArgs) {
-		case 1:
-			return t.client.GetTrades(newArgs[0])
-		case 2:
-			return t.client.GetTrades(newArgs[0], newArgs[1])
-		case 3:
-			return t.client.GetTrades(newArgs[0], newArgs[1], newArgs[2])
-		case 4:
-			return t.client.GetTrades(newArgs[0], newArgs[1], newArgs[2], newArgs[3])
-		case 5:
-			return t.client.GetTrades(newArgs[0], newArgs[1], newArgs[2], newArgs[3], newArgs[4])
-		}
-	}
-	return nil, fmt.Errorf("Cannot go to the next page because it does not exist")
-}
-
-// GetPage returns the page you have
-func (t *Trades) GetPage() int {
-	return t.pagination.Page
-}
-
-// GetLimit returns the limit you have provided, but if you have not, it provides the default
-func (t *Trades) GetLimit() int {
-	return t.pagination.Limit
+	return &trades, nil
 }
 
 // GetPrices return a pointer to a Prices struct with the data given by
@@ -654,91 +485,27 @@ func (t *Trades) GetLimit() int {
 // *Prices.Data["bid"][index].fieldYouWant
 //
 // List of accepted Arguments:
-//
-//		- required: Market, Timeframe
-//		- optional: Page, Limit
+//   - required: Market, Timeframe
+//   - optional: Page, Limit
 func (client *Client) GetPrices(args ...args.Argument) (*Prices, error) {
-	required := []string{"market", "timeframe"}
-	req, err := makeReq(required, args...)
+	req, err := makeReq([]string{"market", "timeframe"}, args...)
 	if err != nil {
-		return nil, fmt.Errorf("Error in MakeMarket: %s", err)
+		return nil, fmt.Errorf("Error in GetPrices: %s", err)
 	}
 	resp, err := client.getPublic("prices", req)
 	if err != nil {
-		return nil, fmt.Errorf("error at client: %s", err)
+		return nil, fmt.Errorf("error making the request: %s", err)
 	}
-
-	var response TemporalPrices
-	//unmarshal string to response
-	err = json.Unmarshal([]byte(resp), &response)
-	if err != nil {
-		return nil, err
-	} else {
-		if response.Status == "success" {
-			var resp Prices
-			resp.args = req.GetArguments()
-			resp.pagination = response.Pagination
-			resp.client = client
-			resp.Data = response.Data
-			return &resp, nil
-		} else {
-			return nil, fmt.Errorf("Response from server failed")
-		}
+	var pResp PricesResponse
+	json.Unmarshal(resp, &pResp)
+	if pResp.Status == "error" {
+		return nil, fmt.Errorf("error from the server side: %s", pResp.Message)
 	}
-}
-
-// Here you have methods to interact with Prices's pagination
-
-// GetPrevious lets you go to the previous page if it exists, returns (*Prices, nil) if
-// it is successfull and (nil, error) otherwise
-func (p *Prices) GetPrevious() (*Prices, error) {
-	if p.pagination.Next != nil {
-		_, okPage := p.args["page"]
-		_, okLimit := p.args["limit"]
-		limit, _ := strconv.Atoi(p.args["limit"])
-		pageToPut := int(p.pagination.Page - 1)
-		if okPage && !okLimit {
-			return p.client.GetPrices(args.Market(p.args["market"]), args.Timeframe(p.args["timeframe"]), args.Page(pageToPut))
-		} else if !okPage && okLimit {
-			return p.client.GetPrices(args.Market(p.args["market"]), args.Timeframe(p.args["timeframe"]), args.Page(pageToPut), args.Limit(limit))
-		} else if okPage && okLimit {
-			return p.client.GetPrices(args.Market(p.args["market"]), args.Timeframe(p.args["timeframe"]), args.Page(pageToPut), args.Limit(limit))
-		} else {
-			return p.client.GetPrices(args.Market(p.args["market"]), args.Timeframe(p.args["timeframe"]))
-		}
-	} else {
-		return nil, fmt.Errorf("Cannot go to the next page, because it does not exist")
+	prices := Prices{
+		args:       req.GetArguments(),
+		pagination: pResp.Pagination,
+		client:     client,
+		Data:       pResp.Data,
 	}
-}
-
-// GetNext lets you go to the next page if it exists, returns (*Prices, nil) if
-// it is successfull and (nil, error) otherwise
-func (p *Prices) GetNext() (*Prices, error) {
-	if p.pagination.Next != nil {
-		_, okPage := p.args["page"]
-		_, okLimit := p.args["limit"]
-		limit, _ := strconv.Atoi(p.args["limit"])
-		pageToPut := int(p.pagination.Page + 1)
-		if okPage && !okLimit {
-			return p.client.GetPrices(args.Market(p.args["market"]), args.Timeframe(p.args["timeframe"]), args.Page(pageToPut))
-		} else if !okPage && okLimit {
-			return p.client.GetPrices(args.Market(p.args["market"]), args.Timeframe(p.args["timeframe"]), args.Page(pageToPut), args.Limit(limit))
-		} else if okPage && okLimit {
-			return p.client.GetPrices(args.Market(p.args["market"]), args.Timeframe(p.args["timeframe"]), args.Page(pageToPut), args.Limit(limit))
-		} else {
-			return p.client.GetPrices(args.Market(p.args["market"]), args.Timeframe(p.args["timeframe"]))
-		}
-	} else {
-		return nil, fmt.Errorf("Cannot go to the next page, because it does not exist")
-	}
-}
-
-// GetPage returns the page you have
-func (p *Prices) GetPage() int {
-	return p.pagination.Page
-}
-
-// GetLimit returns the limit you have provided, but if you have not, it provides the default
-func (p *Prices) GetLimit() int {
-	return p.pagination.Limit
+	return &prices, nil
 }

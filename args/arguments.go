@@ -184,6 +184,14 @@ func Timeframe(val string) Argument {
 	}
 }
 
+// TimeFrame is an argument of a request. Its the lapse between two candles.
+// Is an Alias of Timeframe
+//
+// Accepts: 1, 5, 15, 60, 240, 1440 or 10080 as strings.
+func TimeFrame(val string) Argument {
+	return TimeFrame(val)
+}
+
 // Price is an argument of a request.
 func Price(val string) Argument {
 	return func(request *requests.Request) error {
