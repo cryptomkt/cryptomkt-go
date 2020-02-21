@@ -11,7 +11,7 @@ import (
 var argus [8]args.Argument = [8]args.Argument{args.Market("ETHCLP"), args.Type("buy"), args.Type("sell"), args.Page(0), args.Limit(50), args.Start("2017-03-03"), args.End("2018-03-03"), args.Timeframe("60")}
 
 
-func TestGetBook(t *testing.T) {
+func TestGetBookPage(t *testing.T) {
 	client := NewClient("NoKey", "NoSecret")
 	rand.Seed(time.Now().UnixNano())
 	var optional [2]args.Argument = [2]args.Argument{argus[3], argus[4]}
@@ -19,16 +19,16 @@ func TestGetBook(t *testing.T) {
 		var numArgs int = rand.Intn(3)
 		switch numArgs {
 		case 0:
-			if _, err := client.GetBook(argus[0], argus[1]); err != nil {
+			if _, err := client.GetBookPage(argus[0], argus[1]); err != nil {
 				t.Errorf("Book with cero optional args failed: %s", err)
 			}
 		case 1:
 			var random int = rand.Intn(2)
-			if _, err := client.GetBook(argus[0], argus[1], optional[random]); err != nil {
+			if _, err := client.GetBookPage(argus[0], argus[1], optional[random]); err != nil {
 				t.Errorf("Book with %v optional args failed: %s", 1, err)
 			}
 		case 2:
-			if _, err := client.GetBook(argus[0], argus[1], optional[0], optional[1]); err != nil {
+			if _, err := client.GetBookPage(argus[0], argus[1], optional[0], optional[1]); err != nil {
 				t.Errorf("Book with 2 optional arguments failed because %s ", err)
 			}
 		}
@@ -38,7 +38,7 @@ func TestGetBook(t *testing.T) {
 
 func TestBookGetPrevious(t *testing.T) {
 	client := NewClient("NoKey", "NoSecret")
-	book, err := client.GetBook(args.Market("ETHCLP"), args.Type("buy"), args.Page(1))
+	book, err := client.GetBookPage(args.Market("ETHCLP"), args.Type("buy"), args.Page(1))
 	if err != nil {
 		t.Errorf("Error getting the book: %s", err)
 	}
@@ -50,7 +50,7 @@ func TestBookGetPrevious(t *testing.T) {
 
 func TestBookGetNext(t *testing.T) {
 	client := NewClient("NoKey", "NoSecret")
-	book, err := client.GetBook(args.Market("ETHCLP"), args.Type("buy"), args.Page(0))
+	book, err := client.GetBookPage(args.Market("ETHCLP"), args.Type("buy"), args.Page(0))
 	if err != nil {
 		t.Errorf("Error getting the book: %s", err)
 	}
@@ -60,39 +60,10 @@ func TestBookGetNext(t *testing.T) {
 	}
 }
 
-func TestGetAllBooks(t *testing.T) {
+func TestGetBooks(t *testing.T) {
 	client := NewClient("NoKey", "NoSecret")
-	rand.Seed(time.Now().UnixNano())
-	var optional [2]args.Argument = [2]args.Argument{argus[3], argus[4]}
-	for i := 0; i < 100; i++ { //here you can change the number of repetitions
-		var numArgs int = rand.Intn(3)
-		switch numArgs {
-		case 0:
-			if book, err := client.GetBook(args.Market("ETHCLP"),args.Type("buy")); err != nil {
-				t.Errorf("Book with cero optional args failed: %s", err)
-				_, err := book.GetAllBooks()
-				if err != nil {
-					t.Errorf("All books failed with cero optional args, %s", err)
-				}
-			}
-		case 1:
-			var random int = rand.Intn(2)
-			if book, err := client.GetBook(args.Market("ETHCLP"), args.Type("buy"), optional[random]); err != nil {
-				t.Errorf("Book with %v optional args failed: %s", 1, err)
-				_, err := book.GetAllBooks()
-				if err != nil {
-					t.Errorf("All books failed with one optional args, %s", err)
-				}
-			}
-		case 2:
-			if book, err := client.GetBook(args.Market("ETHCLP"), args.Type("buy"), optional[0], optional[1]); err != nil {
-				t.Errorf("Book with 2 optional arguments failed because %s ", err)
-				_, err := book.GetAllBooks()
-				if err != nil {
-					t.Errorf("All books failed with two optional args, %s", err)
-				}
-			}
-		}
-		time.Sleep(3 * time.Second)
+	time.Sleep(3 * time.Second)
+	if _, err := client.GetBook(args.Market("ETHCLP"),args.Type("buy")); err != nil {
+		t.Errorf("failed to retrieve books, %s", err)
 	}
 }

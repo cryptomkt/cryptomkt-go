@@ -41,7 +41,7 @@ func (p *Prices) GetPrevious() (*Prices, error) {
 	if p.pagination.Previous == nil {
 		return nil, fmt.Errorf("Previous page does not exist")
 	}
-	return p.client.GetPrices(
+	return p.client.GetPricesPage(
 		args.Market(p.args["market"]),
 		args.Type(p.args["timeframe"]),
 		args.Page(int(p.pagination.Previous.(float64))),
@@ -54,7 +54,7 @@ func (p *Prices) GetNext() (*Prices, error) {
 	if p.pagination.Next == nil {
 		return nil, fmt.Errorf("Next page does not exist")
 	}
-	return p.client.GetPrices(
+	return p.client.GetPricesPage(
 		args.Market(p.args["market"]),
 		args.Type(p.args["timeframe"]),
 		args.Page(int(p.pagination.Next.(float64))),

@@ -3,8 +3,6 @@ package conn
 import (
 	"encoding/json"
 	"fmt"
-	"strconv"
-	"time"
 
 	"github.com/cryptomkt/cryptomkt-go/args"
 	"github.com/cryptomkt/cryptomkt-go/requests"
@@ -55,8 +53,8 @@ func (client *Client) GetWallets() (*[]Balance, error) {
 //   - required: Currency
 //   - optional: Page, Limit
 // https://developers.cryptomkt.com/es/#obtener-movimientos
-func (client *Client) GetTransactions(args ...args.Argument) (*[]Transaction, error) {
-	resp, err := client.getReq("transactions", "GetTransaction", []string{"currency"}, args...)
+func (client *Client) GetTransactions(arguments ...args.Argument) (*[]Transaction, error) {
+	resp, err := client.getReq("transactions", "GetTransaction", []string{"currency"}, arguments...)
 	if err != nil {
 		return nil, fmt.Errorf("error making the request: %s", err)
 	}
@@ -74,8 +72,8 @@ func (client *Client) GetTransactions(args ...args.Argument) (*[]Transaction, er
 //   - required: Market
 //   - optional: Page, Limit
 // https://developers.cryptomkt.com/es/#ordenes-activas
-func (client *Client) GetActiveOrdersPage(args ...args.Argument) (*OrderList, error) {
-	req, err := makeReq([]string{"market"}, args...)
+func (client *Client) GetActiveOrdersPage(arguments ...args.Argument) (*OrderList, error) {
+	req, err := makeReq([]string{"market"}, arguments...)
 	if err != nil {
 		return nil, fmt.Errorf("Error in GetActiveOrders: %s", err)
 	}
@@ -104,8 +102,8 @@ func (client *Client) GetActiveOrdersPage(args ...args.Argument) (*OrderList, er
 //   - required: Market
 //   - optional: Page, Limit
 // https://developers.cryptomkt.com/es/#ordenes-ejecutadas
-func (client *Client) GetExecutedOrdersPage(args ...args.Argument) (*OrderList, error) {
-	req, err := makeReq([]string{"market"}, args...)
+func (client *Client) GetExecutedOrdersPage(arguments ...args.Argument) (*OrderList, error) {
+	req, err := makeReq([]string{"market"}, arguments...)
 	if err != nil {
 		return nil, fmt.Errorf("Error in GetExecutedOrders: %s", err)
 	}
@@ -135,8 +133,8 @@ func (client *Client) GetExecutedOrdersPage(args ...args.Argument) (*OrderList, 
 //   - required: Id
 //   - optional: none
 // https://developers.cryptomkt.com/es/#estado-de-orden
-func (client *Client) GetOrderStatus(args ...args.Argument) (*Order, error) {
-	resp, err := client.getReq("orders/status", "GetOrderStatus", []string{"id"}, args...)
+func (client *Client) GetOrderStatus(arguments ...args.Argument) (*Order, error) {
+	resp, err := client.getReq("orders/status", "GetOrderStatus", []string{"id"}, arguments...)
 	if err != nil {
 		return nil, fmt.Errorf("error making the request: %s", err)
 	}
@@ -155,8 +153,8 @@ func (client *Client) GetOrderStatus(args ...args.Argument) (*Order, error) {
 //   - required: Market, Type, Amount
 //   - optional: none
 // https://developers.cryptomkt.com/es/#obtener-cantidad
-func (client *Client) GetInstant(args ...args.Argument) (*Quantity, error) {
-	resp, err := client.getReq("orders/instant/get", "GetInstant", []string{"market", "type", "amount"}, args...)
+func (client *Client) GetInstant(arguments ...args.Argument) (*Quantity, error) {
+	resp, err := client.getReq("orders/instant/get", "GetInstant", []string{"market", "type", "amount"}, arguments...)
 	if err != nil {
 		return nil, fmt.Errorf("error making the request: %s", err)
 	}
@@ -174,8 +172,8 @@ func (client *Client) GetInstant(args ...args.Argument) (*Quantity, error) {
 //   - required: Amount, Market, Price, Type
 //   - optional: none
 // https://developers.cryptomkt.com/es/#crear-orden
-func (client *Client) CreateOrder(args ...args.Argument) (*Order, error) {
-	resp, err := client.postReq("orders/create", "CreateOrder", []string{"amount", "market", "price", "type"}, args...)
+func (client *Client) CreateOrder(arguments ...args.Argument) (*Order, error) {
+	resp, err := client.postReq("orders/create", "CreateOrder", []string{"amount", "market", "price", "type"}, arguments...)
 	if err != nil {
 		return nil, fmt.Errorf("error making the request: %s", err)
 	}
@@ -194,8 +192,8 @@ func (client *Client) CreateOrder(args ...args.Argument) (*Order, error) {
 //   - required: Id
 //   - optional: none
 // https://developers.cryptomkt.com/es/#cancelar-una-orden
-func (client *Client) CancelOrder(args ...args.Argument) (*Order, error) {
-	resp, err := client.postReq("orders/cancel", "CancelOrder", []string{"id"}, args...)
+func (client *Client) CancelOrder(arguments ...args.Argument) (*Order, error) {
+	resp, err := client.postReq("orders/cancel", "CancelOrder", []string{"id"}, arguments...)
 	if err != nil {
 		return nil, fmt.Errorf("error making the request: %s", err)
 	}
@@ -214,8 +212,8 @@ func (client *Client) CancelOrder(args ...args.Argument) (*Order, error) {
 //   - required: Market, Type, Amount
 //   - optional: none
 // https://developers.cryptomkt.com/es/#crear-orden-2
-func (client *Client) CreateInstant(args ...args.Argument) error {
-	resp, err := client.postReq("orders/instant/create", "CreateInstant", []string{"market", "type", "amount"}, args...)
+func (client *Client) CreateInstant(arguments ...args.Argument) error {
+	resp, err := client.postReq("orders/instant/create", "CreateInstant", []string{"market", "type", "amount"}, arguments...)
 	if err != nil {
 		return fmt.Errorf("error making the request: %s", err)
 	}
@@ -234,8 +232,8 @@ func (client *Client) CreateInstant(args ...args.Argument) error {
 //   - required only for México, Brasil and European Union: Voucher
 //   - required only for México: Date, TrackingCode
 // https://developers.cryptomkt.com/es/#notificar-deposito
-func (client *Client) RequestDeposit(args ...args.Argument) error {
-	resp, err := client.postReq("request/deposit", "RequestDeposit", []string{"amount", "bank_account"}, args...)
+func (client *Client) RequestDeposit(arguments ...args.Argument) error {
+	resp, err := client.postReq("request/deposit", "RequestDeposit", []string{"amount", "bank_account"}, arguments...)
 	if err != nil {
 		return fmt.Errorf("error making the request: %s", err)
 	}
@@ -253,8 +251,8 @@ func (client *Client) RequestDeposit(args ...args.Argument) error {
 //   - required: Amount, BankAccount
 //   - optional: none
 // https://developers.cryptomkt.com/es/#notificar-retiro
-func (client *Client) RequestWithdrawal(args ...args.Argument) error {
-	resp, err := client.postReq("request/withdrawal", "RequestWithdrawal", []string{"amount", "bank_account"}, args...)
+func (client *Client) RequestWithdrawal(arguments ...args.Argument) error {
+	resp, err := client.postReq("request/withdrawal", "RequestWithdrawal", []string{"amount", "bank_account"}, arguments...)
 	if err != nil {
 		return fmt.Errorf("error making the request: %s", err)
 	}
@@ -272,8 +270,8 @@ func (client *Client) RequestWithdrawal(args ...args.Argument) error {
 //   - required: Address, Amount, Currency
 //   - optional: Memo
 // https://developers.cryptomkt.com/es/#transferir
-func (client *Client) Transfer(args ...args.Argument) error {
-	resp, err := client.postReq("transfer", "Transfer", []string{"address", "amount", "currency"}, args...)
+func (client *Client) Transfer(arguments ...args.Argument) error {
+	resp, err := client.postReq("transfer", "Transfer", []string{"address", "amount", "currency"}, arguments...)
 	if err != nil {
 		return fmt.Errorf("error making the request: %s", err)
 	}
@@ -292,8 +290,8 @@ func (client *Client) Transfer(args ...args.Argument) error {
 //   - required: ToReceive, ToReceiveCurrency, PaymentReceiver
 //   - optional: ExternalId, CallbackUrl, ErrorUrl, SuccessUrl, RefundEmail, Language
 // https://developers.cryptomkt.com/es/#crear-orden-de-pago
-func (client *Client) NewOrder(args ...args.Argument) (*PaymentOrder, error) {
-	resp, err := client.postReq("payment/new_order", "NewOrder", []string{"to_receive", "to_receive_currency", "payment_receiver"}, args...)
+func (client *Client) NewOrder(arguments ...args.Argument) (*PaymentOrder, error) {
+	resp, err := client.postReq("payment/new_order", "NewOrder", []string{"to_receive", "to_receive_currency", "payment_receiver"}, arguments...)
 	if err != nil {
 		return nil, fmt.Errorf("error making the request: %s", err)
 	}
@@ -311,8 +309,8 @@ func (client *Client) NewOrder(args ...args.Argument) (*PaymentOrder, error) {
 //   - required: Id, Token, Wallet
 //   - optional: none
 // https://developers.cryptomkt.com/es/#crear-billetera-de-orden-de-pago
-func (client *Client) CreateWallet(args ...args.Argument) (*PaymentOrder, error) {
-	resp, err := client.postReq("payment/create_wallet", "CreateWallet", []string{"id", "token", "wallet"}, args...)
+func (client *Client) CreateWallet(arguments ...args.Argument) (*PaymentOrder, error) {
+	resp, err := client.postReq("payment/create_wallet", "CreateWallet", []string{"id", "token", "wallet"}, arguments...)
 	if err != nil {
 		return nil, fmt.Errorf("error making the request: %s", err)
 	}
@@ -330,8 +328,8 @@ func (client *Client) CreateWallet(args ...args.Argument) (*PaymentOrder, error)
 //   - required: StartDate, EndDate
 //   - optional: Page, Limit
 // https://developers.cryptomkt.com/es/#listado-de-ordenes-de-pago
-func (client *Client) PaymentOrders(args ...args.Argument) (*PaymentOrderList, error) {
-	req, err := makeReq([]string{"start_date", "end_date"}, args...)
+func (client *Client) PaymentOrdersPage(arguments ...args.Argument) (*PaymentOrderList, error) {
+	req, err := makeReq([]string{"start_date", "end_date"}, arguments...)
 	if err != nil {
 		return nil, fmt.Errorf("Error in PaymentOrders: %s", err)
 	}
@@ -361,8 +359,8 @@ func (client *Client) PaymentOrders(args ...args.Argument) (*PaymentOrderList, e
 //   - required: Id
 //   - optional: none
 // https://developers.cryptomkt.com/es/#estado-de-orden-de-pago
-func (client *Client) GetPaymentStatus(args ...args.Argument) (*PaymentOrder, error) {
-	resp, err := client.postReq("payment/status", "PaymentStatus", []string{"id"}, args...)
+func (client *Client) GetPaymentStatus(arguments ...args.Argument) (*PaymentOrder, error) {
+	resp, err := client.postReq("payment/status", "PaymentStatus", []string{"id"}, arguments...)
 	if err != nil {
 		return nil, fmt.Errorf("error making the request: %s", err)
 	}
@@ -404,8 +402,8 @@ func (client *Client) GetMarkets() ([]string, error) {
 // List of accepted Arguments:
 //   - required: none
 //   - optional: Market
-func (client *Client) GetTicker(args ...args.Argument) (*[]Ticker, error) {
-	resp, err := client.getReq("ticker", "GetTicker", []string{}, args...)
+func (client *Client) GetTicker(arguments ...args.Argument) (*[]Ticker, error) {
+	resp, err := client.getReq("ticker", "GetTicker", []string{}, arguments...)
 	if err != nil {
 		return nil, fmt.Errorf("error making the request: %s", err)
 	}
@@ -425,8 +423,8 @@ func (client *Client) GetTicker(args ...args.Argument) (*[]Ticker, error) {
 // List of accepted Arguments:
 //   - required: Market, Type
 //   - optional: Page, Limit
-func (client *Client) GetBook(args ...args.Argument) (*Book, error) {
-	req, err := makeReq([]string{"market", "type"}, args...)
+func (client *Client) GetBookPage(arguments ...args.Argument) (*Book, error) {
+	req, err := makeReq([]string{"market", "type"}, arguments...)
 	if err != nil {
 		return nil, fmt.Errorf("Error in GetBook: %s", err)
 	}
@@ -448,33 +446,29 @@ func (client *Client) GetBook(args ...args.Argument) (*Book, error) {
 	return &book, nil
 }
 
-func (b *Book) GetAllBooks() ([]BookData, error) {
-	var resp []BookData = make([]BookData, 0)
-	var bookPointer *Book
-	var err error
-	if _, ok := b.args["limit"]; ok {
-		value, err2 := strconv.Atoi(b.args["limit"])
-		if err2 == nil {
-			bookPointer, err = b.client.GetBook(args.Market(b.args["market"]), args.Type(b.args["type"]), args.Page(0), args.Limit(value))
-		}
-	} else {
-		bookPointer, err = b.client.GetBook(args.Market(b.args["market"]), args.Type(b.args["type"]), args.Page(0))
+func (client *Client) GetBook(arguments ...args.Argument) ([]BookData, error) {
+	req, err := makeReq([]string{"market", "type"}, arguments...)
+	if err != nil {
+		return nil, fmt.Errorf("Error in GetPaymentOrders: %s", err)
 	}
+	neededArguments := []args.Argument{args.Page(0), args.Limit(100)}
+	argsMap := req.GetArguments()
+	neededArguments = append(neededArguments, args.Market(argsMap["market"]))
+	neededArguments = append(neededArguments, args.Type(argsMap["type"]))
 
-	for bookPointer.pagination.Next != nil {
-		if err != nil {
-			return resp, fmt.Errorf("Error getting next page, %s", err)
-		} else {
-			resp = append(resp, bookPointer.Data...)
-		}
-		bookPointer, err = bookPointer.GetNext()
-		time.Sleep(3 * time.Second)
+	bList, err := client.GetBookPage(neededArguments...)
+	if err != nil {
+		return nil, fmt.Errorf("Error in GetPaymentOrders: %s", err)
 	}
-	resp = append(resp, bookPointer.Data...) // at the end of the loop, there is one left to add
-	return resp, nil
+	allb := make([]BookData, len(bList.Data))
+	copy(allb, bList.Data)
+	for bList, err = bList.GetNext(); err == nil; bList, err = bList.GetNext() {
+		allb = append(allb, bList.Data...)
+	}
+	return allb, nil
 }
 
-// GetTrades returns a pointer to a Trades struct with the data given
+// GetTradesPage returns a pointer to a Trades struct with the data given
 // by the api and an error message. It returns (nil, error) when an error
 // is raised and (*Trades, nil) when the operation is successful.
 // The data fields are market_taker, price, amount, tid, timestamp and market.
@@ -482,10 +476,10 @@ func (b *Book) GetAllBooks() ([]BookData, error) {
 // List of accepted Arguments:
 //   - required: Market
 //   - optional: Start, End, Page, Limit
-func (client *Client) GetTrades(args ...args.Argument) (*Trades, error) {
-	req, err := makeReq([]string{"market"}, args...)
+func (client *Client) GetTradesPage(arguments ...args.Argument) (*Trades, error) {
+	req, err := makeReq([]string{"market"}, arguments...)
 	if err != nil {
-		return nil, fmt.Errorf("Error in GetTrades: %s", err)
+		return nil, fmt.Errorf("Error in GetTradesPage: %s", err)
 	}
 	resp, err := client.getPublic("trades", req)
 	if err != nil {
@@ -505,131 +499,35 @@ func (client *Client) GetTrades(args ...args.Argument) (*Trades, error) {
 	return &trades, nil
 }
 
-// getArgsList returns the args list from a *Trades object that has been created. Only
-// used internally by this SDK
-func getArgsList(t *Trades, tipe string) ([]args.Argument, error) {
-	var newArgs []args.Argument = make([]args.Argument, len(t.args))
-	var i int = 0
-	for k, v := range t.args {
-		switch k {
-		case "start":
-			newArgs[i] = args.Start(v)
-		case "end":
-			newArgs[i] = args.End(v)
-		case "page":
-			page, err := strconv.Atoi(v)
-			if err == nil {
-				if tipe == "p" {
-					newArgs[i] = args.Page(int(page - 1))
-				} else if tipe == "n" {
-					newArgs[i] = args.Page(int(page + 1))
-				}
-			} else {
-				return nil, fmt.Errorf("Cannot convert page to int")
-			}
-		case "limit":
-			limit, err := strconv.Atoi(v)
-			if err == nil {
-				newArgs[i] = args.Limit(int(limit))
-			} else {
-				return nil, fmt.Errorf("Cannot convert limit to int")
-			}
-		case "market":
-			newArgs[i] = args.Market(v)
-		default:
-			return nil, fmt.Errorf("Unknown argument")
-		}
-		i++
-	}
-	return newArgs, nil
-}
-
-// executeTradeRandomArgs returns the object with the arguments provided by the object
-// Used internally by this SDK
-func executeTradeRandomArgs(newArgs []args.Argument, t *Trades) (*Trades, error) {
-	switch len(newArgs) {
-	case 1:
-		return t.client.GetTrades(newArgs[0])
-	case 2:
-		return t.client.GetTrades(newArgs[0], newArgs[1])
-	case 3:
-		return t.client.GetTrades(newArgs[0], newArgs[1], newArgs[2])
-	case 4:
-		return t.client.GetTrades(newArgs[0], newArgs[1], newArgs[2], newArgs[3])
-	case 5:
-		return t.client.GetTrades(newArgs[0], newArgs[1], newArgs[2], newArgs[3], newArgs[4])
-	default:
-		return nil, fmt.Errorf("Need one to five args")
-	}
-}
-
-// executePrevNext returns the previous or the next object page depending on the
-// string passed. Used internally by this SDK
-func executePrevNext(t *Trades, tipe string) (*Trades, error) {
-	var newArgs []args.Argument
-	var err error
-
-	if t.pagination.Previous != nil {
-		newArgs, err = getArgsList(t, tipe)
-		if err != nil {
-			return nil, fmt.Errorf("Cannot get args, because %s ", err)
-		} else {
-			//You have the optional args so far.
-			return executeTradeRandomArgs(newArgs, t)
-		}
-	}
-	return nil, fmt.Errorf("Cannot go to previous page, because it does not exist")
-}
-
-func createMapStringArgument(argus map[string]string) []args.Argument {
-	slice := make([]args.Argument, len(argus))
-	var i int = 0
-	for k, v := range argus {
-		switch k {
-		case "start":
-			slice[i] = args.Start(v)
-		case "end":
-			slice[i] = args.End(v)
-		case "limit":
-			value, err := strconv.Atoi(v)
-			if err == nil {
-				slice[i] = args.Limit(value)
-			}
-		case "page": //page is given
-			slice[i] = args.Page(0)
-		case "timeframe":
-			slice[i] = args.Timeframe(v)
-		}
-		i++
-	}
-	//check if "page" argument is not given
-	if _, ok := argus["page"]; !ok {
-		slice[len(slice)] = args.Page(0)
-	}
-	return slice
-}
-
 // Check if the error is nil when is used, because if it has an error, the response is wrong
-func (t *Trades) GetAllTrades() ([]TradeData, error) {
-	var resp []TradeData
-	var newArgs []args.Argument = createMapStringArgument(t.args) // set the page to zero value
-
-	tradesPointer, err := executeTradeRandomArgs(newArgs, t)
-	for tradesPointer.pagination.Next != nil {
-		if err != nil {
-			return resp, fmt.Errorf("%s", err)
-		} else {
-			resp = append(resp, tradesPointer.Data...)
-		}
-		tradesPointer, err = tradesPointer.GetNext()
+func (client *Client) GetTrades(arguments ...args.Argument) ([]TradeData, error) {
+	req, err := makeReq([]string{"market"}, arguments...)
+	if err != nil {
+		return nil, fmt.Errorf("Error in GetPaymentOrders: %s", err)
+	}
+	neededArguments := []args.Argument{args.Page(0), args.Limit(100)}
+	argsMap := req.GetArguments()
+	neededArguments = append(neededArguments, args.StartDate(argsMap["market"]))
+	if val, ok := argsMap["start"]; ok {
+		neededArguments = append(neededArguments, args.Start(val))
+	}
+	if val, ok := argsMap["end"]; ok {
+		neededArguments = append(neededArguments, args.End(val))
 	}
 
-	//append the last element left
-	resp = append(resp, tradesPointer.Data...)
-	return resp, nil
+	tPage, err := client.GetTradesPage(neededArguments...)
+	if err != nil {
+		return nil, fmt.Errorf("Error in GetPaymentOrders: %s", err)
+	}
+	allt := make([]TradeData, len(tPage.Data))
+	copy(allt, tPage.Data)
+	for tPage, err = tPage.GetNext(); err == nil; tPage, err = tPage.GetNext() {
+		allt = append(allt, tPage.Data...)
+	}
+	return allt, nil
 }
 
-// GetPrices return a pointer to a Prices struct with the data given by
+// GetPricesPage return a pointer to a Prices struct with the data given by
 // the api and an error message. It returns (nil,error) when an error
 // is raised and (*Prices, nil) when the operation is successful.
 // The data field is a map[string][]Field, where the Field structure contains all the
@@ -639,10 +537,10 @@ func (t *Trades) GetAllTrades() ([]TradeData, error) {
 // List of accepted Arguments:
 //   - required: Market, Timeframe
 //   - optional: Page, Limit
-func (client *Client) GetPrices(args ...args.Argument) (*Prices, error) {
-	req, err := makeReq([]string{"market", "timeframe"}, args...)
+func (client *Client) GetPricesPage(arguments ...args.Argument) (*Prices, error) {
+	req, err := makeReq([]string{"market", "timeframe"}, arguments...)
 	if err != nil {
-		return nil, fmt.Errorf("Error in GetPrices: %s", err)
+		return nil, fmt.Errorf("Error in GetPricesPage: %s", err)
 	}
 	resp, err := client.getPublic("prices", req)
 	if err != nil {
@@ -662,28 +560,32 @@ func (client *Client) GetPrices(args ...args.Argument) (*Prices, error) {
 	return &prices, nil
 }
 
-func (p *Prices) GetAllPrices() ([]DataPrices, error) {
-	var resp []DataPrices = make([]DataPrices, 0)
-	var pricesPointer *Prices
-	var err error
-	if _, ok := p.args["limit"]; ok {
-		value, err2 := strconv.Atoi(p.args["limit"])
-		if err2 == nil {
-			pricesPointer, err = p.client.GetPrices(args.Market(p.args["market"]), args.Type(p.args["type"]), args.Page(0), args.Limit(value))
-		}
-	} else {
-		pricesPointer, err = p.client.GetPrices(args.Market(p.args["market"]), args.Type(p.args["type"]), args.Page(0))
+func (client *Client) GetPrices(arguments ...args.Argument) (*DataPrices, error) {
+	req, err := makeReq([]string{"market", "timeframe"}, arguments...)
+	if err != nil {
+		return nil, fmt.Errorf("Error in GetPrices: %s", err)
 	}
+	neededArguments := []args.Argument{args.Page(0), args.Limit(100)}
+	argsMap := req.GetArguments()
+	neededArguments = append(neededArguments, args.StartDate(argsMap["market"]))
+	neededArguments = append(neededArguments, args.StartDate(argsMap["timeframe"]))
 
-	for pricesPointer.pagination.Next != nil {
-		if err != nil {
-			return resp, fmt.Errorf("Error getting next page, %s", err)
-		} else {
-			resp = append(resp, pricesPointer.Data)
-		}
-		pricesPointer, err = pricesPointer.GetNext()
-		time.Sleep(3 * time.Second)
+	tPage, err := client.GetPricesPage(neededArguments...)
+	if err != nil {
+		return nil, fmt.Errorf("Error in GetPrices: %s", err)
 	}
-	resp = append(resp, pricesPointer.Data) // at the end of the loop, there is one left to add
-	return resp, nil
+	allAsks := make([]Candle, len(tPage.Data.Ask))
+	allBids := make([]Candle, len(tPage.Data.Bid))
+	copy(allAsks, tPage.Data.Ask)
+	copy(allBids, tPage.Data.Bid)
+
+	for tPage, err = tPage.GetNext(); err == nil; tPage, err = tPage.GetNext() {
+		allAsks = append(allAsks, tPage.Data.Ask...)
+		allBids = append(allBids, tPage.Data.Bid...)
+	}
+	prices := DataPrices{
+		Ask:allAsks,
+		Bid:allBids,
+	}
+	return &prices, nil
 }

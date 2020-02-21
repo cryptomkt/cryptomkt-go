@@ -130,7 +130,7 @@ func (o *OrderList) GetNext() (*OrderList, error) {
 // List of accepted Arguments:
 //   - required: Market
 //   - optional: none
-func (client *Client) GetExecutedOrders(arguments... args.Argument) (*[]Order, error) {
+func (client *Client) GetExecutedOrders(arguments... args.Argument) ([]Order, error) {
 	req, err := makeReq([]string{"market"}, arguments...)
 	if err != nil {
 		return nil, fmt.Errorf("Error in GetAllExecutedOrders: %s", err)
@@ -147,7 +147,7 @@ func (client *Client) GetExecutedOrders(arguments... args.Argument) (*[]Order, e
 	return getAllOrders(oList), nil
 }
 
-func (client *Client) GetActiveOrders(arguments... args.Argument) (*[]Order, error) {
+func (client *Client) GetActiveOrders(arguments... args.Argument) ([]Order, error) {
 	req, err := makeReq([]string{"market"}, arguments...)
 	if err != nil {
 		return nil, fmt.Errorf("Error in GetAllActiveOrders: %s", err)
@@ -164,14 +164,14 @@ func (client *Client) GetActiveOrders(arguments... args.Argument) (*[]Order, err
 	return getAllOrders(oList), nil
 }
 
-func getAllOrders(oList *OrderList) (*[]Order) {
+func getAllOrders(oList *OrderList) ([]Order) {
 	allo := make([]Order, len(oList.Data))
 	copy(allo, oList.Data)
 	for oList, err := oList.GetNext(); err == nil; oList, err = oList.GetNext() {
 		oList.setClientInOrders()
 		allo = append(allo, oList.Data...)
 	}
-	return &allo
+	return allo
 }
 
 func (oList *OrderList) setClientInOrders() {
