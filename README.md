@@ -97,7 +97,7 @@ previousPage2, err := previousPage.GetPrevious()
 
 ```
 
-Also you can close and refresh orders directly from their objects
+Also you can close and refresh and close orders directly from their objects
 
 ```golang
 import (
@@ -110,15 +110,13 @@ var apiSecret string = "YourApiSecretKey"
 
 client := conn.NewClient(apiKey,apiSecret)
 
-response, err := client.OrderStatus(args.Id("M103966"))
+order, err := client.OrderStatus(args.Id("M103966"))
 
-nextPage, err := reponse.GetNext()
-previousPage, err := response.GetPrevious()
+// to update the order
+order.Refresh()
 
-// You can call these methods from its response if the page exists
-nextPage2, err := nextPage.GetNext()
-previousPage2, err := previousPage.GetPrevious()
-
+// and to close it
+order.Close()
 ```
 
 To protect from attacks, Cryptomarket only accepts a maximum amount of message per minute. If you go over this number, your ip is blocked so you can't keep making request using neither the sdk nor the api. In order to keep your ip usable, big requests (those ending in AllPages) will make one request to the server evey 2 seconds. So, the bigger the request, the slower. Here is an example
