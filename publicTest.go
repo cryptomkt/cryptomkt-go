@@ -9,7 +9,7 @@ import (
 	"github.com/cryptomkt/cryptomkt-go/conn"
 )
 
-var argus [8]args.Argument = [8]args.Argument{args.Market("ETHCLP"), args.Type("buy"), args.Type("sell"), args.Page(0), args.Limit(50), args.Start("03/03/2017"), args.End("03/03/2018"), args.Timeframe("60")}
+var argus [8]args.Argument = [8]args.Argument{args.Market("ETHCLP"), args.Type("buy"), args.Type("sell"), args.Page(0), args.Limit(50), args.Start("2017-03-03"), args.End("2018-03-03"), args.Timeframe("60")}
 
 var client *conn.Client = conn.NewClient("YourApiKey", "YourSecretKey")
 
@@ -124,14 +124,14 @@ func testPrices(times int) error {
 }
 
 func main() {
-	fmt.Println("Testing trades . . .")
+	/*fmt.Println("Testing trades . . .")
 	err := testTrades(500)
 	if err != nil {
 		fmt.Println(err)
 	} else {
 		fmt.Println("Trades test successfull")
 	}
-	/*fmt.Println("Testing prices . . .")
+	fmt.Println("Testing prices . . .")
 	err = testPrices(500)
 	if err != nil {
 		fmt.Println(err)
