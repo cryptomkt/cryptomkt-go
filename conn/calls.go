@@ -486,7 +486,7 @@ func (client *Client) GetTradesAllPages(arguments ...args.Argument) ([]TradeData
 	}
 	neededArguments := []args.Argument{args.Page(0), args.Limit(100)}
 	argsMap := req.GetArguments()
-	neededArguments = append(neededArguments, args.StartDate(argsMap["market"]))
+	neededArguments = append(neededArguments, args.Market(argsMap["market"]))
 	if val, ok := argsMap["start"]; ok {
 		neededArguments = append(neededArguments, args.Start(val))
 	}
