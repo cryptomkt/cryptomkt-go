@@ -2,7 +2,6 @@ package conn
 
 import (
 	"fmt"
-
 	"github.com/cryptomkt/cryptomkt-go/args"
 )
 
@@ -71,4 +70,34 @@ func (po *PaymentOrderList) GetNext() (*PaymentOrderList, error) {
 		args.EndDate(po.endDate),
 		args.Page(int(po.pagination.Next.(float64))),
 		args.Limit(po.pagination.Limit))
+}
+
+// GetAllPaymentOrders get all the payment orders between the two given dates.
+// Returns an array of PaymentOrder
+//
+// List of accepted Arguments:
+//   - required: StartDate, EndDate
+//   - optional: none
+func (client *Client) GetAllPaymentOrders(arguments... args.Argument) (*[]PaymentOrder, error) {
+	req, err := makeReq([]string{"start_date", "end_date"}, arguments...)
+	if err != nil {
+		return nil, fmt.Errorf("Error in GetAllPaymentOrders: %s", err)
+	}
+	neededArguments := []args.Argument{args.Page(0), args.Limit(100)}
+	argsMap := req.GetArguments()
+	val := argsMap["start_date"]
+	neededArguments = append(neededArguments, args.StartDate(val))
+	val = argsMap["end_date"]
+	neededArguments = append(neededArguments, args.EndDate(val))
+	
+	poList, err := client.PaymentOrders(neededArguments...)
+	if err != nil {
+		return nil, fmt.Errorf("Error in GetAllPaymentOrders: %s", err)
+	}
+	allpo := make([]PaymentOrder, len(poList.Data))
+	copy(allpo, poList.Data)
+	for poList, err = poList.GetNext(); err == nil; poList, err = poList.GetNext() {
+		allpo = append(allpo, poList.Data...)
+	}
+	return &allpo, nil
 }

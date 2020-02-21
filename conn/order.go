@@ -77,3 +77,55 @@ func (o *OrderList) GetNext() (*OrderList, error) {
 		args.Page(int(o.pagination.Next.(float64))),
 		args.Limit(o.pagination.Limit))
 }
+
+// GetAllPaymentOrders get all the payment orders between the two given dates.
+// Returns an array of PaymentOrder
+//
+// List of accepted Arguments:
+//   - required: Market
+//   - optional: none
+func (client *Client) GetAllExecutedOrders(arguments... args.Argument) (*[]Order, error) {
+	req, err := makeReq([]string{"market"}, arguments...)
+	if err != nil {
+		return nil, fmt.Errorf("Error in GetAllExecutedOrders: %s", err)
+	}
+	neededArguments := []args.Argument{args.Page(0), args.Limit(100)}
+	argsMap := req.GetArguments()
+	val := argsMap["market"]
+	neededArguments = append(neededArguments, args.Market(val))
+
+	
+	oList, err := client.GetExecutedOrders(neededArguments...)
+	if err != nil {
+		return nil, fmt.Errorf("Error in GetAllExecutedOrders: %s", err)
+	}
+	allo := make([]Order, len(oList.Data))
+	copy(allo, oList.Data)
+	for oList, err = oList.GetNext(); err == nil; oList, err = oList.GetNext() {
+		allo = append(allo, oList.Data...)
+	}
+	return &allo, nil
+}
+
+func (client *Client) GetAllActiveOrders(arguments... args.Argument) (*[]Order, error) {
+	req, err := makeReq([]string{"market"}, arguments...)
+	if err != nil {
+		return nil, fmt.Errorf("Error in GetAllActiveOrders: %s", err)
+	}
+	neededArguments := []args.Argument{args.Page(0), args.Limit(100)}
+	argsMap := req.GetArguments()
+	val := argsMap["market"]
+	neededArguments = append(neededArguments, args.Market(val))
+
+	
+	oList, err := client.GetActiveOrders(neededArguments...)
+	if err != nil {
+		return nil, fmt.Errorf("Error in GetAllActiveOrders: %s", err)
+	}
+	allo := make([]Order, len(oList.Data))
+	copy(allo, oList.Data)
+	for oList, err = oList.GetNext(); err == nil; oList, err = oList.GetNext() {
+		allo = append(allo, oList.Data...)
+	}
+	return &allo, nil
+}
