@@ -58,7 +58,7 @@ func (po *PaymentOrderList) GetPrevious() (*PaymentOrderList, error) {
 	return po.client.PaymentOrders(
 		args.StartDate(po.startDate),
 		args.EndDate(po.endDate),
-		args.Page(po.pagination.Previous.(int)),
+		args.Page(int(po.pagination.Previous.(float64))),
 		args.Limit(po.pagination.Limit))
 }
 
@@ -69,6 +69,6 @@ func (po *PaymentOrderList) GetNext() (*PaymentOrderList, error) {
 	return po.client.PaymentOrders(
 		args.StartDate(po.startDate),
 		args.EndDate(po.endDate),
-		args.Page(po.pagination.Next.(int)),
+		args.Page(int(po.pagination.Next.(float64))),
 		args.Limit(po.pagination.Limit))
 }

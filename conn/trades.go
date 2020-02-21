@@ -37,7 +37,7 @@ func (t *Trades) GetPrevious() (*Trades, error) {
 	var newArgs []args.Argument = make([]args.Argument, 0, 5)
 	// there is always a market and a pagination
 	newArgs = append(newArgs, args.Market(t.args["market"]))
-	newArgs = append(newArgs, args.Page(t.pagination.Previous.(int)))
+	newArgs = append(newArgs, args.Page(int(t.pagination.Previous.(float64))))
 	newArgs = append(newArgs, args.Limit(t.pagination.Limit))
 	if v, ok := t.args["start"]; ok {
 		newArgs = append(newArgs, args.Start(v))
@@ -57,7 +57,7 @@ func (t *Trades) GetNext() (*Trades, error) {
 	var newArgs []args.Argument = make([]args.Argument, 0, 5)
 	// there is always a market and a pagination
 	newArgs = append(newArgs, args.Market(t.args["market"]))
-	newArgs = append(newArgs, args.Page(t.pagination.Next.(int)))
+	newArgs = append(newArgs, args.Page(int(t.pagination.Next.(float64))))
 	newArgs = append(newArgs, args.Limit(t.pagination.Limit))
 	if v, ok := t.args["start"]; ok {
 		newArgs = append(newArgs, args.Start(v))

@@ -44,7 +44,7 @@ func (p *Prices) GetPrevious() (*Prices, error) {
 	return p.client.GetPrices(
 		args.Market(p.args["market"]),
 		args.Type(p.args["timeframe"]),
-		args.Page(p.pagination.Previous.(int)),
+		args.Page(int(p.pagination.Previous.(float64))),
 		args.Limit(p.pagination.Limit))
 }
 
@@ -57,7 +57,7 @@ func (p *Prices) GetNext() (*Prices, error) {
 	return p.client.GetPrices(
 		args.Market(p.args["market"]),
 		args.Type(p.args["timeframe"]),
-		args.Page(p.pagination.Next.(int)),
+		args.Page(int(p.pagination.Next.(float64))),
 		args.Limit(p.pagination.Limit))
 }
 

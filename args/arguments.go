@@ -145,10 +145,10 @@ func Limit(val int) Argument {
 
 // Start is an argument of a request.
 //
-// Date format: dd/mm/yyyy.
+// Date format: yyyy-mm-dd.
 func Start(val string) Argument {
 	return func(request *requests.Request) error {
-		err := assertDateFormatV1(val, "Start")
+		err := assertDateFormatV2(val, "Start")
 		if err != nil {
 			return err
 		}
@@ -159,10 +159,10 @@ func Start(val string) Argument {
 
 // End is an argument of a request.
 //
-// Date format: dd/mm/yyyy.
+// Date format: yyyy-mm-dd.
 func End(val string) Argument {
 	return func(request *requests.Request) error {
-		err := assertDateFormatV1(val, "End")
+		err := assertDateFormatV2(val, "End")
 		if err != nil {
 			return err
 		}

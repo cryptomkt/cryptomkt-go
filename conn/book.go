@@ -34,7 +34,7 @@ func (b *Book) GetPrevious() (*Book, error) {
 	return b.client.GetBook(
 		args.Market(b.args["market"]),
 		args.Type(b.args["type"]),
-		args.Page(b.pagination.Previous.(int)),
+		args.Page(int(b.pagination.Previous.(float64))),
 		args.Limit(b.pagination.Limit))
 }
 
@@ -47,7 +47,7 @@ func (b *Book) GetNext() (*Book, error) {
 	return b.client.GetBook(
 		args.Market(b.args["market"]),
 		args.Type(b.args["type"]),
-		args.Page(b.pagination.Next.(int)),
+		args.Page(int(b.pagination.Next.(float64))),
 		args.Limit(b.pagination.Limit))
 }
 

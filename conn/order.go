@@ -51,12 +51,12 @@ func (o *OrderList) GetPrevious() (*OrderList, error) {
 	if o.caller == "active_orders" {
 		return o.client.GetActiveOrders(
 			args.Market(o.market),
-			args.Page(o.pagination.Previous.(int)),
+			args.Page(int(o.pagination.Previous.(float64))),
 			args.Limit(o.pagination.Limit))
 	}
 	return o.client.GetExecutedOrders(
 		args.Market(o.market),
-		args.Page(o.pagination.Previous.(int)),
+		args.Page(int(o.pagination.Previous.(float64))),
 		args.Limit(o.pagination.Limit))
 }
 
@@ -69,11 +69,11 @@ func (o *OrderList) GetNext() (*OrderList, error) {
 	if o.caller == "active_orders" {
 		return o.client.GetActiveOrders(
 			args.Market(o.market),
-			args.Page(o.pagination.Next.(int)),
+			args.Page(int(o.pagination.Next.(float64))),
 			args.Limit(o.pagination.Limit))
 	}
 	return o.client.GetExecutedOrders(
 		args.Market(o.market),
-		args.Page(o.pagination.Next.(int)),
+		args.Page(int(o.pagination.Next.(float64))),
 		args.Limit(o.pagination.Limit))
 }
