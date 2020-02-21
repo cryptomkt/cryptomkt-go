@@ -554,6 +554,7 @@ func (client *Client) GetTrades(args ...args.Argument) (*Trades, error) {
 			resp.Data = response.Data
 			return &resp, nil
 		} else {
+			fmt.Println(response.Status)
 			return nil, fmt.Errorf("Response from server failed")
 		}
 	}

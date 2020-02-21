@@ -51,11 +51,10 @@ func TestTicker(t *testing.T) {
 	}
 }
 
-func BenchmarkBook(b *testing.B) {
+/*func TestBook(t *testing.T) {
 	rand.Seed(time.Now().UnixNano())
-	b.ResetTimer()
 	var optional [2]args.Argument = [2]args.Argument{argus[3], argus[4]}
-	for i := 0; i < b.N; i++ { //here you can change the number of repetitions
+	for i := 0; i < 100; i++ { //here you can change the number of repetitions
 		var numArgs int = rand.Intn(3)
 		switch numArgs {
 		case 0:
@@ -134,7 +133,7 @@ func TestPrices(t *testing.T) {
 		time.Sleep(3 * time.Second)
 	}
 
-}
+}*/
 
 func TestPrevious(t *testing.T) {
 	book, err := client.GetBook(args.Market("ETHCLP"), args.Type("buy"), args.Page(1))
