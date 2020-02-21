@@ -9,7 +9,7 @@ To install the sdk, run the `go get` command
 
 ## Documentation
 
-For further information about the sdk see the [godoc documentation](link to godoc once the repo is available) of the module.
+For further information about the sdk see the godoc
 
 The base api for this sdk can be foun in [here](https://developers.cryptomkt.com/)
 
@@ -57,11 +57,7 @@ if err != nil {
 ## Calls to the API
 
 Calls have multiple return formats.
-All calls return at least one informative error value as an unmeeted argument, an invalid apiKey or a "not_enough_balance" as a replay from the server if you try to buy more than your money can take.
-Some calls (for example, the public endpoints) return pointers to structs (or slice of structs).
-And lastly we have some calls that return the same information as before, buy instead of using structs, they use map\[string\]string (or slices of maps) to store all values.
-
-For example, there are two calls that can give you the account information:
+All calls return at least one informative error if something goes wrong, as an unmeeted argument, an invalid apiKey or a "not_enough_balance" as a replay from the server if you try to buy more than your money can take.
 
 ```golang
 import (
@@ -75,23 +71,14 @@ account, err := client.GetAccount()
 if err != nil {
     fmt.Errorf("Error getting the account: %s", err)
 }
-
-//accountAsMap is the same information of account, but stored in a map[string]string
-accountAsMap, err := client.GetAccountAsMap()
-if err != nil {
-    fmt.Errorf("Error getting the account: %s", err)
-}
 ```
 
-The calls that returns maps end with 'AsMap' or 'AsMapList' in contrast with the ones that return structs, that have the same name, but without the suffix.
-
-The advantage of the map format is its simplicity and ease of use, while using structs gives aditional functionality over the recieved data. For example, if we want to go over a long range of trade data of a market, we can call `client.GetTrades` to get a list of `Trades`, this list can be one page of many, so once we read the data on the page, to get the rest of the pages, we can call over and over `GetNext()` over the struct, until an `Next page does not exist` error is raised. Replace `GetObject` with the appropriate method. The structs that support this functionality so far are Trades, Book and Prices. Here is in code:
+If we want to go over a long range of trade data of a market, we can call `client.GetTrades` to get a list of `Trades`, this list can be one page of many, so once we read the data on the page, to get the rest of the pages, we can call over and over `GetNext()` over the struct, until an `Next page does not exist` error is raised. Replace `GetObject` with the appropriate method. The structs that support this functionality so far are Trades, Book and Prices, Orders and Payments. Here is in code:
 
 ```golang
 import (
     "github.com/cryptomkt/cryptomkt-go/conn"
     "github.com/cryptomkt/cryptomkt-go/args"
-    "github.com/cryptomkt/cryptomkt-go/requests"
 )
 
 var apiKey string = "YourApiKey"
@@ -99,19 +86,42 @@ var apiSecret string = "YourApiSecretKey"
 
 client := conn.NewClient(apiKey,apiSecret)
 
-response, err1 := client.GetObject(args.Argument1(value1), args.Argument2(value2), ...)
+response, err := client.GetObject(args.Argument1(value1), args.Argument2(value2), ...)
 
-nextPage, err2 := reponse.GetNext()
-previousPage, err3 := response.GetPrevious()
+nextPage, err := reponse.GetNext()
+previousPage, err := response.GetPrevious()
 
 // You can call these methods from its response if the page exists
-nextPage2, err4 := nextPage.GetNext()
-previousPage2, err4 := previousPage.GetPrevious()
+nextPage2, err := nextPage.GetNext()
+previousPage2, err := previousPage.GetPrevious()
 
 ```
 
-/* por implementar (big requests)*/
-To protect from attacks, Cryptomarket only accepts a maximum amount of message per minute. If you go over this number, your ip is blocked so you can't keep making request using neither the sdk nor the api. In order to keep your ip usable, big requests, as getting all trades from 2019 will make one request to the server evey 3 seconds. So, the bigger the request, the slower.
+Also you can close and refresh orders directly from their objects
+
+```golang
+import (
+    "github.com/cryptomkt/cryptomkt-go/conn"
+    "github.com/cryptomkt/cryptomkt-go/args"
+)
+
+var apiKey string = "YourApiKey"
+var apiSecret string = "YourApiSecretKey"
+
+client := conn.NewClient(apiKey,apiSecret)
+
+response, err := client.OrderStatus(args.Id("M103966"))
+
+nextPage, err := reponse.GetNext()
+previousPage, err := response.GetPrevious()
+
+// You can call these methods from its response if the page exists
+nextPage2, err := nextPage.GetNext()
+previousPage2, err := previousPage.GetPrevious()
+
+```
+
+To protect from attacks, Cryptomarket only accepts a maximum amount of message per minute. If you go over this number, your ip is blocked so you can't keep making request using neither the sdk nor the api. In order to keep your ip usable, big requests (those ending in AllPages) will make one request to the server evey 2 seconds. So, the bigger the request, the slower. Here is an example
 
 ```golang
 import (
@@ -120,8 +130,8 @@ import (
 )
 client := conn.NewClient(apiKey, apiSecret)
 
-//account is a pointer to a struct that matches the account information
-trades, err := client.GetAllTrades(
+// the bigger the slower, if you just want one or two pages, use the usual call insted
+trades, err := client.GetTradesAllPages(
     args.Market("ETHARS"),
     args.Start("2019-05-10"),
     args.End("2019-12-10"),
@@ -134,7 +144,6 @@ if err != nil {
 
 ## API Calls Examples
 
-Here we include some API calls examples
 
 ### Public endpoints
 
@@ -205,7 +214,6 @@ client := conn.NewClient(apiKey,apiSecret)
 
 // Here you call with the requiered (Market and Type) arguments. See the godoc for more info 
 book,err := client.GetBook(args.Market("ETHCLP"), args.Type("buy"))
-
 if err != nil{
     fmt.Errorf("Error getting orders book, %s", err)
 }else{
@@ -230,7 +238,6 @@ client := conn.NewClient(apiKey,apiSecret)
 // Here you call trades from bitcoin argentinean pesos market. 
 // You can see the optional arguments in the godoc
 trades,err:= client.GetTrades(args.Market("BTCARS"))
-
 if err != nil {
      fmt.Errorf("Error getting trades, %s", err)
 }
@@ -252,7 +259,6 @@ client := conn.NewClient(apiKey,apiSecret)
 // a timeframe of 60 minutes. You can see which timeframe values are
 // available in the godoc.
 prices,err := client.GetPrices(args.Market("ETHCLP"),args.TimeFrame("60"))
-
 if err != nil{
     fmt.Errorf("Error getting prices, %s", err)
 }else{
@@ -276,12 +282,6 @@ account, err := client.Account()
 if err != nil {
     fmt.Errorf("Error getting account: %s", err)
 }
-
-//sameAccount is the same information of account, but stored in a map[string]string
-sameAccount, err := client.GetAccountAsMap()
-if err != nil {
-    fmt.Errorf("Error getting the account: %s", err)
-}
 ```
 
 
@@ -298,8 +298,7 @@ order, err := client.CreateOrder(
     args.Amount(0.3),
     args.Market("ETHCLP"),
     args.Price(1000),
-    args.Type("buy"),
-)
+    args.Type("buy"))
 if err != nil {
     fmt.Errorf("Error making an order: %s", err)
 }
@@ -313,10 +312,9 @@ import (
 )
 client := conn.NewClient(apiKey, apiSecret)
 
-// See the optional args here https://developers.cryptomkt.com/es/?python#ordenes-de-mercado
+// See the optional args here https://developers.cryptomkt.com/es/#ordenes-de-mercado
 // or in the documentation
 orders,err := client.GetActiveOrders(args.Market("BTCARS")) 
-
 if err != nil{
     fmt.Errorf("Error getting active orders, %s", err)
 }
@@ -331,10 +329,9 @@ import (
 )
 client := conn.NewClient(apiKey, apiSecret)
 
-// See the optional args here https://developers.cryptomkt.com/es/?python#ordenes-de-mercado
+// See the optional args here https://developers.cryptomkt.com/es/#ordenes-de-mercado
 // or in the documentation
 orders,err := client.GetExecutedOrders(args.Market("BTCARS")) 
-
 if err != nil{
     fmt.Errorf("Error getting executed orders, %s", err)
 }
@@ -348,10 +345,9 @@ import (
 )
 client := conn.NewClient(apiKey, apiSecret)
 
-// See the optional args here https://developers.cryptomkt.com/es/?python#ordenes-de-mercado
+// See the optional args here https://developers.cryptomkt.com/es/#ordenes-de-mercado
 // or in the documentation
 orders,err := client.GetOrderStatus(args.Id("YourId")) 
-
 if err != nil{
     fmt.Errorf("Error getting order status, %s", err)
 }

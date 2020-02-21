@@ -41,7 +41,6 @@ func TestTrades(t *testing.T) {
 		}
 		time.Sleep(3 * time.Second)
 	}
-
 }
 
 func TestTradesGetPrevious(t *testing.T) {
