@@ -1,24 +1,36 @@
 package conn
 
-type PaginationO struct {
-	PreviousHolder interface{} `json:"previous"`
-	NextHolder     interface{} `json:"next"`
-	Previous       int
-	Next           int
-	Limit          int
-	Page           int
+import (
+	"fmt"
+	"github.com/cryptomkt/cryptomkt-go/args"
+)
+
+type OrderListResp struct {
+	Status     string
+	Message    string
+	Pagination Pagination
+	Warnings   string
+	Data       []Order
+}
+
+type OrderResponse struct {
+	Status  string
+	Message string
+	Data    Order
 }
 
 type OrderList struct {
-	apiClient  *Client
+	client     *Client
+	caller     string
+	market     string
 	Status     string
-	Pagination PaginationO
+	pagination Pagination
 	Warnings   string
 	Data       []Order
 }
 
 type Order struct {
-	apiClient         *Client
+	client            *Client
 	Id                string
 	Status            string
 	Type              string
@@ -30,4 +42,38 @@ type Order struct {
 	CreatedAt         string `json:"created_at"`
 	UpdatedAt         string `json:"updated_at"`
 	ExecutedAt        string `json:"executed_at"`
+}
+
+func (o *OrderList) GetPrevious() (*OrderList, error) {
+	if o.pagination.Next == nil {
+		return nil, fmt.Errorf("Previous page does not exist")
+	}
+	if o.caller == "active_orders" {
+		return o.client.GetActiveOrders(
+			args.Market(o.market),
+			args.Page(int(o.pagination.Previous.(float64))),
+			args.Limit(o.pagination.Limit))
+	}
+	return o.client.GetExecutedOrders(
+		args.Market(o.market),
+		args.Page(int(o.pagination.Previous.(float64))),
+		args.Limit(o.pagination.Limit))
+}
+
+// GetNext lets you go to the next page if it exists, returns (*Prices, nil) if
+// it is successfull and (nil, error) otherwise
+func (o *OrderList) GetNext() (*OrderList, error) {
+	if o.pagination.Next == nil {
+		return nil, fmt.Errorf("Next page does not exist")
+	}
+	if o.caller == "active_orders" {
+		return o.client.GetActiveOrders(
+			args.Market(o.market),
+			args.Page(int(o.pagination.Next.(float64))),
+			args.Limit(o.pagination.Limit))
+	}
+	return o.client.GetExecutedOrders(
+		args.Market(o.market),
+		args.Page(int(o.pagination.Next.(float64))),
+		args.Limit(o.pagination.Limit))
 }

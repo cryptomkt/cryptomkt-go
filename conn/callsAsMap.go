@@ -37,7 +37,7 @@ func (client *Client) GetActiveOrdersAsMapList(args ...args.Argument) ([]map[str
 		return nil, err
 	}
 	mapList := make([]map[string]string, 0)
-	for _, order := range *activeOrders {
+	for _, order := range activeOrders.Data {
 		mapList = append(mapList, OrderToMap(order))
 	}
 	return mapList, nil
@@ -56,7 +56,7 @@ func (client *Client) GetExecutedOrdersAsMapList(args ...args.Argument) ([]map[s
 		return nil, err
 	}
 	mapList := make([]map[string]string, 0)
-	for _, order := range *activeOrders {
+	for _, order := range activeOrders.Data {
 		mapList = append(mapList, OrderToMap(order))
 	}
 	return mapList, nil
@@ -152,12 +152,12 @@ func (client *Client) CreateWalletAsMap(args ...args.Argument) (map[string]strin
 	return PaymentOrderToMap(*payment), nil
 }
 
-// PaymentOrdersAsMapList returns all the generated payment orders.
+// PaymentOrdersAsMapList returns all the requested payment orders.
 // Returns the data in a slice of maps: []map[string]string.
 //
 // List of accepted Arguments:
 //   - required: StartDate, EndDate
-//   - optional: Page, Limit
+//   - optional: none
 // https://developers.cryptomkt.com/es/#listado-de-ordenes-de-pago
 func (client *Client) PaymentOrdersAsMapList(args ...args.Argument) ([]map[string]string, error) {
 	paymentList, err := client.PaymentOrders(args...)
@@ -165,7 +165,7 @@ func (client *Client) PaymentOrdersAsMapList(args ...args.Argument) ([]map[strin
 		return nil, err
 	}
 	mapList := make([]map[string]string, 0)
-	for _, payment := range *paymentList {
+	for _, payment := range paymentList.Data {
 		mapList = append(mapList, PaymentOrderToMap(payment))
 	}
 	return mapList, nil
