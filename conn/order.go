@@ -94,17 +94,11 @@ func (client *Client) GetAllExecutedOrders(arguments... args.Argument) (*[]Order
 	val := argsMap["market"]
 	neededArguments = append(neededArguments, args.Market(val))
 
-	
 	oList, err := client.GetExecutedOrders(neededArguments...)
 	if err != nil {
 		return nil, fmt.Errorf("Error in GetAllExecutedOrders: %s", err)
 	}
-	allo := make([]Order, len(oList.Data))
-	copy(allo, oList.Data)
-	for oList, err = oList.GetNext(); err == nil; oList, err = oList.GetNext() {
-		allo = append(allo, oList.Data...)
-	}
-	return &allo, nil
+	return getAllOrders(oList), nil
 }
 
 func (client *Client) GetAllActiveOrders(arguments... args.Argument) (*[]Order, error) {
@@ -117,15 +111,18 @@ func (client *Client) GetAllActiveOrders(arguments... args.Argument) (*[]Order, 
 	val := argsMap["market"]
 	neededArguments = append(neededArguments, args.Market(val))
 
-	
 	oList, err := client.GetActiveOrders(neededArguments...)
 	if err != nil {
 		return nil, fmt.Errorf("Error in GetAllActiveOrders: %s", err)
 	}
+	return getAllOrders(oList), nil
+}
+
+func getAllOrders(oList *OrderList) (*[]Order) {
 	allo := make([]Order, len(oList.Data))
 	copy(allo, oList.Data)
-	for oList, err = oList.GetNext(); err == nil; oList, err = oList.GetNext() {
+	for oList, err := oList.GetNext(); err == nil; oList, err = oList.GetNext() {
 		allo = append(allo, oList.Data...)
 	}
-	return &allo, nil
+	return &allo
 }
