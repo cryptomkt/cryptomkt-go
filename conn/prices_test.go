@@ -65,3 +65,42 @@ func TestNext(t *testing.T) {
 		t.Errorf("Error in next prices: %s", err)
 	}
 }
+
+
+func TestGetAllPrices(t *testing.T) {
+	client := NewClient("NoKey", "NoSecret")
+	rand.Seed(time.Now().UnixNano())
+	var optional [2]args.Argument = [2]args.Argument{argus[3], argus[4]}
+	for i := 0; i < 100; i++ {
+		var numArgs int = rand.Intn(3)
+		switch numArgs {
+		case 0:
+			if price, err := client.GetPrices(args.Market("ETHCLP"), args.Timeframe("10080")); err != nil {
+				t.Errorf("Prices with zero optional args failed, %s", err)
+				_, err2 := price.GetAllPrices()
+				if err2 != nil {
+					t.Errorf("Error getting all prices with zero optional args, %s", err)
+				}
+
+			}
+		case 1:
+			var randomIndex int = rand.Intn(2)
+			if price, err := client.GetPrices(args.Market("ETHCLP"), args.Timeframe("10080"), optional[randomIndex]); err != nil {
+				t.Errorf("Prices with one optional argument failed, %s", err)
+				_, err2 := price.GetAllPrices()
+				if err2 != nil {
+					t.Errorf("Error getting all prices with one optional args, %s", err)
+				}
+			}
+		case 2:
+			if price, err := client.GetPrices(args.Market("ETHCLP"), args.Timeframe("10080"), optional[0], optional[1]); err != nil {
+				t.Errorf("Prices with 2 optional args failed, %s", err)
+				_, err2 := price.GetAllPrices()
+				if err2 != nil {
+					t.Errorf("Error getting all prices with two optional args, %s", err)
+				}
+			}
+		}
+		time.Sleep(3 * time.Second)
+	}
+}

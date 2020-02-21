@@ -36,7 +36,6 @@ func newDebugClient(filePath string) (*Client, error) {
 func find(slice []int, value int) bool {
 	for i := 0; i < len(slice); i++ {
 		if value == slice[i] {
-			time.Sleep(time.Second)
 			return true
 		}
 	}
