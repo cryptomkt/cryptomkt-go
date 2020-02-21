@@ -74,7 +74,7 @@ func (client *Client) GetTransactions(args ...args.Argument) (*[]Transaction, er
 //   - required: Market
 //   - optional: Page, Limit
 // https://developers.cryptomkt.com/es/#ordenes-activas
-func (client *Client) GetActiveOrders(args ...args.Argument) (*OrderList, error) {
+func (client *Client) GetActiveOrdersPage(args ...args.Argument) (*OrderList, error) {
 	req, err := makeReq([]string{"market"}, args...)
 	if err != nil {
 		return nil, fmt.Errorf("Error in GetActiveOrders: %s", err)
@@ -104,7 +104,7 @@ func (client *Client) GetActiveOrders(args ...args.Argument) (*OrderList, error)
 //   - required: Market
 //   - optional: Page, Limit
 // https://developers.cryptomkt.com/es/#ordenes-ejecutadas
-func (client *Client) GetExecutedOrders(args ...args.Argument) (*OrderList, error) {
+func (client *Client) GetExecutedOrdersPage(args ...args.Argument) (*OrderList, error) {
 	req, err := makeReq([]string{"market"}, args...)
 	if err != nil {
 		return nil, fmt.Errorf("Error in GetExecutedOrders: %s", err)

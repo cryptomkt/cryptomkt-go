@@ -37,7 +37,7 @@ func (client *Client) GetActiveOrdersAsMapList(args ...args.Argument) ([]map[str
 		return nil, err
 	}
 	mapList := make([]map[string]string, 0)
-	for _, order := range activeOrders.Data {
+	for _, order := range *activeOrders {
 		mapList = append(mapList, OrderToMap(order))
 	}
 	return mapList, nil
@@ -56,7 +56,7 @@ func (client *Client) GetExecutedOrdersAsMapList(args ...args.Argument) ([]map[s
 		return nil, err
 	}
 	mapList := make([]map[string]string, 0)
-	for _, order := range activeOrders.Data {
+	for _, order := range *activeOrders {
 		mapList = append(mapList, OrderToMap(order))
 	}
 	return mapList, nil

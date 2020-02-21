@@ -13,6 +13,12 @@ type MarketListResponse struct {
 	Data    []string
 }
 
+type TickerResponse struct {
+	Status  string
+	Message string
+	Data    []Ticker
+}
+
 type Ticker struct {
 	High      string
 	Volume    string
@@ -24,10 +30,10 @@ type Ticker struct {
 	Market    string
 }
 
-type TickerResponse struct {
+type BalancesResponse struct {
 	Status  string
 	Message string
-	Data    []Ticker
+	Data    []Balance
 }
 
 type Balance struct {
@@ -36,12 +42,11 @@ type Balance struct {
 	Balance   string
 }
 
-type BalancesResponse struct {
+type AccountResponse struct {
 	Status  string
 	Message string
-	Data    []Balance
+	Data    Account
 }
-
 
 type Account struct {
 	Name         string
@@ -63,10 +68,10 @@ type BankAccount struct {
 	Number      string
 }
 
-type AccountResponse struct {
+type InstantResponse struct {
 	Status  string
 	Message string
-	Data    Account
+	Data    Quantity
 }
 
 type Quantity struct {
@@ -74,10 +79,12 @@ type Quantity struct {
 	Required string
 }
 
-type InstantResponse struct {
-	Status  string
-	Message string
-	Data    Quantity
+type TransactionsResponse struct {
+	client     *Client
+	Status     string
+	Message    string
+	Pagination Pagination
+	Data       []Transaction
 }
 
 type Transaction struct {
@@ -91,18 +98,4 @@ type Transaction struct {
 	Hash       string
 	Address    string
 	Memo       string
-}
-
-type TransactionsResponse struct {
-	client     *Client
-	Status     string
-	Message    string
-	Pagination Pagination
-	Data       []Transaction
-}
-
-type Amount struct {
-	Original  string
-	Remaining string
-	Executed  string
 }
