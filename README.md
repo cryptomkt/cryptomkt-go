@@ -119,27 +119,6 @@ order.Refresh()
 order.Close()
 ```
 
-To protect from attacks, Cryptomarket only accepts a maximum amount of message per minute. If you go over this number, your ip is blocked so you can't keep making request using neither the sdk nor the api. In order to keep your ip usable, big requests (those ending in AllPages) will make one request to the server evey 2 seconds. So, the bigger the request, the slower. Here is an example
-
-```golang
-import (
-    "github.com/cryptomkt/cryptomkt-go/conn"
-    "github.com/cryptomkt/cryptomkt-go/args"
-)
-client := conn.NewClient(apiKey, apiSecret)
-
-// the bigger the slower, if you just want one or two pages, use the usual call insted
-trades, err := client.GetTradesAllPages(
-    args.Market("ETHARS"),
-    args.Start("2019-05-10"),
-    args.End("2019-12-10"),
-)
-if err != nil {
-    fmt.Errorf("Error getting the trades: %s", err)
-}
-
-```
-
 ## API Calls Examples
 
 

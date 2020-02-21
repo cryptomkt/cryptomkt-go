@@ -478,6 +478,7 @@ func (client *Client) GetTrades(arguments ...args.Argument) (*Trades, error) {
 	return &trades, nil
 }
 
+
 // Check if the error is nil when is used, because if it has an error, the response is wrong
 func (client *Client) GetTradesAllPages(arguments ...args.Argument) ([]TradeData, error) {
 	req, err := makeReq([]string{"market"}, arguments...)
@@ -486,7 +487,9 @@ func (client *Client) GetTradesAllPages(arguments ...args.Argument) ([]TradeData
 	}
 	neededArguments := []args.Argument{args.Page(0), args.Limit(100)}
 	argsMap := req.GetArguments()
+
 	neededArguments = append(neededArguments, args.Market(argsMap["market"]))
+
 	if val, ok := argsMap["start"]; ok {
 		neededArguments = append(neededArguments, args.Start(val))
 	}

@@ -57,21 +57,41 @@ func TestTradesGetPrevious(t *testing.T) {
 
 func TestTradesGetNext(t *testing.T) {
 	client := NewClient("NoKey", "NoSecret")
-	trades, err := client.GetTrades(args.Market("ETHCLP"), args.Start("2019-12-12"), args.End("2020-01-01"), args.Page(1))
-	if err != nil {
-		t.Errorf("Error Trades: %s", err)
-	}
-	_, err = trades.GetNext()
-	if err != nil {
-		t.Errorf("Error in next trades: %s", err)
-	}
+	t.Run("optionals=no", func(t *testing.T) {
+		trades, err := client.GetTrades(
+			args.Market("ETHCLP"))
+		if err != nil {
+			t.Errorf("Error Trades: %s", err)
+		}
+		_, err = trades.GetNext()
+		if err != nil {
+			t.Errorf("Error in next trades: %s", err)
+		}
+	})
+	t.Run("optionals=yes", func(t *testing.T) {
+		trades, err := client.GetTrades(
+			args.Market("ETHCLP"), 
+			args.Start("2019-12-12"), 
+			args.End("2020-02-21"), 
+			args.Page(0))
+		if err != nil {
+			t.Errorf("Error Trades: %s", err)
+		}
+		_, err = trades.GetNext()
+		if err != nil {
+			t.Errorf("Error in next trades: %s", err)
+		}
+	})
 }
 
-
-func TestGetTrades(t *testing.T) {
+func TestGetTradesAllPages(t *testing.T) {
 	client := NewClient("NoKey", "NoSecret")
 	time.Sleep(3 * time.Second)
-	if _, err := client.GetTrades(args.Market("ETHCLP"), args.Start("2019-12-12"), args.End("2020-01-01")); err != nil {
-		t.Errorf("Trades with zero optional arguments failed because %s", err)
+	_, err := client.GetTradesAllPages(
+		args.Market("ETHCLP"), 
+		args.Start("2019-02-12"), 
+		args.End("2020-02-21"))
+	if err != nil {
+		t.Errorf("TestGetTradesAllPages failed: %s", err)
 	}
 }

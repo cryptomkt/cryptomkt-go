@@ -63,7 +63,7 @@ func (t *Trades) GetNext() (*Trades, error) {
 		newArgs = append(newArgs, args.Start(v))
 	}
 	if v, ok := t.args["end"]; ok {
-		newArgs = append(newArgs, args.Start(v))
+		newArgs = append(newArgs, args.End(v))
 	}
 	return t.client.GetTrades(newArgs...)
 }
