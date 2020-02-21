@@ -66,7 +66,6 @@ func TestNext(t *testing.T) {
 	}
 }
 
-
 func TestGetAllPrices(t *testing.T) {
 	client := NewClient("NoKey", "NoSecret")
 	time.Sleep(3 * time.Second)
