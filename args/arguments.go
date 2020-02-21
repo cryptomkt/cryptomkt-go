@@ -179,7 +179,7 @@ func Timeframe(val string) Argument {
 		if !(val == "1" || val == "5" || val == "15" || val == "60" || val == "240" || val == "1440" || val == "10080") {
 			return errors.New("timeframe must be one of the following numbers as string: 1, 5, 15, 60, 240, 1440 or 10080")
 		}
-		request.AddArgument("limit", val)
+		request.AddArgument("timeframe", val)
 		return nil
 	}
 }

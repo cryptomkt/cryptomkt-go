@@ -344,16 +344,16 @@ func (client *Client) PaymentOrdersPage(arguments ...args.Argument) (*PaymentOrd
 	}
 	argMap := req.GetArguments()
 	paymentOrderList := PaymentOrderList{
-		startDate:argMap["start_date"],
-		endDate:argMap["end_date"],
-		client:client,
-		pagination:poResp.Pagination,
-		Data:poResp.Data,
+		startDate:  argMap["start_date"],
+		endDate:    argMap["end_date"],
+		client:     client,
+		pagination: poResp.Pagination,
+		Data:       poResp.Data,
 	}
 	return &paymentOrderList, nil
 }
 
-// GetPaymentStatus gives the status of a pyment order
+// GetPaymentStatus gives the status of a payment order
 //
 // List of accepted Arguments:
 //   - required: Id
