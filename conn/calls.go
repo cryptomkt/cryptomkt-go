@@ -355,7 +355,7 @@ func (client *Client) PaymentOrders(args ...args.Argument) (*PaymentOrderList, e
 	return &paymentOrderList, nil
 }
 
-// GetPaymentStatus gives the status of a pyment order
+// GetPaymentStatus gives the status of a payment order
 //
 // List of accepted Arguments:
 //   - required: Id

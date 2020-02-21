@@ -8,7 +8,7 @@ import (
 	"github.com/cryptomkt/cryptomkt-go/args"
 )
 
-//var argus [8]args.Argument = [8]args.Argument{args.Market("ETHCLP"), args.Type("buy"), args.Type("sell"), args.Page(0), args.Limit(50), args.Start("2017-03-03"), args.End("2018-03-03"), args.Timeframe("60")}
+var argus [8]args.Argument = [8]args.Argument{args.Market("ETHCLP"), args.Type("buy"), args.Type("sell"), args.Page(0), args.Limit(50), args.Start("2017-03-03"), args.End("2018-03-03"), args.Timeframe("60")}
 
 func TestGetBook(t *testing.T) {
 	client := NewClient("NoKey", "NoSecret")

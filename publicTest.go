@@ -123,6 +123,41 @@ func testPrices(times int) error {
 	return nil
 }
 
+func testGetAllBooks(times int) error {
+	rand.Seed(time.Now().UnixNano())
+	var optional [2]args.Argument = [2]args.Argument{argus[3], argus[4]}
+	for i := 0; i < times; i++ { //here you can change the number of repetitions
+		var numArgs int = rand.Intn(3)
+		switch numArgs {
+		case 0:
+			if book, err := client.GetBook(args.Market("ETHCLP"), args.Type("buy")); err != nil {
+				return fmt.Errorf("Book with cero optional args failed: %s", err)
+				_, err := book.GetAllBooks()
+				if err != nil {
+					return fmt.Errorf("All books failed with cero optional args, %s", err)
+				}
+			}
+		case 1:
+			var random int = rand.Intn(2)
+			if book, err := client.GetBook(args.Market("ETHCLP"), args.Type("buy"), optional[random]); err != nil {
+				return fmt.Errorf("Book with %v optional args failed: %s", 1, err)
+				_, err := book.GetAllBooks()
+				if err != nil {
+					return fmt.Errorf("All books failed with one optional args, %s", err)
+				}
+			}
+		case 2:
+			if book, err := client.GetBook(args.Market("ETHCLP"), args.Type("buy"), optional[0], optional[1]); err != nil {
+				return fmt.Errorf("Book with 2 optional arguments failed because %s ", err)
+				_, err := book.GetAllBooks()
+				if err != nil {
+					return fmt.Errorf("All books failed with two optional args, %s", err)
+				}
+			}
+		}
+		time.Sleep(3 * time.Second)
+	}
+}
 func main() {
 	/*fmt.Println("Testing trades . . .")
 	err := testTrades(500)
