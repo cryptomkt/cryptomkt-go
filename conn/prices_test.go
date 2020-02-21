@@ -16,21 +16,21 @@ func TestPrices(t *testing.T) {
 		var numArgs int = rand.Intn(3)
 		switch numArgs {
 		case 0:
-			if _, err := client.GetPricesPage(
+			if _, err := client.GetPrices(
 				args.Market("ETHCLP"), 
 				args.Timeframe("60")); err != nil {
 				t.Errorf("Prices with zero optional args failed, %s", err)
 			}
 		case 1:
 			var randomIndex int = rand.Intn(2)
-			if _, err := client.GetPricesPage(
+			if _, err := client.GetPrices(
 				args.Market("ETHCLP"), 
 				args.Timeframe("60"), 
 				optional[randomIndex]); err != nil {
 				t.Errorf("Prices with one optional argument failed, %s", err)
 			}
 		case 2:
-			if _, err := client.GetPricesPage(
+			if _, err := client.GetPrices(
 				args.Market("ETHCLP"), 
 				args.Timeframe("60"), 
 				optional[0], 
@@ -44,7 +44,7 @@ func TestPrices(t *testing.T) {
 
 func TestPrevious(t *testing.T) {
 	client := NewClient("NoKey", "NoSecret")
-	prices, err := client.GetPricesPage(args.Market("ETHCLP"), args.Timeframe("60"), args.Page(1), args.Limit(40))
+	prices, err := client.GetPrices(args.Market("ETHCLP"), args.Timeframe("60"), args.Page(1), args.Limit(40))
 	if err != nil {
 		t.Errorf("Error in previous prices: %s", err)
 	}
@@ -56,7 +56,7 @@ func TestPrevious(t *testing.T) {
 
 func TestNext(t *testing.T) {
 	client := NewClient("NoKey", "NoSecret")
-	prices, err :=client.GetPricesPage(args.Market("ETHCLP"), args.Timeframe("10080"), args.Page(0), args.Limit(40))
+	prices, err := client.GetPrices(args.Market("ETHCLP"), args.Timeframe("10080"), args.Page(0), args.Limit(40))
 	if err != nil {
 		t.Errorf("Error in next prices: %s", err)
 	}

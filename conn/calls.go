@@ -3,6 +3,7 @@ package conn
 import (
 	"encoding/json"
 	"fmt"
+	"time"
 
 	"github.com/cryptomkt/cryptomkt-go/args"
 	"github.com/cryptomkt/cryptomkt-go/requests"
@@ -72,7 +73,7 @@ func (client *Client) GetTransactions(arguments ...args.Argument) (*[]Transactio
 //   - required: Market
 //   - optional: Page, Limit
 // https://developers.cryptomkt.com/es/#ordenes-activas
-func (client *Client) GetActiveOrdersPage(arguments ...args.Argument) (*OrderList, error) {
+func (client *Client) GetActiveOrders(arguments ...args.Argument) (*OrderList, error) {
 	req, err := makeReq([]string{"market"}, arguments...)
 	if err != nil {
 		return nil, fmt.Errorf("Error in GetActiveOrders: %s", err)
@@ -102,7 +103,7 @@ func (client *Client) GetActiveOrdersPage(arguments ...args.Argument) (*OrderLis
 //   - required: Market
 //   - optional: Page, Limit
 // https://developers.cryptomkt.com/es/#ordenes-ejecutadas
-func (client *Client) GetExecutedOrdersPage(arguments ...args.Argument) (*OrderList, error) {
+func (client *Client) GetExecutedOrders(arguments ...args.Argument) (*OrderList, error) {
 	req, err := makeReq([]string{"market"}, arguments...)
 	if err != nil {
 		return nil, fmt.Errorf("Error in GetExecutedOrders: %s", err)
@@ -328,7 +329,7 @@ func (client *Client) CreateWallet(arguments ...args.Argument) (*PaymentOrder, e
 //   - required: StartDate, EndDate
 //   - optional: Page, Limit
 // https://developers.cryptomkt.com/es/#listado-de-ordenes-de-pago
-func (client *Client) PaymentOrdersPage(arguments ...args.Argument) (*PaymentOrderList, error) {
+func (client *Client) PaymentOrders(arguments ...args.Argument) (*PaymentOrderList, error) {
 	req, err := makeReq([]string{"start_date", "end_date"}, arguments...)
 	if err != nil {
 		return nil, fmt.Errorf("Error in PaymentOrders: %s", err)
@@ -423,7 +424,7 @@ func (client *Client) GetTicker(arguments ...args.Argument) (*[]Ticker, error) {
 // List of accepted Arguments:
 //   - required: Market, Type
 //   - optional: Page, Limit
-func (client *Client) GetBookPage(arguments ...args.Argument) (*Book, error) {
+func (client *Client) GetBook(arguments ...args.Argument) (*Book, error) {
 	req, err := makeReq([]string{"market", "type"}, arguments...)
 	if err != nil {
 		return nil, fmt.Errorf("Error in GetBook: %s", err)
@@ -446,28 +447,6 @@ func (client *Client) GetBookPage(arguments ...args.Argument) (*Book, error) {
 	return &book, nil
 }
 
-func (client *Client) GetBook(arguments ...args.Argument) ([]BookData, error) {
-	req, err := makeReq([]string{"market", "type"}, arguments...)
-	if err != nil {
-		return nil, fmt.Errorf("Error in GetPaymentOrders: %s", err)
-	}
-	neededArguments := []args.Argument{args.Page(0), args.Limit(100)}
-	argsMap := req.GetArguments()
-	neededArguments = append(neededArguments, args.Market(argsMap["market"]))
-	neededArguments = append(neededArguments, args.Type(argsMap["type"]))
-
-	bList, err := client.GetBookPage(neededArguments...)
-	if err != nil {
-		return nil, fmt.Errorf("Error in GetPaymentOrders: %s", err)
-	}
-	allb := make([]BookData, len(bList.Data))
-	copy(allb, bList.Data)
-	for bList, err = bList.GetNext(); err == nil; bList, err = bList.GetNext() {
-		allb = append(allb, bList.Data...)
-	}
-	return allb, nil
-}
-
 // GetTradesPage returns a pointer to a Trades struct with the data given
 // by the api and an error message. It returns (nil, error) when an error
 // is raised and (*Trades, nil) when the operation is successful.
@@ -476,7 +455,7 @@ func (client *Client) GetBook(arguments ...args.Argument) ([]BookData, error) {
 // List of accepted Arguments:
 //   - required: Market
 //   - optional: Start, End, Page, Limit
-func (client *Client) GetTradesPage(arguments ...args.Argument) (*Trades, error) {
+func (client *Client) GetTrades(arguments ...args.Argument) (*Trades, error) {
 	req, err := makeReq([]string{"market"}, arguments...)
 	if err != nil {
 		return nil, fmt.Errorf("Error in GetTradesPage: %s", err)
@@ -500,7 +479,7 @@ func (client *Client) GetTradesPage(arguments ...args.Argument) (*Trades, error)
 }
 
 // Check if the error is nil when is used, because if it has an error, the response is wrong
-func (client *Client) GetTrades(arguments ...args.Argument) ([]TradeData, error) {
+func (client *Client) GetTradesAllPages(arguments ...args.Argument) ([]TradeData, error) {
 	req, err := makeReq([]string{"market"}, arguments...)
 	if err != nil {
 		return nil, fmt.Errorf("Error in GetPaymentOrders: %s", err)
@@ -515,19 +494,20 @@ func (client *Client) GetTrades(arguments ...args.Argument) ([]TradeData, error)
 		neededArguments = append(neededArguments, args.End(val))
 	}
 
-	tPage, err := client.GetTradesPage(neededArguments...)
+	tPage, err := client.GetTrades(neededArguments...)
 	if err != nil {
 		return nil, fmt.Errorf("Error in GetPaymentOrders: %s", err)
 	}
 	allt := make([]TradeData, len(tPage.Data))
 	copy(allt, tPage.Data)
 	for tPage, err = tPage.GetNext(); err == nil; tPage, err = tPage.GetNext() {
+		time.Sleep(2 * time.Second)
 		allt = append(allt, tPage.Data...)
 	}
 	return allt, nil
 }
 
-// GetPricesPage return a pointer to a Prices struct with the data given by
+// GetPrices return a pointer to a Prices struct with the data given by
 // the api and an error message. It returns (nil,error) when an error
 // is raised and (*Prices, nil) when the operation is successful.
 // The data field is a map[string][]Field, where the Field structure contains all the
@@ -537,10 +517,10 @@ func (client *Client) GetTrades(arguments ...args.Argument) ([]TradeData, error)
 // List of accepted Arguments:
 //   - required: Market, Timeframe
 //   - optional: Page, Limit
-func (client *Client) GetPricesPage(arguments ...args.Argument) (*Prices, error) {
+func (client *Client) GetPrices(arguments ...args.Argument) (*Prices, error) {
 	req, err := makeReq([]string{"market", "timeframe"}, arguments...)
 	if err != nil {
-		return nil, fmt.Errorf("Error in GetPricesPage: %s", err)
+		return nil, fmt.Errorf("Error in GetPrices: %s", err)
 	}
 	resp, err := client.getPublic("prices", req)
 	if err != nil {
@@ -556,36 +536,6 @@ func (client *Client) GetPricesPage(arguments ...args.Argument) (*Prices, error)
 		pagination: pResp.Pagination,
 		client:     client,
 		Data:       pResp.Data,
-	}
-	return &prices, nil
-}
-
-func (client *Client) GetPrices(arguments ...args.Argument) (*DataPrices, error) {
-	req, err := makeReq([]string{"market", "timeframe"}, arguments...)
-	if err != nil {
-		return nil, fmt.Errorf("Error in GetPrices: %s", err)
-	}
-	neededArguments := []args.Argument{args.Page(0), args.Limit(100)}
-	argsMap := req.GetArguments()
-	neededArguments = append(neededArguments, args.StartDate(argsMap["market"]))
-	neededArguments = append(neededArguments, args.StartDate(argsMap["timeframe"]))
-
-	tPage, err := client.GetPricesPage(neededArguments...)
-	if err != nil {
-		return nil, fmt.Errorf("Error in GetPrices: %s", err)
-	}
-	allAsks := make([]Candle, len(tPage.Data.Ask))
-	allBids := make([]Candle, len(tPage.Data.Bid))
-	copy(allAsks, tPage.Data.Ask)
-	copy(allBids, tPage.Data.Bid)
-
-	for tPage, err = tPage.GetNext(); err == nil; tPage, err = tPage.GetNext() {
-		allAsks = append(allAsks, tPage.Data.Ask...)
-		allBids = append(allBids, tPage.Data.Bid...)
-	}
-	prices := DataPrices{
-		Ask:allAsks,
-		Bid:allBids,
 	}
 	return &prices, nil
 }

@@ -31,7 +31,7 @@ func (b *Book) GetPrevious() (*Book, error) {
 	if b.pagination.Previous == nil {
 		return nil, fmt.Errorf("Previous page does not exist")
 	}
-	return b.client.GetBookPage(
+	return b.client.GetBook(
 		args.Market(b.args["market"]),
 		args.Type(b.args["type"]),
 		args.Page(int(b.pagination.Previous.(float64))),
@@ -44,7 +44,7 @@ func (b *Book) GetNext() (*Book, error) {
 	if b.pagination.Next == nil {
 		return nil, fmt.Errorf("Next page does not exist")
 	}
-	return b.client.GetBookPage(
+	return b.client.GetBook(
 		args.Market(b.args["market"]),
 		args.Type(b.args["type"]),
 		args.Page(int(b.pagination.Next.(float64))),

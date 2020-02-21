@@ -45,7 +45,7 @@ func (t *Trades) GetPrevious() (*Trades, error) {
 	if v, ok := t.args["end"]; ok {
 		newArgs = append(newArgs, args.Start(v))
 	}
-	return t.client.GetTradesPage(newArgs...)
+	return t.client.GetTrades(newArgs...)
 }
 
 // GetNext lets you go to the next page if it exists, returns (*Trades, nil) if
@@ -65,7 +65,7 @@ func (t *Trades) GetNext() (*Trades, error) {
 	if v, ok := t.args["end"]; ok {
 		newArgs = append(newArgs, args.Start(v))
 	}
-	return t.client.GetTradesPage(newArgs...)
+	return t.client.GetTrades(newArgs...)
 }
 
 // GetPage returns the actual page of the request.

@@ -13,7 +13,6 @@ import (
 	"path"
 	"sort"
 	"strings"
-	"time"
 )
 
 // DELAY is the amount to wait in seconds between requests to the server,
@@ -26,7 +25,6 @@ type Client struct {
 	baseApiUri string
 	auth       *HMACAuth
 	httpClient *http.Client
-	lastRequestTime time.Time
 }
 
 // New builds a new client and returns a pointer to it.
@@ -45,17 +43,7 @@ func NewClient(apiKey, apiSecret string) *Client {
 	return client
 }
 
-func (client *Client) delayIfNeeded() {
-	actualTime := time.Now()
-	if actualTime.Sub(client.lastRequestTime) < time.Duration(DELAY * 10e9) {
-		time.Sleep(actualTime.Sub(client.lastRequestTime))
-	}
-	client.lastRequestTime = time.Now()
-	
-}
-
 func (client *Client) runRequest(httpReq *http.Request) ([]byte, error) {
-	client.delayIfNeeded()
 	resp, err := client.httpClient.Do(httpReq)
 	if err != nil {
 		return nil, fmt.Errorf("Error making request: %v", err)
