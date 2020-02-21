@@ -346,11 +346,11 @@ func (client *Client) PaymentOrders(args ...args.Argument) (*PaymentOrderList, e
 	}
 	argMap := req.GetArguments()
 	paymentOrderList := PaymentOrderList{
-		startDate:argMap["start_date"],
-		endDate:argMap["end_date"],
-		client:client,
-		pagination:poResp.Pagination,
-		Data:poResp.Data,
+		startDate:  argMap["start_date"],
+		endDate:    argMap["end_date"],
+		client:     client,
+		pagination: poResp.Pagination,
+		Data:       poResp.Data,
 	}
 	return &paymentOrderList, nil
 }
@@ -491,25 +491,6 @@ func (client *Client) GetTrades(args ...args.Argument) (*Trades, error) {
 	if err != nil {
 		return nil, fmt.Errorf("error making the request: %s", err)
 	}
-<<<<<<< HEAD
-
-	var response TemporalTrades
-	err = json.Unmarshal([]byte(resp), &response)
-	if err != nil {
-		return nil, err
-	} else {
-		var resp Trades
-		if response.Status == "success" {
-			resp.args = req.GetArguments()
-			resp.pagination = response.Pagination
-			resp.client = client
-			resp.Data = response.Data
-			return &resp, nil
-		} else {
-			fmt.Println(response.Status)
-			return nil, fmt.Errorf("Response from server failed")
-		}
-=======
 	var tResp TradesResponse
 	json.Unmarshal(resp, &tResp)
 	if tResp.Status == "error" {
@@ -520,7 +501,6 @@ func (client *Client) GetTrades(args ...args.Argument) (*Trades, error) {
 		pagination: tResp.Pagination,
 		client:     client,
 		Data:       tResp.Data,
->>>>>>> acf6f1809829eacbb6c5e2d0642d555b12ce5543
 	}
 	return &trades, nil
 }
