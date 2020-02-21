@@ -445,7 +445,7 @@ func (client *Client) GetBook(args ...args.Argument) (*Book, error) {
 // it is successfull and (nil, error) otherwise
 func (b *Book) GetPrevious() (*Book, error) {
 	if b.pagination.Previous != nil {
-		_, okPage := p.args["page"]
+		_, okPage := b.args["page"]
 		_, okLimit := b.args["limit"]
 		limit, _ := strconv.Atoi(b.args["limit"])
 		pageToPut := int(b.pagination.Page - 1)
@@ -631,8 +631,8 @@ func executePrevNext(t *Trades, tipe string) (*Trades, error) {
 			//You have the optional args so far.
 			return executeTradeRandomArgs(newArgs, t)
 		}
-		return nil, fmt.Errorf("Cannot go to previous page, because it does not exist")
 	}
+	return nil, fmt.Errorf("Cannot go to previous page, because it does not exist")
 }
 
 // Here you find methods to interact with the Trades's pagination
@@ -672,8 +672,6 @@ func createMapStringArgument(argus map[string]string) []args.Argument {
 			value, err := strconv.Atoi(v)
 			if err == nil {
 				slice[i] = args.Limit(value)
-			} else {
-				fmt.Errorf("Cannot conver %s to int, %s", v, err)
 			}
 		case "page": //page is given
 			slice[i] = args.Page(0)

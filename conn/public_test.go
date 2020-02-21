@@ -51,24 +51,25 @@ func TestTicker(t *testing.T) {
 	}
 }
 
-func TestBook(t *testing.T) {
+func BenchmarkBook(b *testing.B) {
 	rand.Seed(time.Now().UnixNano())
+	b.ResetTimer()
 	var optional [2]args.Argument = [2]args.Argument{argus[3], argus[4]}
-	for i := 0; i < 100; i++ { //here you can change the number of repetitions
+	for i := 0; i < b.N; i++ { //here you can change the number of repetitions
 		var numArgs int = rand.Intn(3)
 		switch numArgs {
 		case 0:
 			if _, err := client.GetBook(argus[0], argus[1]); err != nil {
-				t.Errorf("Book with cero optional args failed: %s", err)
+				b.Errorf("Book with cero optional args failed: %s", err)
 			}
 		case 1:
 			var random int = rand.Intn(2)
 			if _, err := client.GetBook(argus[0], argus[1], optional[random]); err != nil {
-				t.Errorf("Book with %v optional args failed: %s", 1, err)
+				b.Errorf("Book with %v optional args failed: %s", 1, err)
 			}
 		case 2:
 			if _, err := client.GetBook(argus[0], argus[1], optional[0], optional[1]); err != nil {
-				t.Errorf("Book with 2 optional arguments failed because %s ", err)
+				b.Errorf("Book with 2 optional arguments failed because %s ", err)
 			}
 		}
 		time.Sleep(3 * time.Second)
