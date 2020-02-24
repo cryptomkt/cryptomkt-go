@@ -3,7 +3,6 @@ package conn
 import (
 	"encoding/json"
 	"fmt"
-	"time"
 
 	"github.com/cryptomkt/cryptomkt-go/args"
 	"github.com/cryptomkt/cryptomkt-go/requests"
@@ -377,11 +376,12 @@ func (client *Client) GetPaymentStatus(arguments ...args.Argument) (*PaymentOrde
 
 //
 
-// GetMarket returns a pointer to a MarketStruct with the field "data" given by the api. The data given is
+// GetMarkets returns a pointer to a MarketStruct with the field "data" given by the api. The data given is
 // an array of strings indicating the markets in cryptomkt. This function returns two values.
 // The first is a reference to the struct created and the second is a error message. It returns (nil, error)
 // when an error is raised.
 // This method does not accept any arguments.
+// https://developers.cryptomkt.com/es/mercado
 func (client *Client) GetMarkets() ([]string, error) {
 	resp, err := client.get("market", requests.NewEmptyReq())
 	if err != nil {
@@ -403,6 +403,7 @@ func (client *Client) GetMarkets() ([]string, error) {
 // List of accepted Arguments:
 //   - required: none
 //   - optional: Market
+// https://developers.cryptomkt.com/es/#ticker
 func (client *Client) GetTicker(arguments ...args.Argument) (*[]Ticker, error) {
 	resp, err := client.getReq("ticker", "GetTicker", []string{}, arguments...)
 	if err != nil {
@@ -424,6 +425,7 @@ func (client *Client) GetTicker(arguments ...args.Argument) (*[]Ticker, error) {
 // List of accepted Arguments:
 //   - required: Market, Type
 //   - optional: Page, Limit
+// https://developers.cryptomkt.com/es/#ordenes
 func (client *Client) GetBook(arguments ...args.Argument) (*Book, error) {
 	req, err := makeReq([]string{"market", "type"}, arguments...)
 	if err != nil {
@@ -447,7 +449,7 @@ func (client *Client) GetBook(arguments ...args.Argument) (*Book, error) {
 	return &book, nil
 }
 
-// GetTradesPage returns a pointer to a Trades struct with the data given
+// GetTrades returns a pointer to a Trades struct with the data given
 // by the api and an error message. It returns (nil, error) when an error
 // is raised and (*Trades, nil) when the operation is successful.
 // The data fields are market_taker, price, amount, tid, timestamp and market.
@@ -455,6 +457,7 @@ func (client *Client) GetBook(arguments ...args.Argument) (*Book, error) {
 // List of accepted Arguments:
 //   - required: Market
 //   - optional: Start, End, Page, Limit
+// https://developers.cryptomkt.com/es/#trades
 func (client *Client) GetTrades(arguments ...args.Argument) (*Trades, error) {
 	req, err := makeReq([]string{"market"}, arguments...)
 	if err != nil {
@@ -478,48 +481,14 @@ func (client *Client) GetTrades(arguments ...args.Argument) (*Trades, error) {
 	return &trades, nil
 }
 
-
-// Check if the error is nil when is used, because if it has an error, the response is wrong
-func (client *Client) GetTradesAllPages(arguments ...args.Argument) ([]TradeData, error) {
-	req, err := makeReq([]string{"market"}, arguments...)
-	if err != nil {
-		return nil, fmt.Errorf("Error in GetPaymentOrders: %s", err)
-	}
-	neededArguments := []args.Argument{args.Page(0), args.Limit(100)}
-	argsMap := req.GetArguments()
-
-	neededArguments = append(neededArguments, args.Market(argsMap["market"]))
-
-	if val, ok := argsMap["start"]; ok {
-		neededArguments = append(neededArguments, args.Start(val))
-	}
-	if val, ok := argsMap["end"]; ok {
-		neededArguments = append(neededArguments, args.End(val))
-	}
-
-	tPage, err := client.GetTrades(neededArguments...)
-	if err != nil {
-		return nil, fmt.Errorf("Error in GetPaymentOrders: %s", err)
-	}
-	allt := make([]TradeData, len(tPage.Data))
-	copy(allt, tPage.Data)
-	for tPage, err = tPage.GetNext(); err == nil; tPage, err = tPage.GetNext() {
-		time.Sleep(2 * time.Second)
-		allt = append(allt, tPage.Data...)
-	}
-	return allt, nil
-}
-
 // GetPrices return a pointer to a Prices struct with the data given by
 // the api and an error message. It returns (nil,error) when an error
 // is raised and (*Prices, nil) when the operation is successful.
-// The data field is a map[string][]Field, where the Field structure contains all the
-// information. To consult these fields you must call *Prices.Data.Ask[index].fieldYouWant or
-// *Prices.Data.Bid[index].fieldYouWant
 //
 // List of accepted Arguments:
 //   - required: Market, Timeframe
 //   - optional: Page, Limit
+// https://developers.cryptomkt.com/es/#precios
 func (client *Client) GetPrices(arguments ...args.Argument) (*Prices, error) {
 	req, err := makeReq([]string{"market", "timeframe"}, arguments...)
 	if err != nil {
