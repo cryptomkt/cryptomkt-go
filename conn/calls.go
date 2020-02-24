@@ -53,7 +53,7 @@ func (client *Client) GetWallets() (*[]Balance, error) {
 //   - required: Currency
 //   - optional: Page, Limit
 // https://developers.cryptomkt.com/es/#obtener-movimientos
-func (client *Client) GetTransactions(arguments ...args.Argument) (*[]Transaction, error) {
+func (client *Client) GetTransactions(arguments ...args.Argument) ([]Transaction, error) {
 	resp, err := client.getReq("transactions", "GetTransaction", []string{"currency"}, arguments...)
 	if err != nil {
 		return nil, fmt.Errorf("error making the request: %s", err)
@@ -63,7 +63,7 @@ func (client *Client) GetTransactions(arguments ...args.Argument) (*[]Transactio
 	if tResp.Status == "error" {
 		return nil, fmt.Errorf("error from the server side: %s", tResp.Message)
 	}
-	return &tResp.Data, nil
+	return tResp.Data, nil
 }
 
 // GetActiveOrders returns the list of active orders of the client
