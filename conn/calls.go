@@ -3,7 +3,6 @@ package conn
 import (
 	"encoding/json"
 	"fmt"
-	"time"
 
 	"github.com/cryptomkt/cryptomkt-go/args"
 	"github.com/cryptomkt/cryptomkt-go/requests"
@@ -488,44 +487,6 @@ func (client *Client) GetTrades(arguments ...args.Argument) (*Trades, error) {
 		Data:       tResp.Data,
 	}
 	return &trades, nil
-}
-
-// GetTradesAllPages gives you all trades, if end argument is not provided, the maximum data
-// amount will be trucated when it raises more than 100 elements. It is not sure it will give you
-// exactly 100 TradeData Data.
-func (client *Client) GetTradesAllPages(arguments ...args.Argument) ([]TradeData, error) {
-	req, err := makeReq([]string{"market"}, arguments...)
-	if err != nil {
-		return nil, fmt.Errorf("Error in GetPaymentOrders: %s", err)
-	}
-	neededArguments := []args.Argument{args.Page(0), args.Limit(100)}
-	argsMap := req.GetArguments()
-	neededArguments = append(neededArguments, args.Market(argsMap["market"]))
-	if val, ok := argsMap["start"]; ok {
-		neededArguments = append(neededArguments, args.Start(val))
-	}
-	if val, ok := argsMap["end"]; ok {
-		neededArguments = append(neededArguments, args.End(val))
-	}
-
-	tPage, err := client.GetTrades(neededArguments...)
-	if err != nil {
-		return nil, fmt.Errorf("Error in GetPaymentOrders: %s", err)
-	}
-	allt := make([]TradeData, len(tPage.Data))
-	copy(allt, tPage.Data)
-	for tPage, err = tPage.GetNext(); err == nil; tPage, err = tPage.GetNext() {
-		time.Sleep(2 * time.Second) //because the server only accepts 30 calls per minute.
-		allt = append(allt, tPage.Data...)
-		// the data length raises 100 elements or more when "end" parameter is not provided,
-		// it breaks.
-		if _, ok := argsMap["end"]; !ok {
-			if len(allt) > 100 {
-				break
-			}
-		}
-	}
-	return allt, nil
 }
 
 // GetPrices return a pointer to a Prices struct with the data given by
