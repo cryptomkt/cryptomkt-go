@@ -74,10 +74,10 @@ func (client *Client) GetTransactions(arguments ...args.Argument) (*TransactionL
 		return nil, fmt.Errorf("error from the server side: %s", tResp.Message)
 	}
 	tList := TransactionList{
-		currency:req.GetArguments()["currency"],
-		client:client,
-		pagination:tResp.Pagination,
-		data:tResp.Data,
+		currency:   req.GetArguments()["currency"],
+		client:     client,
+		pagination: tResp.Pagination,
+		Data:       tResp.Data,
 	}
 	return &tList, nil
 }

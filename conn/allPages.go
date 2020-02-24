@@ -21,7 +21,7 @@ import (
 func (client *Client) GetTradesAllPages(arguments ...args.Argument) ([]TradeData, error) {
 	req, err := makeReq([]string{"market"}, arguments...)
 	if err != nil {
-		return nil, fmt.Errorf("Error in GetPaymentOrders: %s", err)
+		return nil, fmt.Errorf("Error in GetTradesAllPages: %s", err)
 	}
 	neededArguments := []args.Argument{args.Page(0), args.Limit(100)}
 	argsMap := req.GetArguments()
@@ -35,7 +35,7 @@ func (client *Client) GetTradesAllPages(arguments ...args.Argument) ([]TradeData
 
 	tPage, err := client.GetTrades(neededArguments...)
 	if err != nil {
-		return nil, fmt.Errorf("Error in GetPaymentOrders: %s", err)
+		return nil, fmt.Errorf("Error in GetTrades: %s", err)
 	}
 	allt := make([]TradeData, len(tPage.Data))
 	copy(allt, tPage.Data)
@@ -72,7 +72,7 @@ func (client *Client) GetActiveOrdersAllPages(arguments ...args.Argument) ([]Ord
 
 	oList, err := client.GetActiveOrders(neededArguments...)
 	if err != nil {
-		return nil, fmt.Errorf("Error in GetAllActiveOrders: %s", err)
+		return nil, fmt.Errorf("Error in GetActiveOrdersAllPages: %s", err)
 	}
 	return getAllOrders(oList), nil
 }
@@ -86,7 +86,7 @@ func (client *Client) GetActiveOrdersAllPages(arguments ...args.Argument) ([]Ord
 func (client *Client) GetExecutedOrdersAllPages(arguments ...args.Argument) ([]Order, error) {
 	req, err := makeReq([]string{"market"}, arguments...)
 	if err != nil {
-		return nil, fmt.Errorf("Error in GetAllExecutedOrders: %s", err)
+		return nil, fmt.Errorf("Error in GetExecutedOrdersAllPages: %s", err)
 	}
 	neededArguments := []args.Argument{args.Page(0), args.Limit(100)}
 	argsMap := req.GetArguments()
@@ -109,7 +109,7 @@ func (client *Client) GetExecutedOrdersAllPages(arguments ...args.Argument) ([]O
 func (client *Client) PaymentOrdersAllPages(arguments ...args.Argument) ([]PaymentOrder, error) {
 	req, err := makeReq([]string{"start_date", "end_date"}, arguments...)
 	if err != nil {
-		return nil, fmt.Errorf("Error in GetPaymentOrders: %s", err)
+		return nil, fmt.Errorf("Error in PaymentOrdersAllPages: %s", err)
 	}
 	neededArguments := []args.Argument{args.Page(0), args.Limit(100)}
 	argsMap := req.GetArguments()
@@ -127,7 +127,7 @@ func (client *Client) PaymentOrdersAllPages(arguments ...args.Argument) ([]Payme
 	for poList, err = poList.GetNext(); err == nil; poList, err = poList.GetNext() {
 		time.Sleep(2 * time.Second)
 		allpo = append(allpo, poList.Data...)
-		// When the data length raises 100 elements or more when "end" parameter is not provided,
+		// When the data length raises 100 elements or more,
 		// it breaks. This "if" block limit the number of pages
 		if len(allpo) > 100 {
 			break
@@ -144,11 +144,36 @@ func getAllOrders(oList *OrderList) []Order {
 		oList.setClientInOrders()
 		allo = append(allo, oList.Data...)
 
-		// When the data length raises 100 elements or more when "end" parameter is not provided,
+		// When the data pages length raises 100 elements or more,
 		// it breaks. This "if" block limit the number of pages
 		if len(allo) > 100 {
 			break
 		}
 	}
 	return allo
+}
+
+func (client *Client) GetAllTransactions(argus ...args.Argument) ([]Transaction, error) {
+	req, err := makeReq([]string{"currency"}, argus...)
+	if err != nil {
+		return nil, fmt.Errorf("Error in GetAllTransactions: %s", err)
+	}
+	neededArguments := []args.Argument{args.Page(0), args.Limit(100)}
+	argsMap := req.GetArguments()
+	neededArguments = append(neededArguments, args.Currency(argsMap["currency"]))
+
+	trans, err := client.GetTransactions(neededArguments...)
+	if err != nil {
+		return nil, fmt.Errorf("Error in GetTransactions: %s", err)
+	}
+	allTrans := make([]Transaction, len(trans.Data))
+	copy(allTrans, trans.Data)
+	for trans, err = trans.GetNext(); err == nil; trans, err = trans.GetNext() {
+		time.Sleep(2 * time.Second)
+		allTrans = append(allTrans, trans.Data...)
+		if len(allTrans) > 100 {
+			break
+		}
+	}
+	return allTrans, nil
 }
