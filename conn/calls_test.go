@@ -241,7 +241,7 @@ func TestGetInstant(t *testing.T) {
 			}
 		}
 	})
-	
+
 	time.Sleep(6 * time.Second)
 	t.Run("missing=market and type", func(t *testing.T) {
 		_, err := client.GetInstant(
@@ -272,7 +272,6 @@ func TestGetInstant(t *testing.T) {
 		}
 	})
 }
-
 
 func TestRequestDeposit(t *testing.T) {
 	client, err := newDebugClient(keysfile)
@@ -357,7 +356,6 @@ func TestNewOrder(t *testing.T) {
 		}
 	})
 }
-
 
 func TestCreateWallet(t *testing.T) {
 	client, err := newDebugClient(keysfile)

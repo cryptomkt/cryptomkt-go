@@ -78,24 +78,3 @@ type Quantity struct {
 	Obtained string
 	Required string
 }
-
-type TransactionsResponse struct {
-	client     *Client
-	Status     string
-	Message    string
-	Pagination Pagination
-	Data       []Transaction
-}
-
-type Transaction struct {
-	Id         string
-	Type       int
-	Amount     string
-	FeePercent string `json:"fee_percent"`
-	FeeAmount  string `json:"fee_amount"`
-	Balance    string
-	Date       string
-	Hash       string
-	Address    string
-	Memo       string
-}

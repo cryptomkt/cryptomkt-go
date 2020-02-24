@@ -1,5 +1,5 @@
-// Package client implements a client to connect with CryptoMarket,
-// using the endpoints given at https://developers.cryptomkt.com/
+// Package client implements a client to connect with CryptoMarket using
+// the endpoints given at https://developers.cryptomkt.com/.
 package conn
 
 import (
@@ -15,34 +15,35 @@ import (
 	"strings"
 )
 
-// DELAY is the amount to wait in seconds between requests to the server,
-// too many requests and the ip is blocked
-var DELAY float64 = 2.5
+var (
+	// DELAY is the amount to wait in seconds between requests to the server,
+	// too many requests and the ip is blocked.
+	DELAY float64 = 2.5
 
-// Client keep the needed information to connect with the asociated CryptoMarket account.
+	// Version of the api used to connect with crypto market.
+	apiVersion = "v1"
+
+	// URI to connect with crypto market api.
+	baseApiUri = "https://api.cryptomkt.com/"
+)
+
+// Client keep the needed data to connect with the asociated CryptoMarket account.
 type Client struct {
-	apiVersion string
-	baseApiUri string
 	auth       *HMACAuth
 	httpClient *http.Client
 }
 
 // New builds a new client and returns a pointer to it.
-// It can fail if the api key or the api secret are empty
 func NewClient(apiKey, apiSecret string) *Client {
-	apiVersion := "v1"
-	baseApiUri := "https://api.cryptomkt.com/"
-	auth := newAuth(apiKey, apiSecret)
-
 	client := &Client{
-		baseApiUri: baseApiUri,
-		apiVersion: apiVersion,
-		auth:       auth,
+		auth:       newAuth(apiKey, apiSecret),
 		httpClient: &http.Client{},
 	}
 	return client
 }
 
+// runRequest makes the builded http request to cryptoMarket,
+// and read the response
 func (client *Client) runRequest(httpReq *http.Request) ([]byte, error) {
 	resp, err := client.httpClient.Do(httpReq)
 	if err != nil {
@@ -56,13 +57,15 @@ func (client *Client) runRequest(httpReq *http.Request) ([]byte, error) {
 	return respBody, nil
 }
 
+// getPublic makes an http request to a given enpoint, given a custom request that contains
+// the needed arguments
 func (client *Client) getPublic(endpoint string, request *requests.Request) ([]byte, error) {
 	args := request.GetArguments()
-	u, err := url.Parse(client.baseApiUri)
+	u, err := url.Parse(baseApiUri)
 	if err != nil {
-		return nil, fmt.Errorf("Error parsing url %s: %v", client.baseApiUri, err)
+		return nil, fmt.Errorf("Error parsing url %s: %v", baseApiUri, err)
 	}
-	u.Path = path.Join(u.Path, client.apiVersion, endpoint)
+	u.Path = path.Join(u.Path, apiVersion, endpoint)
 	httpReq, err := http.NewRequest("GET", u.String(), nil)
 	if err != nil {
 		return nil, fmt.Errorf("Error building NewRequest struct: %v", err)
@@ -77,15 +80,15 @@ func (client *Client) getPublic(endpoint string, request *requests.Request) ([]b
 	return client.runRequest(httpReq)
 }
 
-// get comunicates to Cryptomarket via the http get method
-// Its the base implementation which the public methods use.
+// get comunicates to Cryptomarket via the http get method, also set
+// the needed headers of the request for an authenticated communication.
 func (client *Client) get(endpoint string, request *requests.Request) ([]byte, error) {
 	args := request.GetArguments()
-	u, err := url.Parse(client.baseApiUri)
+	u, err := url.Parse(baseApiUri)
 	if err != nil {
-		return nil, fmt.Errorf("Error parsing url %s: %v", client.baseApiUri, err)
+		return nil, fmt.Errorf("Error parsing url %s: %v", baseApiUri, err)
 	}
-	u.Path = path.Join(u.Path, client.apiVersion, endpoint)
+	u.Path = path.Join(u.Path, apiVersion, endpoint)
 	httpReq, err := http.NewRequest("GET", u.String(), nil)
 	if err != nil {
 		return nil, fmt.Errorf("Error building NewRequest struct: %v", err)
@@ -99,23 +102,22 @@ func (client *Client) get(endpoint string, request *requests.Request) ([]byte, e
 		httpReq.URL.RawQuery = q.Encode()
 	}
 
-	requestPath := "/" + client.apiVersion + "/" + endpoint
+	requestPath := "/" + apiVersion + "/" + endpoint
 	client.auth.setHeaders(httpReq, requestPath, "")
 
 	return client.runRequest(httpReq)
 }
 
-// post comunicates to Cryptomarket via the http post method.
-// Its the base implementation which the public methods use.
-// Arguments are required.
+// post comunicates to Cryptomarket via the http post method, also set
+// the needed headers of the request for an authenticated communication.
 func (client *Client) post(endpoint string, request *requests.Request) ([]byte, error) {
 	args := request.GetArguments()
 
-	u, err := url.Parse(client.baseApiUri)
+	u, err := url.Parse(baseApiUri)
 	if err != nil {
-		return nil, fmt.Errorf("Error parsing url %s: %v", client.baseApiUri, err)
+		return nil, fmt.Errorf("Error parsing url %s: %v", baseApiUri, err)
 	}
-	u.Path = path.Join(u.Path, client.apiVersion, endpoint)
+	u.Path = path.Join(u.Path, apiVersion, endpoint)
 
 	// builds a form from the Arguments
 	form := url.Values{}
@@ -127,7 +129,7 @@ func (client *Client) post(endpoint string, request *requests.Request) ([]byte, 
 		return nil, fmt.Errorf("Error building NewRequest struct: %v", err)
 	}
 
-	//sets the body for the header
+	//sets the body for the header, arguments must be sorted
 	keys := make([]string, 0, len(args))
 	for k := range args {
 		keys = append(keys, k)
@@ -139,7 +141,7 @@ func (client *Client) post(endpoint string, request *requests.Request) ([]byte, 
 		bb.WriteString(args[k])
 	}
 
-	requestPath := "/" + client.apiVersion + "/" + endpoint
+	requestPath := "/" + apiVersion + "/" + endpoint
 	client.auth.setHeaders(httpReq, requestPath, bb.String())
 
 	//required header for the reciever to interpret the request as a http form post
@@ -165,7 +167,7 @@ func makeReq(required []string, args ...args.Argument) (*requests.Request, error
 }
 
 // postReq builds a post request and send it to CryptoMarket.
-// Returns a string with the response
+// Returns a []byte with the response
 func (client *Client) postReq(endpoint string, caller string, required []string, args ...args.Argument) ([]byte, error) {
 	req, err := makeReq(required, args...)
 	if err != nil {
@@ -175,7 +177,7 @@ func (client *Client) postReq(endpoint string, caller string, required []string,
 }
 
 // postReq builds a getReq request and send it to CryptoMarket.
-// Returns a string with the response
+// Returns a []byte with the response
 func (client *Client) getReq(endpoint string, caller string, required []string, args ...args.Argument) ([]byte, error) {
 	req, err := makeReq(required, args...)
 	if err != nil {

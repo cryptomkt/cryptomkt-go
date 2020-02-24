@@ -6,7 +6,7 @@ import (
 )
 
 type PaymentOrder struct {
-	client *Client
+	client            *Client
 	Id                string
 	ExternalId        string `json:"external_id"`
 	Status            int
@@ -37,10 +37,10 @@ type PaymentResponse struct {
 
 type PaymentOrderList struct {
 	pagination Pagination
-	startDate string
-	endDate string
-	client *Client
-	Data []PaymentOrder
+	startDate  string
+	endDate    string
+	client     *Client
+	Data       []PaymentOrder
 }
 
 type PaymentOrdersResponse struct {

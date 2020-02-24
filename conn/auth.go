@@ -25,8 +25,9 @@ func newAuth(apiKey, apiSecret string) *HMACAuth {
 	return auth
 }
 
-// setHeaders set the X-MKT-APIKEY, X-MKT-SIGNATURE and the X-MKT-TIMESTAMP headers.
-// https://developers.cryptomkt.com/es/#api-key
+// setHeaders set the X-MKT-APIKEY, X-MKT-SIGNATURE and the X-MKT-TIMESTAMP
+// headers of an http request.
+// https://developers.cryptomkt.com/#api-key
 func (auth *HMACAuth) setHeaders(req *http.Request, endpoint string, body string) {
 	timestamp := strconv.FormatInt(time.Now().Unix(), 10)
 	data := timestamp + endpoint + body

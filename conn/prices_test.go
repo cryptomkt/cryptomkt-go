@@ -17,23 +17,23 @@ func TestPrices(t *testing.T) {
 		switch numArgs {
 		case 0:
 			if _, err := client.GetPrices(
-				args.Market("ETHCLP"), 
+				args.Market("ETHCLP"),
 				args.Timeframe("60")); err != nil {
 				t.Errorf("Prices with zero optional args failed, %s", err)
 			}
 		case 1:
 			var randomIndex int = rand.Intn(2)
 			if _, err := client.GetPrices(
-				args.Market("ETHCLP"), 
-				args.Timeframe("60"), 
+				args.Market("ETHCLP"),
+				args.Timeframe("60"),
 				optional[randomIndex]); err != nil {
 				t.Errorf("Prices with one optional argument failed, %s", err)
 			}
 		case 2:
 			if _, err := client.GetPrices(
-				args.Market("ETHCLP"), 
-				args.Timeframe("60"), 
-				optional[0], 
+				args.Market("ETHCLP"),
+				args.Timeframe("60"),
+				optional[0],
 				optional[1]); err != nil {
 				t.Errorf("Prices with 2 optional args failed, %s", err)
 			}

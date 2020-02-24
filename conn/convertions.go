@@ -57,7 +57,6 @@ func (balance *Balance) ToMap() map[string]string {
 	return asMap
 }
 
-
 func (order *Order) ToMap() map[string]string {
 	asMap := make(map[string]string)
 	asMap["id"] = order.Id

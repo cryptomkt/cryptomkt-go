@@ -1,12 +1,12 @@
 package conn
 
 import (
-	"math/rand"
-	"time"
-	"log"
-	"os"
 	"bufio"
-	
+	"log"
+	"math/rand"
+	"os"
+	"time"
+
 	"github.com/cryptomkt/cryptomkt-go/args"
 )
 
@@ -60,4 +60,3 @@ func generateIndexes(cantidad int, rango int) []int {
 	}
 	return resp
 }
-

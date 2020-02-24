@@ -1,8 +1,8 @@
 package conn
 
 import (
-	"github.com/cryptomkt/cryptomkt-go/args"
 	"fmt"
+	"github.com/cryptomkt/cryptomkt-go/args"
 	"time"
 )
 
@@ -37,7 +37,7 @@ func (client *Client) GetTradesAllPages(arguments ...args.Argument) ([]TradeData
 	}
 	allt := make([]TradeData, len(tPage.Data))
 	copy(allt, tPage.Data)
-	
+
 	for tPage, err = tPage.GetNext(); err == nil; tPage, err = tPage.GetNext() {
 		time.Sleep(2 * time.Second)
 		allt = append(allt, tPage.Data...)
@@ -52,7 +52,7 @@ func (client *Client) GetTradesAllPages(arguments ...args.Argument) ([]TradeData
 //   - required: Market
 //   - optional: none
 // https://developers.cryptomkt.com/es/#ordenes-activas
-func (client *Client) GetActiveOrdersAllPages(arguments... args.Argument) ([]Order, error) {
+func (client *Client) GetActiveOrdersAllPages(arguments ...args.Argument) ([]Order, error) {
 	req, err := makeReq([]string{"market"}, arguments...)
 	if err != nil {
 		return nil, fmt.Errorf("Error in GetAllActiveOrders: %s", err)
@@ -75,7 +75,7 @@ func (client *Client) GetActiveOrdersAllPages(arguments... args.Argument) ([]Ord
 //   - required: Market
 //   - optional: none
 // https://developers.cryptomkt.com/es/#ordenes-ejecutadas
-func (client *Client) GetExecutedOrdersAllPages(arguments... args.Argument) ([]Order, error) {
+func (client *Client) GetExecutedOrdersAllPages(arguments ...args.Argument) ([]Order, error) {
 	req, err := makeReq([]string{"market"}, arguments...)
 	if err != nil {
 		return nil, fmt.Errorf("Error in GetAllExecutedOrders: %s", err)
@@ -92,14 +92,13 @@ func (client *Client) GetExecutedOrdersAllPages(arguments... args.Argument) ([]O
 	return getAllOrders(oList), nil
 }
 
-
 // PaymentOrdersAllPages get all the payment orders between the two given dates.
 // Returns an array of PaymentOrder
 //
 // List of accepted Arguments:
 //   - required: StartDate, EndDate
 //   - optional: none
-func (client *Client) PaymentOrdersAllPages(arguments... args.Argument) ([]PaymentOrder, error) {
+func (client *Client) PaymentOrdersAllPages(arguments ...args.Argument) ([]PaymentOrder, error) {
 	req, err := makeReq([]string{"start_date", "end_date"}, arguments...)
 	if err != nil {
 		return nil, fmt.Errorf("Error in GetPaymentOrders: %s", err)
@@ -110,7 +109,7 @@ func (client *Client) PaymentOrdersAllPages(arguments... args.Argument) ([]Payme
 	neededArguments = append(neededArguments, args.StartDate(val))
 	val = argsMap["end_date"]
 	neededArguments = append(neededArguments, args.EndDate(val))
-	
+
 	poList, err := client.PaymentOrders(neededArguments...)
 	if err != nil {
 		return nil, fmt.Errorf("Error in GetPaymentOrders: %s", err)
@@ -124,7 +123,7 @@ func (client *Client) PaymentOrdersAllPages(arguments... args.Argument) ([]Payme
 	return allpo, nil
 }
 
-func getAllOrders(oList *OrderList) ([]Order) {
+func getAllOrders(oList *OrderList) []Order {
 	allo := make([]Order, len(oList.Data))
 	copy(allo, oList.Data)
 	for oList, err := oList.GetNext(); err == nil; oList, err = oList.GetNext() {
