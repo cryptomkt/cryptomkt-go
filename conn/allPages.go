@@ -175,5 +175,5 @@ func (client *Client) GetAllTransactions(argus ...args.Argument) ([]Transaction,
 			break
 		}
 	}
-	return allTrans
+	return allTrans, nil
 }
