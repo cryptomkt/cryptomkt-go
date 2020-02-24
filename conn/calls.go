@@ -348,17 +348,17 @@ func (client *Client) CreateWallet(arguments ...args.Argument) (*PaymentOrder, e
 	return &poResp.Data, nil
 }
 
-// PaymentOrders returns the generated payment orders
+// GetPaymentOrders returns the generated payment orders
 //
 // List of accepted Arguments:
 //   - required: StartDate, EndDate
 //   - optional: Page, Limit
 // https://developers.cryptomkt.com/#listado-de-ordenes-de-pago
-func (client *Client) PaymentOrders(arguments ...args.Argument) (*PaymentOrderList, error) {
+func (client *Client) GetPaymentOrders(arguments ...args.Argument) (*PaymentOrderList, error) {
 	required := []string{"start_date", "end_date"}
 	req, err := makeReq(required, arguments...)
 	if err != nil {
-		return nil, fmt.Errorf("Error in PaymentOrders: %s", err)
+		return nil, fmt.Errorf("Error in GetPaymentOrders: %s", err)
 	}
 	resp, err := client.post("payment/orders", req)
 	if err != nil {
@@ -388,7 +388,7 @@ func (client *Client) PaymentOrders(arguments ...args.Argument) (*PaymentOrderLi
 // https://developers.cryptomkt.com/#estado-de-orden-de-pago
 func (client *Client) GetPaymentStatus(arguments ...args.Argument) (*PaymentOrder, error) {
 	required := []string{"id"}
-	resp, err := client.postReq("payment/status", "PaymentStatus", required, arguments...)
+	resp, err := client.postReq("payment/status", "GetPaymentStatus", required, arguments...)
 	if err != nil {
 		return nil, fmt.Errorf("error making the request: %s", err)
 	}
@@ -420,11 +420,10 @@ func (client *Client) GetMarkets() ([]string, error) {
 	return mResp.Data, nil
 }
 
-// GetTicker returns an array of TickerData struct with the data given by th api.
-// It returns (nil,error) when an error is raised and (*TickerData, nil)
+// GetTicker returns a list of Tickers.
+// It returns (nil,error) when an error is raised and ([]Tiker, nil)
 // when the operation is successful. The data fields are: High, Low, Ask, Bid,
-// LastPrice, Volume, Market and Timestamp. To access them, call this way:
-// *TicketData.Data[indexYouWant].FieldYouWant
+// LastPrice, Volume, Market and Timestamp.
 //
 // List of accepted Arguments:
 //   - required: none
@@ -454,7 +453,8 @@ func (client *Client) GetTicker(arguments ...args.Argument) ([]Ticker, error) {
 //   - optional: Page, Limit
 // https://developers.cryptomkt.com/#ordenes
 func (client *Client) GetBook(arguments ...args.Argument) (*Book, error) {
-	req, err := makeReq([]string{"market", "type"}, arguments...)
+	required := []string{"market", "type"}
+	req, err := makeReq(required, arguments...)
 	if err != nil {
 		return nil, fmt.Errorf("Error in GetBook: %s", err)
 	}
@@ -487,9 +487,10 @@ func (client *Client) GetBook(arguments ...args.Argument) (*Book, error) {
 //   - optional: Start, End, Page, Limit
 // https://developers.cryptomkt.com/#trades
 func (client *Client) GetTrades(arguments ...args.Argument) (*Trades, error) {
-	req, err := makeReq([]string{"market"}, arguments...)
+	required := []string{"market"}
+	req, err := makeReq(required, arguments...)
 	if err != nil {
-		return nil, fmt.Errorf("Error in GetTradesPage: %s", err)
+		return nil, fmt.Errorf("Error in GetTrades: %s", err)
 	}
 	resp, err := client.getPublic("trades", req)
 	if err != nil {
@@ -522,7 +523,8 @@ func (client *Client) GetTrades(arguments ...args.Argument) (*Trades, error) {
 //   - optional: Page, Limit
 // https://developers.cryptomkt.com/#precios
 func (client *Client) GetPrices(arguments ...args.Argument) (*Prices, error) {
-	req, err := makeReq([]string{"market", "timeframe"}, arguments...)
+	required := []string{"market", "timeframe"}
+	req, err := makeReq(required, arguments...)
 	if err != nil {
 		return nil, fmt.Errorf("Error in GetPrices: %s", err)
 	}

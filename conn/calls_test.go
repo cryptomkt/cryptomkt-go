@@ -384,7 +384,7 @@ func TestPaymentOrders(t *testing.T) {
 	}
 	time.Sleep(6 * time.Second)
 	t.Run("", func(t *testing.T) {
-		_, err := client.PaymentOrders(
+		_, err := client.GetPaymentOrders(
 			args.StartDate("01/03/2018"),
 			args.EndDate("08/03/2018"),
 		)

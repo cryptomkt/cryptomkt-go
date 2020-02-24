@@ -56,7 +56,7 @@ func (poList *PaymentOrderList) GetPrevious() (*PaymentOrderList, error) {
 	if poList.pagination.Previous == nil {
 		return nil, fmt.Errorf("Previous page does not exist")
 	}
-	previouspoList, err := poList.client.PaymentOrders(
+	previouspoList, err := poList.client.GetPaymentOrders(
 		args.StartDate(poList.startDate),
 		args.EndDate(poList.endDate),
 		args.Page(int(poList.pagination.Previous.(float64))),
@@ -73,7 +73,7 @@ func (poList *PaymentOrderList) GetNext() (*PaymentOrderList, error) {
 	if poList.pagination.Next == nil {
 		return nil, fmt.Errorf("Next page does not exist")
 	}
-	nextpoList, err := poList.client.PaymentOrders(
+	nextpoList, err := poList.client.GetPaymentOrders(
 		args.StartDate(poList.startDate),
 		args.EndDate(poList.endDate),
 		args.Page(int(poList.pagination.Next.(float64))),
