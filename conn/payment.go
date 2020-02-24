@@ -83,3 +83,13 @@ func (poList *PaymentOrderList) GetNext() (*PaymentOrderList, error) {
 	}
 	return nextpoList, nil
 }
+
+// Refresh updates the information of a payment order.
+func (po *PaymentOrder) Refresh() error {
+	poUpdated, err := po.client.GetPaymentStatus(args.Id(po.Id))
+	if err != nil {
+		return fmt.Errorf("refresh of %s failed: %s", po.Id, err)
+	}
+	po = poUpdated
+	return nil
+}
