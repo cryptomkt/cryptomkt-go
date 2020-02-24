@@ -73,7 +73,7 @@ func (client *Client) GetTransactions(arguments ...args.Argument) (*TransactionL
 		currency:   req.GetArguments()["currency"],
 		client:     client,
 		pagination: tResp.Pagination,
-		data:       tResp.Data,
+		Data:       tResp.Data,
 	}
 	return &tList, nil
 }
