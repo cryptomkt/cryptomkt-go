@@ -380,7 +380,8 @@ func (client *Client) GetPaymentStatus(arguments ...args.Argument) (*PaymentOrde
 // GetMarket returns a pointer to a MarketStruct with the field "data" given by the api. The data given is
 // an array of strings indicating the markets in cryptomkt. This function returns two values.
 // The first is a reference to the struct created and the second is a error message. It returns (nil, error)
-// when an error is raised.
+// when an error is raised and when the call is correct, it returns a slice of strings with the markets in
+// cryptomkt and a nil error.
 // This method does not accept any arguments.
 func (client *Client) GetMarkets() ([]string, error) {
 	resp, err := client.get("market", requests.NewEmptyReq())
@@ -396,14 +397,16 @@ func (client *Client) GetMarkets() ([]string, error) {
 	return mResp.Data, nil
 }
 
-// GetTicker returns a pointer to a Ticker struct with the data given by the api and an error message. It returns (nil,error)
-//when an error is raised and (*Ticker, nil) when the operation is successful. The data fields are: High, Low, Ask, Bid,
-//LastPrice, Volume, Market and Timestamp
+// GetTicker returns an array of TickerData struct with the data given by th api.
+// It returns (nil,error) when an error is raised and (*TickerData, nil)
+// when the operation is successful. The data fields are: High, Low, Ask, Bid,
+// LastPrice, Volume, Market and Timestamp. To access them, call this way:
+// *TicketData.Data[indexYouWant].FieldYouWant
 //
 // List of accepted Arguments:
 //   - required: none
 //   - optional: Market
-func (client *Client) GetTicker(arguments ...args.Argument) (*[]Ticker, error) {
+func (client *Client) GetTicker(arguments ...args.Argument) (*TickerData, error) {
 	resp, err := client.getReq("ticker", "GetTicker", []string{}, arguments...)
 	if err != nil {
 		return nil, fmt.Errorf("error making the request: %s", err)
@@ -413,13 +416,17 @@ func (client *Client) GetTicker(arguments ...args.Argument) (*[]Ticker, error) {
 	if tResp.Status == "error" {
 		return nil, fmt.Errorf("error from the server side: %s", tResp.Message)
 	}
-	return &tResp.Data, nil
+	var ans TickerData
+	ans.Data = tResp.Data
+
+	return &ans, nil
 }
 
 // GetBook returns a pointer to a Book struct with the data given by
 // the api and an error message. It returns (nil, error) when an error
 // is raised and (*Book, nil) when the operation is successful.
-// The data fields are: price, amount and timestamp.
+// The data fields are: Price, Amount and Timestamp. To access these fields,
+// you can call them by *Book.Data[indexYouWant].FieldYouWant
 //
 // List of accepted Arguments:
 //   - required: Market, Type
@@ -447,10 +454,11 @@ func (client *Client) GetBook(arguments ...args.Argument) (*Book, error) {
 	return &book, nil
 }
 
-// GetTradesPage returns a pointer to a Trades struct with the data given
+// GetTrades returns a pointer to a Trades struct with the data given
 // by the api and an error message. It returns (nil, error) when an error
 // is raised and (*Trades, nil) when the operation is successful.
-// The data fields are market_taker, price, amount, tid, timestamp and market.
+// The data fields are MarketTaker, Price, Amount, Tid, Timestamp and Market.
+// You can access them by *Trades.Data[indexYouWant].FieldYouWant
 //
 // List of accepted Arguments:
 //   - required: Market
@@ -478,7 +486,9 @@ func (client *Client) GetTrades(arguments ...args.Argument) (*Trades, error) {
 	return &trades, nil
 }
 
-// Check if the error is nil when is used, because if it has an error, the response is wrong
+// GetTradesAllPages gives you all trades, if end argument is not provided, the maximum amount
+// of data will be trucated when it raises more than 100 elements. It is not sure it will give you
+// exactly 100 TradeData Data.
 func (client *Client) GetTradesAllPages(arguments ...args.Argument) ([]TradeData, error) {
 	req, err := makeReq([]string{"market"}, arguments...)
 	if err != nil {
@@ -501,8 +511,15 @@ func (client *Client) GetTradesAllPages(arguments ...args.Argument) ([]TradeData
 	allt := make([]TradeData, len(tPage.Data))
 	copy(allt, tPage.Data)
 	for tPage, err = tPage.GetNext(); err == nil; tPage, err = tPage.GetNext() {
-		time.Sleep(2 * time.Second)
+		time.Sleep(2 * time.Second) //because the server only accepts 30 calls per minute.
 		allt = append(allt, tPage.Data...)
+		// the data length raises 100 elements or more when "end" parameter is not provided,
+		// it breaks.
+		if _, ok := argsMap["end"]; !ok {
+			if len(allt) > 100 {
+				break
+			}
+		}
 	}
 	return allt, nil
 }
@@ -510,9 +527,10 @@ func (client *Client) GetTradesAllPages(arguments ...args.Argument) ([]TradeData
 // GetPrices return a pointer to a Prices struct with the data given by
 // the api and an error message. It returns (nil,error) when an error
 // is raised and (*Prices, nil) when the operation is successful.
-// The data field is a map[string][]Field, where the Field structure contains all the
-// information. To consult these fields you must call *Prices.Data.Ask[index].fieldYouWant or
-// *Prices.Data.Bid[index].fieldYouWant
+// The data fields are classified in two categories, Ask and Bid.
+// The fields are CandleId, OpenPrice, HightPrice, ClosePrice, LowPrice, VolumeSum
+// CandleDate and TickCount. To access the data you can call this way:
+// *Prices.Data.Ask[indexYouWant].FieldYouWant or *Prices.Data.Bid[indexYouWant].FieldYouWant
 //
 // List of accepted Arguments:
 //   - required: Market, Timeframe

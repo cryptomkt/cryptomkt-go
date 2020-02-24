@@ -29,6 +29,9 @@ type Ticker struct {
 	LastPrice string `json:"last_price"`
 	Market    string
 }
+type TickerData struct {
+	Data []Ticker
+}
 
 type BalancesResponse struct {
 	Status  string

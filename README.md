@@ -178,7 +178,8 @@ var apiSecret string = "YourApiSecretKey"
 
 client := conn.NewClient(apiKey, apiSecret)
 
-// Here you get the ticker list for the ethereum chilean pesos market 
+// Here you get the ticker list for the ethereum chilean pesos market. It is 
+// your choice to give the Market argument
 ticker, err := client.GetTicker(args.Market("ETHCLP"))
 
 if err != nil {
@@ -210,7 +211,8 @@ var apiSecret string = "YourApiSecretKey"
 
 client := conn.NewClient(apiKey,apiSecret)
 
-// Here you call with the requiered (Market and Type) arguments. See the godoc for more info 
+// Here you call with the requiered (Market and Type) arguments. See here: https://developers.cryptomkt.com/es/#ordenes
+// or the documentation for more info 
 book,err := client.GetBook(args.Market("ETHCLP"), args.Type("buy"))
 if err != nil{
     fmt.Errorf("Error getting orders book, %s", err)
@@ -234,7 +236,8 @@ var apiSecret string = "YourApiSecretKey"
 client := conn.NewClient(apiKey,apiSecret)
 
 // Here you call trades from bitcoin argentinean pesos market. 
-// You can see the optional arguments in the godoc
+// You can see the optional arguments here: https://developers.cryptomkt.com/es/#trades 
+// or in the documentation
 trades,err:= client.GetTrades(args.Market("BTCARS"))
 if err != nil {
      fmt.Errorf("Error getting trades, %s", err)
@@ -254,8 +257,8 @@ var apiSecret string = "YourApiSecretKey"
 client := conn.NewClient(apiKey,apiSecret)
 
 // Here you call prices from ethereum chilean pesos market and 
-// a timeframe of 60 minutes. You can see which timeframe values are
-// available in the godoc.
+// a timeframe of 60 minutes. Optional args here: https://developers.cryptomkt.com/es/#precios
+// or in the documentation
 prices,err := client.GetPrices(args.Market("ETHCLP"),args.TimeFrame("60"))
 if err != nil{
     fmt.Errorf("Error getting prices, %s", err)
