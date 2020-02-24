@@ -70,9 +70,9 @@ func TestTradesGetNext(t *testing.T) {
 	})
 	t.Run("optionals=yes", func(t *testing.T) {
 		trades, err := client.GetTrades(
-			args.Market("ETHCLP"), 
-			args.Start("2019-12-12"), 
-			args.End("2020-02-21"), 
+			args.Market("ETHCLP"),
+			args.Start("2019-12-12"),
+			args.End("2020-02-21"),
 			args.Page(0))
 		if err != nil {
 			t.Errorf("Error Trades: %s", err)
@@ -88,8 +88,8 @@ func TestGetTradesAllPages(t *testing.T) {
 	client := NewClient("NoKey", "NoSecret")
 	time.Sleep(3 * time.Second)
 	_, err := client.GetTradesAllPages(
-		args.Market("ETHCLP"), 
-		args.Start("2019-02-12"), 
+		args.Market("ETHCLP"),
+		args.Start("2019-02-12"),
 		args.End("2020-02-21"))
 	if err != nil {
 		t.Errorf("TestGetTradesAllPages failed: %s", err)

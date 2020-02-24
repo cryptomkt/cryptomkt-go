@@ -60,7 +60,7 @@ func TestBookGetNext(t *testing.T) {
 func TestGetBooks(t *testing.T) {
 	client := NewClient("NoKey", "NoSecret")
 	time.Sleep(3 * time.Second)
-	if _, err := client.GetBook(args.Market("ETHCLP"),args.Type("buy")); err != nil {
+	if _, err := client.GetBook(args.Market("ETHCLP"), args.Type("buy")); err != nil {
 		t.Errorf("failed to retrieve books, %s", err)
 	}
 }

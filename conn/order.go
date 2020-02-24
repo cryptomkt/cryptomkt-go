@@ -59,7 +59,7 @@ func (o *Order) Close() error {
 	if err != nil {
 		return fmt.Errorf("Close order %s failed: %s", o.Id, err)
 	}
-	o =  oClosed
+	o = oClosed
 	return nil
 }
 
@@ -76,7 +76,6 @@ func (o *Order) Refresh() error {
 	return nil
 }
 
-
 // Close closes every order in the order list.
 func (oList *OrderList) Close() error {
 	for i, order := range oList.Data {
@@ -90,7 +89,7 @@ func (oList *OrderList) Close() error {
 }
 
 // Refresh refreshes every order in the order list.
-// its an iterative implementation, so if an error is rised refreshing 
+// its an iterative implementation, so if an error is rised refreshing
 // some order, the preciding orders end refreshed.
 func (oList *OrderList) Refresh() error {
 	for i, order := range oList.Data {
@@ -106,7 +105,7 @@ func (oList *OrderList) Refresh() error {
 // GetPrevious get the previous page of the List of orders.
 // If there is no previous page, rise an error.
 func (o *OrderList) GetPrevious() (*OrderList, error) {
-	if o.pagination.Next == nil {
+	if o.pagination.Previous == nil {
 		return nil, fmt.Errorf("Previous page does not exist")
 	}
 	var call func(args ...args.Argument) (*OrderList, error)

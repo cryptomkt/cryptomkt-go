@@ -118,7 +118,7 @@ func (client *Client) PaymentOrdersAllPages(arguments ...args.Argument) ([]Payme
 	val = argsMap["end_date"]
 	neededArguments = append(neededArguments, args.EndDate(val))
 
-	poList, err := client.PaymentOrders(neededArguments...)
+	poList, err := client.GetPaymentOrders(neededArguments...)
 	if err != nil {
 		return nil, fmt.Errorf("Error in GetPaymentOrders: %s", err)
 	}

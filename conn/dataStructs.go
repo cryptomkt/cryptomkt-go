@@ -29,9 +29,6 @@ type Ticker struct {
 	LastPrice string `json:"last_price"`
 	Market    string
 }
-type TickerData struct {
-	Data []Ticker
-}
 
 type BalancesResponse struct {
 	Status  string
@@ -80,25 +77,4 @@ type InstantResponse struct {
 type Quantity struct {
 	Obtained string
 	Required string
-}
-
-type TransactionsResponse struct {
-	client     *Client
-	Status     string
-	Message    string
-	Pagination Pagination
-	Data       []Transaction
-}
-
-type Transaction struct {
-	Id         string
-	Type       int
-	Amount     string
-	FeePercent string `json:"fee_percent"`
-	FeeAmount  string `json:"fee_amount"`
-	Balance    string
-	Date       string
-	Hash       string
-	Address    string
-	Memo       string
 }
