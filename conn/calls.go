@@ -9,6 +9,7 @@ import (
 )
 
 // GetAccount gives the information of the cryptoMarket account.
+// Returns the data in an Account struct
 //
 // https://developers.cryptomkt.com/#cuenta
 func (client *Client) GetAccount() (*Account, error) {
@@ -25,6 +26,7 @@ func (client *Client) GetAccount() (*Account, error) {
 }
 
 // GetBalance returns the actual balance of the wallets of the client in CryptoMarket
+// Returns the a slice of Balance structs
 //
 // https://developers.cryptomkt.com/#obtener-balance
 func (client *Client) GetBalance() ([]Balance, error) {
@@ -47,8 +49,10 @@ func (client *Client) GetWallets() ([]Balance, error) {
 	return client.GetBalance()
 }
 
-// GetTransactions returns the movements of the wallets of the client
-// for a given currency.
+// GetTransactions returns the movements of the wallets of the client for a given currency.
+// Returns a TransactionList struct, where all the transactions are in the Data field
+// in a slice of Transaction. TransactionList supports Next() and Previous to get the
+// corresponding pages.
 //
 // List of accepted Arguments:
 //   - required: Currency
@@ -78,8 +82,10 @@ func (client *Client) GetTransactions(arguments ...args.Argument) (*TransactionL
 	return &tList, nil
 }
 
-// GetActiveOrders returns the list of active orders of the client
-// in a given market
+// GetActiveOrders returns the list of active orders of the client in a given market.
+// Retunrs an OrderList struct, where all the orders are in the Data field, in a slice of Order.
+// OrderLists supports Next() and Previous() to get the corresponding pages.
+// OrderLists also supports Close() and Refresh(), to close or refresh all the orders of the list.
 //
 // List of accepted Arguments:
 //   - required: Market
@@ -110,8 +116,10 @@ func (client *Client) GetActiveOrders(arguments ...args.Argument) (*OrderList, e
 	return &orderList, nil
 }
 
-// GetExecutedOrders return a list of the executed orders of the client
-// in a given market.
+// GetExecutedOrders return a list of the executed orders of the client in a given market.
+// Retunrs an OrderList struct, where all the orders are in the Data field, in a slice of Order.
+// OrderLists supports Next() and Previous() to get the corresponding pages.
+// OrderLists also supports Close() and Refresh(), to close or refresh all the orders of the list.
 //
 // List of accepted Arguments:
 //   - required: Market
@@ -144,6 +152,8 @@ func (client *Client) GetExecutedOrders(arguments ...args.Argument) (*OrderList,
 }
 
 // GetOrderStatus gives the status of an order given its id.
+// Returns an Order struct that supports Close() and Refresh() to cancel or update
+// the order respectively.
 //
 // List of accepted Arguments:
 //   - required: Id
@@ -165,6 +175,7 @@ func (client *Client) GetOrderStatus(arguments ...args.Argument) (*Order, error)
 }
 
 // GetInstant emulates an order in the current state of the Instant Exchange of CryptoMarket
+// Returns a Quantity struct holding the data.
 //
 // List of accepted Arguments:
 //   - required: Market, Type, Amount
@@ -185,6 +196,8 @@ func (client *Client) GetInstant(arguments ...args.Argument) (*Quantity, error) 
 }
 
 // CreateOrder creates an order to buy or sell in a market of CryptoMarket
+// Returns an Order struct that supports Close() and Refresh() to cancel or update
+// the order respectively.
 //
 // List of accepted Arguments:
 //   - required: Amount, Market, Price, Type
@@ -206,6 +219,8 @@ func (client *Client) CreateOrder(arguments ...args.Argument) (*Order, error) {
 }
 
 // CancelOrder cancel an order in CryptoMarket, given its id
+// Returns an Order struct that supports Close() and Refresh() to cancel or update
+// the order respectively.
 //
 // List of accepted Arguments:
 //   - required: Id
@@ -227,6 +242,7 @@ func (client *Client) CancelOrder(arguments ...args.Argument) (*Order, error) {
 }
 
 // CreateInstant makes an order in the Instant Exchange of CryptoMarket
+// Returns an error if something goes wrong
 //
 // List of accepted Arguments:
 //   - required: Market, Type, Amount
@@ -247,6 +263,7 @@ func (client *Client) CreateInstant(arguments ...args.Argument) error {
 }
 
 // RequestDeposit makes a deposit to a wallet of local currency
+// Returns an error if something goes wrong
 //
 // List of accepted Arguments:
 //   - required: Amount, BankAccount
@@ -268,6 +285,7 @@ func (client *Client) RequestDeposit(arguments ...args.Argument) error {
 }
 
 // RequestWithdrawal makes a withdrawal from a bank account of the client
+// Returns an error if something goes wrong
 //
 // List of accepted Arguments:
 //   - required: Amount, BankAccount
@@ -288,6 +306,7 @@ func (client *Client) RequestWithdrawal(arguments ...args.Argument) error {
 }
 
 // Transfer moves crypto between wallets
+// Returns an error if something goes wrong
 //
 // List of accepted Arguments:
 //   - required: Address, Amount, Currency
@@ -308,7 +327,8 @@ func (client *Client) Transfer(arguments ...args.Argument) error {
 
 }
 
-// NewOrder creates a payment order, and gives a QR and urls to make the payment
+// NewOrder creates a payment order, and gives a QR and urls to make the payment.
+// Returns a PaymentOrder struct that supports Refresh(), to update its information.
 //
 // List of accepted Arguments:
 //   - required: ToReceive, ToReceiveCurrency, PaymentReceiver
@@ -328,7 +348,8 @@ func (client *Client) NewOrder(arguments ...args.Argument) (*PaymentOrder, error
 	return &poResp.Data, nil
 }
 
-// CreateWallet creates a wallet to pay a payment order
+// CreateWallet creates a wallet to pay a payment order.
+// Returns a PaymentOrder struct that supports Refresh(), to update its information.
 //
 // List of accepted Arguments:
 //   - required: Id, Token, Wallet
@@ -348,7 +369,8 @@ func (client *Client) CreateWallet(arguments ...args.Argument) (*PaymentOrder, e
 	return &poResp.Data, nil
 }
 
-// GetPaymentOrders returns the generated payment orders
+// GetPaymentOrders returns the generated payment orders.
+// Returns a PaymentOrder struct that supports Refresh(), to update its information.
 //
 // List of accepted Arguments:
 //   - required: StartDate, EndDate
@@ -380,7 +402,8 @@ func (client *Client) GetPaymentOrders(arguments ...args.Argument) (*PaymentOrde
 	return &paymentOrderList, nil
 }
 
-// GetPaymentStatus gives the status of a payment order
+// GetPaymentStatus gives the status of a payment order.
+// Returns a PaymentOrder struct that supports Refresh(), to update its information.
 //
 // List of accepted Arguments:
 //   - required: Id
@@ -402,7 +425,8 @@ func (client *Client) GetPaymentStatus(arguments ...args.Argument) (*PaymentOrde
 
 // Public Endpoints:
 
-// GetMarkets returns list of available markets in cryptomarket
+
+// GetMarkets returns the available markets in cryptomarket as a string slice
 //
 // https://developers.cryptomkt.com/mercado
 func (client *Client) GetMarkets() ([]string, error) {
