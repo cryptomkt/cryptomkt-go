@@ -28,12 +28,11 @@ type Transaction struct {
 }
 
 type TransactionList struct {
-	currency string
-	client *Client
+	currency   string
+	client     *Client
 	pagination Pagination
-	data []Transaction
+	Data       []Transaction
 }
-
 
 // GetPrevious get the previous page of the Transaction list
 // If there is no previous page, rise an error.

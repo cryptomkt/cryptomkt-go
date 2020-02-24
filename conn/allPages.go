@@ -166,8 +166,8 @@ func (client *Client) GetAllTransactions(argus ...args.Argument) ([]Transaction,
 	if err != nil {
 		return nil, fmt.Errorf("Error in GetTransactions: %s", err)
 	}
-	allTrans := make([]Transaction, len(trans.Data...))
-	copy(allTrans, trans.Data...)
+	allTrans := make([]Transaction, len(trans.Data))
+	copy(allTrans, trans.Data)
 	for trans, err = trans.GetNext(); err == nil; trans, err = trans.GetNext() {
 		time.Sleep(2 * time.Second)
 		allTrans = append(allTrans, trans.Data...)
