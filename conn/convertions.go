@@ -34,7 +34,31 @@ func cleanMap(aMap *map[string]string) {
 	}
 }
 
-func OrderToMap(order Order) map[string]string {
+func (ticker *Ticker) ToMap() map[string]string {
+	asMap := make(map[string]string)
+	asMap["high"] = ticker.High
+	asMap["volume"] = ticker.Volume
+	asMap["low"] = ticker.Low
+	asMap["ask"] = ticker.Ask
+	asMap["timestamp"] = ticker.Timestamp
+	asMap["bid"] = ticker.Bid
+	asMap["last_price"] = ticker.LastPrice
+	asMap["market"] = ticker.Market
+	cleanMap(&asMap)
+	return asMap
+}
+
+func (balance *Balance) ToMap() map[string]string {
+	asMap := make(map[string]string)
+	asMap["wallet"] = balance.Wallet
+	asMap["available"] = balance.Available
+	asMap["balance"] = balance.Balance
+	cleanMap(&asMap)
+	return asMap
+}
+
+
+func (order *Order) ToMap() map[string]string {
 	asMap := make(map[string]string)
 	asMap["id"] = order.Id
 	asMap["status"] = order.Status
@@ -53,7 +77,7 @@ func OrderToMap(order Order) map[string]string {
 	return asMap
 }
 
-func PaymentOrderToMap(payment PaymentOrder) map[string]string {
+func (payment *PaymentOrder) ToMap() map[string]string {
 	asMap := make(map[string]string)
 	asMap["id"] = payment.Id
 	asMap["external_id"] = payment.ExternalId
@@ -79,7 +103,7 @@ func PaymentOrderToMap(payment PaymentOrder) map[string]string {
 	return asMap
 }
 
-func TransactionToMap(transaction Transaction) map[string]string {
+func (transaction *Transaction) ToMap() map[string]string {
 	asMap := make(map[string]string)
 	asMap["id"] = transaction.Id
 	asMap["type"] = strconv.Itoa(transaction.Type)
@@ -95,7 +119,7 @@ func TransactionToMap(transaction Transaction) map[string]string {
 	return asMap
 }
 
-func QuantityToMap(instant Quantity) map[string]string {
+func (instant *Quantity) ToMap() map[string]string {
 	asMap := make(map[string]string)
 	asMap["obtained"] = instant.Obtained
 	asMap["required"] = instant.Required
@@ -103,6 +127,14 @@ func QuantityToMap(instant Quantity) map[string]string {
 	return asMap
 }
 
-func InstantToMap(instant Quantity) map[string]string {
-	return QuantityToMap(instant)
+func (trade *TradeData) ToMap() map[string]string {
+	asMap := make(map[string]string)
+	asMap["market_taker"] = trade.MarketTaker
+	asMap["price"] = trade.Price
+	asMap["amount"] = trade.Amount
+	asMap["tid"] = trade.Tid
+	asMap["timestamp"] = trade.Timestamp
+	asMap["market"] = trade.Market
+	cleanMap(&asMap)
+	return asMap
 }
