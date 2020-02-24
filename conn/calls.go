@@ -420,15 +420,17 @@ func (client *Client) GetMarkets() ([]string, error) {
 	return mResp.Data, nil
 }
 
-// GetTicker returns a pointer to a Ticker struct with the data given by the api and an error message. It returns (nil,error)
-//when an error is raised and (*Ticker, nil) when the operation is successful. The data fields are: High, Low, Ask, Bid,
-//LastPrice, Volume, Market and Timestamp
+// GetTicker returns an array of TickerData struct with the data given by th api.
+// It returns (nil,error) when an error is raised and (*TickerData, nil)
+// when the operation is successful. The data fields are: High, Low, Ask, Bid,
+// LastPrice, Volume, Market and Timestamp. To access them, call this way:
+// *TicketData.Data[indexYouWant].FieldYouWant
 //
 // List of accepted Arguments:
 //   - required: none
 //   - optional: Market
 // https://developers.cryptomkt.com/#ticker
-func (client *Client) GetTicker(arguments ...args.Argument) (*[]Ticker, error) {
+func (client *Client) GetTicker(arguments ...args.Argument) ([]Ticker, error) {
 	resp, err := client.getReq("ticker", "GetTicker", []string{}, arguments...)
 	if err != nil {
 		return nil, fmt.Errorf("error making the request: %s", err)
@@ -438,13 +440,14 @@ func (client *Client) GetTicker(arguments ...args.Argument) (*[]Ticker, error) {
 	if tResp.Status == "error" {
 		return nil, fmt.Errorf("error from the server side: %s", tResp.Message)
 	}
-	return &tResp.Data, nil
+	return tResp.Data, nil
 }
 
 // GetBook returns a pointer to a Book struct with the data given by
 // the api and an error message. It returns (nil, error) when an error
 // is raised and (*Book, nil) when the operation is successful.
-// The data fields are: price, amount and timestamp.
+// The data fields are: Price, Amount and Timestamp. To access these fields,
+// you can call them by *Book.Data[indexYouWant].FieldYouWant
 //
 // List of accepted Arguments:
 //   - required: Market, Type
@@ -476,7 +479,8 @@ func (client *Client) GetBook(arguments ...args.Argument) (*Book, error) {
 // GetTrades returns a pointer to a Trades struct with the data given
 // by the api and an error message. It returns (nil, error) when an error
 // is raised and (*Trades, nil) when the operation is successful.
-// The data fields are market_taker, price, amount, tid, timestamp and market.
+// The data fields are MarketTaker, Price, Amount, Tid, Timestamp and Market.
+// You can access them by *Trades.Data[indexYouWant].FieldYouWant
 //
 // List of accepted Arguments:
 //   - required: Market
@@ -508,6 +512,10 @@ func (client *Client) GetTrades(arguments ...args.Argument) (*Trades, error) {
 // GetPrices return a pointer to a Prices struct with the data given by
 // the api and an error message. It returns (nil,error) when an error
 // is raised and (*Prices, nil) when the operation is successful.
+// The data fields are classified in two categories, Ask and Bid.
+// The fields are CandleId, OpenPrice, HightPrice, ClosePrice, LowPrice, VolumeSum
+// CandleDate and TickCount. To access the data you can call this way:
+// *Prices.Data.Ask[indexYouWant].FieldYouWant or *Prices.Data.Bid[indexYouWant].FieldYouWant
 //
 // List of accepted Arguments:
 //   - required: Market, Timeframe

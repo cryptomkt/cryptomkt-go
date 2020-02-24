@@ -2,13 +2,17 @@ package conn
 
 import (
 	"fmt"
-	"github.com/cryptomkt/cryptomkt-go/args"
 	"time"
+
+	"github.com/cryptomkt/cryptomkt-go/args"
 )
 
 // GetTradesAllPages returns a pointer to a Trades struct with the data given
 // by the api and an error message. It returns (nil, error) when an error
-// is raised and (*Trades, nil) when the operation is successful.
+// is raised and (*Trades, nil) when the operation is successful. If end
+// argument is not provided, the maximum data amount will be trucated when
+// it raises more than 100 elements. It is not sure it will give you
+// exactly 100 TradeData Data.
 //
 // List of accepted Arguments:
 //   - required: Market
@@ -21,9 +25,7 @@ func (client *Client) GetTradesAllPages(arguments ...args.Argument) ([]TradeData
 	}
 	neededArguments := []args.Argument{args.Page(0), args.Limit(100)}
 	argsMap := req.GetArguments()
-
 	neededArguments = append(neededArguments, args.Market(argsMap["market"]))
-
 	if val, ok := argsMap["start"]; ok {
 		neededArguments = append(neededArguments, args.Start(val))
 	}
@@ -37,10 +39,16 @@ func (client *Client) GetTradesAllPages(arguments ...args.Argument) ([]TradeData
 	}
 	allt := make([]TradeData, len(tPage.Data))
 	copy(allt, tPage.Data)
-
 	for tPage, err = tPage.GetNext(); err == nil; tPage, err = tPage.GetNext() {
-		time.Sleep(2 * time.Second)
+		time.Sleep(2 * time.Second) //because the server only accepts 30 calls per minute.
 		allt = append(allt, tPage.Data...)
+		// When the data length raises 100 elements or more when "end" parameter is not provided,
+		// it breaks. This block limit the number of pages
+		if _, ok := argsMap["end"]; !ok {
+			if len(allt) > 100 {
+				break
+			}
+		}
 	}
 	return allt, nil
 }
@@ -119,6 +127,11 @@ func (client *Client) PaymentOrdersAllPages(arguments ...args.Argument) ([]Payme
 	for poList, err = poList.GetNext(); err == nil; poList, err = poList.GetNext() {
 		time.Sleep(2 * time.Second)
 		allpo = append(allpo, poList.Data...)
+		// When the data length raises 100 elements or more when "end" parameter is not provided,
+		// it breaks. This "if" block limit the number of pages
+		if len(allpo) > 100 {
+			break
+		}
 	}
 	return allpo, nil
 }
@@ -130,6 +143,12 @@ func getAllOrders(oList *OrderList) []Order {
 		time.Sleep(2 * time.Second)
 		oList.setClientInOrders()
 		allo = append(allo, oList.Data...)
+
+		// When the data length raises 100 elements or more when "end" parameter is not provided,
+		// it breaks. This "if" block limit the number of pages
+		if len(allo) > 100 {
+			break
+		}
 	}
 	return allo
 }

@@ -73,7 +73,7 @@ if err != nil {
 }
 ```
 
-If we want to go over a long range of trade data of a market, we can call `client.GetTrades` to get a list of `Trades`, this list can be one page of many, so once we read the data on the page, to get the rest of the pages, we can call over and over `GetNext()` over the struct, until an `Next page does not exist` error is raised. Replace `GetObject` with the appropriate method. The structs that support this functionality so far are Trades, Book and Prices, Orders and Payments. Here is in code:
+If we want to go over a long range of trade data of a market, we can call `client.GetTrades` to get a list of `Trades`, this list can be one page of many. When we read the data of one single page, to get the rest of the pages, we can call over and over `GetNext()` over the struct, until an `Next page does not exist` error is raised. Replace `GetObject` with the appropriate method. The structs that support this functionality so far are Trades, Book, Prices, Orders and Payments. Here is in code:
 
 ```golang
 import (
@@ -157,7 +157,8 @@ var apiSecret string = "YourApiSecretKey"
 
 client := conn.NewClient(apiKey, apiSecret)
 
-// Here you get the ticker list for the ethereum chilean pesos market 
+// Here you get the ticker list for the ethereum chilean pesos market. It is 
+// your choice to give the Market argument
 ticker, err := client.GetTicker(args.Market("ETHCLP"))
 
 if err != nil {
@@ -189,7 +190,8 @@ var apiSecret string = "YourApiSecretKey"
 
 client := conn.NewClient(apiKey,apiSecret)
 
-// Here you call with the requiered (Market and Type) arguments. See the godoc for more info 
+// Here you call with the requiered (Market and Type) arguments. See here: https://developers.cryptomkt.com/es/#ordenes
+// or the documentation for more info 
 book,err := client.GetBook(args.Market("ETHCLP"), args.Type("buy"))
 if err != nil{
     fmt.Errorf("Error getting orders book, %s", err)
@@ -213,7 +215,8 @@ var apiSecret string = "YourApiSecretKey"
 client := conn.NewClient(apiKey,apiSecret)
 
 // Here you call trades from bitcoin argentinean pesos market. 
-// You can see the optional arguments in the godoc
+// You can see the optional arguments here: https://developers.cryptomkt.com/es/#trades 
+// or in the documentation
 trades,err:= client.GetTrades(args.Market("BTCARS"))
 if err != nil {
      fmt.Errorf("Error getting trades, %s", err)
@@ -233,8 +236,8 @@ var apiSecret string = "YourApiSecretKey"
 client := conn.NewClient(apiKey,apiSecret)
 
 // Here you call prices from ethereum chilean pesos market and 
-// a timeframe of 60 minutes. You can see which timeframe values are
-// available in the godoc.
+// a timeframe of 60 minutes. Optional args here: https://developers.cryptomkt.com/es/#precios
+// or in the documentation
 prices,err := client.GetPrices(args.Market("ETHCLP"),args.TimeFrame("60"))
 if err != nil{
     fmt.Errorf("Error getting prices, %s", err)
