@@ -73,7 +73,7 @@ if err != nil {
 }
 ```
 
-If we want to go over a long range of trade data of a market, we can call `client.GetTrades` to get a list of `Trades`, this list can be one page of many, so once we read the data on the page, to get the rest of the pages, we can call over and over `GetNext()` over the struct, until an `Next page does not exist` error is raised. Replace `GetObject` with the appropriate method. The structs that support this functionality so far are Trades, Book and Prices, Orders and Payments. Here is in code:
+If we want to go over a long range of trade data of a market, we can call `client.GetTrades` to get a list of `Trades`, this list can be one page of many. When we read the data of one single page, to get the rest of the pages, we can call over and over `GetNext()` over the struct, until an `Next page does not exist` error is raised. Replace `GetObject` with the appropriate method. The structs that support this functionality so far are Trades, Book, Prices, Orders and Payments. Here is in code:
 
 ```golang
 import (
@@ -117,27 +117,6 @@ order.Refresh()
 
 // and to close it
 order.Close()
-```
-
-To protect from attacks, Cryptomarket only accepts a maximum amount of message per minute. If you go over this number, your ip is blocked so you can't keep making request using neither the sdk nor the api. In order to keep your ip usable, big requests (those ending in AllPages) will make one request to the server evey 2 seconds. So, the bigger the request, the slower. Here is an example
-
-```golang
-import (
-    "github.com/cryptomkt/cryptomkt-go/conn"
-    "github.com/cryptomkt/cryptomkt-go/args"
-)
-client := conn.NewClient(apiKey, apiSecret)
-
-// the bigger the slower, if you just want one or two pages, use the usual call insted
-trades, err := client.GetTradesAllPages(
-    args.Market("ETHARS"),
-    args.Start("2019-05-10"),
-    args.End("2019-12-10"),
-)
-if err != nil {
-    fmt.Errorf("Error getting the trades: %s", err)
-}
-
 ```
 
 ## API Calls Examples

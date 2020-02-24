@@ -2,7 +2,6 @@ package conn
 
 import (
 	"fmt"
-	"time"
 	"github.com/cryptomkt/cryptomkt-go/args"
 )
 
@@ -51,55 +50,36 @@ type PaymentOrdersResponse struct {
 	Data       []PaymentOrder
 }
 
-func (po *PaymentOrderList) GetPrevious() (*PaymentOrderList, error) {
-	if po.pagination.Next == nil {
-		return nil, fmt.Errorf("Next page does not exist")
+// GetPrevious get the previous page of the payment order request.
+// If there is no previous page, raise an error.
+func (poList *PaymentOrderList) GetPrevious() (*PaymentOrderList, error) {
+	if poList.pagination.Previous == nil {
+		return nil, fmt.Errorf("Previous page does not exist")
 	}
-	return po.client.PaymentOrders(
-		args.StartDate(po.startDate),
-		args.EndDate(po.endDate),
-		args.Page(int(po.pagination.Previous.(float64))),
-		args.Limit(po.pagination.Limit))
+	previouspoList, err := poList.client.PaymentOrders(
+		args.StartDate(poList.startDate),
+		args.EndDate(poList.endDate),
+		args.Page(int(poList.pagination.Previous.(float64))),
+		args.Limit(poList.pagination.Limit))
+	if err != nil {
+		return nil, fmt.Errorf("error getting the previous page: %s", err)
+	}
+	return previouspoList, nil
 }
 
-func (po *PaymentOrderList) GetNext() (*PaymentOrderList, error) {
-	if po.pagination.Next == nil {
+// GetNext get the next page of the payment order request.
+// If there is no next page, raise an error.
+func (poList *PaymentOrderList) GetNext() (*PaymentOrderList, error) {
+	if poList.pagination.Next == nil {
 		return nil, fmt.Errorf("Next page does not exist")
 	}
-	return po.client.PaymentOrders(
-		args.StartDate(po.startDate),
-		args.EndDate(po.endDate),
-		args.Page(int(po.pagination.Next.(float64))),
-		args.Limit(po.pagination.Limit))
-}
-
-// PaymentOrdersAllPages get all the payment orders between the two given dates.
-// Returns an array of PaymentOrder
-//
-// List of accepted Arguments:
-//   - required: StartDate, EndDate
-//   - optional: none
-func (client *Client) PaymentOrdersAllPages(arguments... args.Argument) ([]PaymentOrder, error) {
-	req, err := makeReq([]string{"start_date", "end_date"}, arguments...)
+	nextpoList, err := poList.client.PaymentOrders(
+		args.StartDate(poList.startDate),
+		args.EndDate(poList.endDate),
+		args.Page(int(poList.pagination.Next.(float64))),
+		args.Limit(poList.pagination.Limit))
 	if err != nil {
-		return nil, fmt.Errorf("Error in GetPaymentOrders: %s", err)
+		return nil, fmt.Errorf("error getting the next page: %s", err)
 	}
-	neededArguments := []args.Argument{args.Page(0), args.Limit(100)}
-	argsMap := req.GetArguments()
-	val := argsMap["start_date"]
-	neededArguments = append(neededArguments, args.StartDate(val))
-	val = argsMap["end_date"]
-	neededArguments = append(neededArguments, args.EndDate(val))
-	
-	poList, err := client.PaymentOrders(neededArguments...)
-	if err != nil {
-		return nil, fmt.Errorf("Error in GetPaymentOrders: %s", err)
-	}
-	allpo := make([]PaymentOrder, len(poList.Data))
-	copy(allpo, poList.Data)
-	for poList, err = poList.GetNext(); err == nil; poList, err = poList.GetNext() {
-		time.Sleep(2 * time.Second)
-		allpo = append(allpo, poList.Data...)
-	}
-	return allpo, nil
+	return nextpoList, nil
 }

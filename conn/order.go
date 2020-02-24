@@ -2,7 +2,6 @@ package conn
 
 import (
 	"fmt"
-	"time"
 	"github.com/cryptomkt/cryptomkt-go/args"
 )
 
@@ -51,6 +50,10 @@ type Amount struct {
 	Executed  string
 }
 
+// Close closes the calling order, and changes the order to reflect
+// the new state of the order, after being closed.
+// Calls CancelOrder with the asociated client of the order.
+// https://developers.cryptomkt.com/es/#cancelar-una-orden
 func (o *Order) Close() error {
 	oClosed, err := o.client.CancelOrder(args.Id(o.Id))
 	if err != nil {
@@ -60,6 +63,10 @@ func (o *Order) Close() error {
 	return nil
 }
 
+// Refresh refreshes the calling order, and changes it to be the actual
+// state of the order.
+// Calls GetOrderStatus with the asociated client of the order.
+// https://developers.cryptomkt.com/es/#estado-de-orden
 func (o *Order) Refresh() error {
 	oRefreshed, err := o.client.GetOrderStatus(args.Id(o.Id))
 	if err != nil {
@@ -69,6 +76,8 @@ func (o *Order) Refresh() error {
 	return nil
 }
 
+
+// Close closes every order in the order list.
 func (oList *OrderList) Close() error {
 	for i, order := range oList.Data {
 		oClosed, err := oList.client.CancelOrder(args.Id(order.Id))
@@ -80,6 +89,9 @@ func (oList *OrderList) Close() error {
 	return nil
 }
 
+// Refresh refreshes every order in the order list.
+// its an iterative implementation, so if an error is rised refreshing 
+// some order, the preciding orders end refreshed.
 func (oList *OrderList) Refresh() error {
 	for i, order := range oList.Data {
 		oRefreshed, err := oList.client.GetOrderStatus(args.Id(order.Id))
@@ -91,20 +103,27 @@ func (oList *OrderList) Refresh() error {
 	return nil
 }
 
+// GetPrevious get the previous page of the List of orders.
+// If there is no previous page, rise an error.
 func (o *OrderList) GetPrevious() (*OrderList, error) {
 	if o.pagination.Next == nil {
 		return nil, fmt.Errorf("Previous page does not exist")
 	}
+	var call func(args ...args.Argument) (*OrderList, error)
 	if o.caller == "active_orders" {
-		return o.client.GetActiveOrders(
-			args.Market(o.market),
-			args.Page(int(o.pagination.Previous.(float64))),
-			args.Limit(o.pagination.Limit))
+		call = o.client.GetActiveOrders
+	} else { // caller is execute_order
+		call = o.client.GetExecutedOrders
 	}
-	return o.client.GetExecutedOrders(
+	oList, err := call(
 		args.Market(o.market),
 		args.Page(int(o.pagination.Previous.(float64))),
 		args.Limit(o.pagination.Limit))
+	if err != nil {
+		return nil, fmt.Errorf("error getting the previous page: %s", err)
+	}
+	oList.setClientInOrders()
+	return oList, nil
 }
 
 // GetNext lets you go to the next page if it exists, returns (*Prices, nil) if
@@ -113,67 +132,21 @@ func (o *OrderList) GetNext() (*OrderList, error) {
 	if o.pagination.Next == nil {
 		return nil, fmt.Errorf("Next page does not exist")
 	}
+	var call func(args ...args.Argument) (*OrderList, error)
 	if o.caller == "active_orders" {
-		return o.client.GetActiveOrders(
-			args.Market(o.market),
-			args.Page(int(o.pagination.Next.(float64))),
-			args.Limit(o.pagination.Limit))
+		call = o.client.GetActiveOrders
+	} else { // caller is execute_order
+		call = o.client.GetExecutedOrders
 	}
-	return o.client.GetExecutedOrders(
+	oList, err := call(
 		args.Market(o.market),
 		args.Page(int(o.pagination.Next.(float64))),
 		args.Limit(o.pagination.Limit))
-}
-
-// GetAllPaymentOrders get all the payment orders between the two given dates.
-// Returns an array of PaymentOrder
-//
-// List of accepted Arguments:
-//   - required: Market
-//   - optional: none
-func (client *Client) GetExecutedOrdersAllPages(arguments... args.Argument) ([]Order, error) {
-	req, err := makeReq([]string{"market"}, arguments...)
 	if err != nil {
-		return nil, fmt.Errorf("Error in GetAllExecutedOrders: %s", err)
+		return nil, fmt.Errorf("error getting the next page: %s", err)
 	}
-	neededArguments := []args.Argument{args.Page(0), args.Limit(100)}
-	argsMap := req.GetArguments()
-	val := argsMap["market"]
-	neededArguments = append(neededArguments, args.Market(val))
-
-	oList, err := client.GetExecutedOrders(neededArguments...)
-	if err != nil {
-		return nil, fmt.Errorf("Error in GetAllExecutedOrders: %s", err)
-	}
-	return getAllOrders(oList), nil
-}
-
-func (client *Client) GetActiveOrdersAllPages(arguments... args.Argument) ([]Order, error) {
-	req, err := makeReq([]string{"market"}, arguments...)
-	if err != nil {
-		return nil, fmt.Errorf("Error in GetAllActiveOrders: %s", err)
-	}
-	neededArguments := []args.Argument{args.Page(0), args.Limit(100)}
-	argsMap := req.GetArguments()
-	val := argsMap["market"]
-	neededArguments = append(neededArguments, args.Market(val))
-
-	oList, err := client.GetActiveOrders(neededArguments...)
-	if err != nil {
-		return nil, fmt.Errorf("Error in GetAllActiveOrders: %s", err)
-	}
-	return getAllOrders(oList), nil
-}
-
-func getAllOrders(oList *OrderList) ([]Order) {
-	allo := make([]Order, len(oList.Data))
-	copy(allo, oList.Data)
-	for oList, err := oList.GetNext(); err == nil; oList, err = oList.GetNext() {
-		time.Sleep(2 * time.Second)
-		oList.setClientInOrders()
-		allo = append(allo, oList.Data...)
-	}
-	return allo
+	oList.setClientInOrders()
+	return oList, nil
 }
 
 func (oList *OrderList) setClientInOrders() {

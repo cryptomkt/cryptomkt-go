@@ -377,12 +377,13 @@ func (client *Client) GetPaymentStatus(arguments ...args.Argument) (*PaymentOrde
 
 //
 
-// GetMarket returns a pointer to a MarketStruct with the field "data" given by the api. The data given is
+// GetMarkets returns a pointer to a MarketStruct with the field "data" given by the api. The data given is
 // an array of strings indicating the markets in cryptomkt. This function returns two values.
 // The first is a reference to the struct created and the second is a error message. It returns (nil, error)
 // when an error is raised and when the call is correct, it returns a slice of strings with the markets in
 // cryptomkt and a nil error.
 // This method does not accept any arguments.
+// https://developers.cryptomkt.com/es/mercado
 func (client *Client) GetMarkets() ([]string, error) {
 	resp, err := client.get("market", requests.NewEmptyReq())
 	if err != nil {
@@ -406,7 +407,8 @@ func (client *Client) GetMarkets() ([]string, error) {
 // List of accepted Arguments:
 //   - required: none
 //   - optional: Market
-func (client *Client) GetTicker(arguments ...args.Argument) (*TickerData, error) {
+// https://developers.cryptomkt.com/es/#ticker
+func (client *Client) GetTicker(arguments ...args.Argument) (*[]Ticker, error) {
 	resp, err := client.getReq("ticker", "GetTicker", []string{}, arguments...)
 	if err != nil {
 		return nil, fmt.Errorf("error making the request: %s", err)
@@ -431,6 +433,7 @@ func (client *Client) GetTicker(arguments ...args.Argument) (*TickerData, error)
 // List of accepted Arguments:
 //   - required: Market, Type
 //   - optional: Page, Limit
+// https://developers.cryptomkt.com/es/#ordenes
 func (client *Client) GetBook(arguments ...args.Argument) (*Book, error) {
 	req, err := makeReq([]string{"market", "type"}, arguments...)
 	if err != nil {
@@ -463,6 +466,7 @@ func (client *Client) GetBook(arguments ...args.Argument) (*Book, error) {
 // List of accepted Arguments:
 //   - required: Market
 //   - optional: Start, End, Page, Limit
+// https://developers.cryptomkt.com/es/#trades
 func (client *Client) GetTrades(arguments ...args.Argument) (*Trades, error) {
 	req, err := makeReq([]string{"market"}, arguments...)
 	if err != nil {
@@ -486,8 +490,8 @@ func (client *Client) GetTrades(arguments ...args.Argument) (*Trades, error) {
 	return &trades, nil
 }
 
-// GetTradesAllPages gives you all trades, if end argument is not provided, the maximum amount
-// of data will be trucated when it raises more than 100 elements. It is not sure it will give you
+// GetTradesAllPages gives you all trades, if end argument is not provided, the maximum data
+// amount will be trucated when it raises more than 100 elements. It is not sure it will give you
 // exactly 100 TradeData Data.
 func (client *Client) GetTradesAllPages(arguments ...args.Argument) ([]TradeData, error) {
 	req, err := makeReq([]string{"market"}, arguments...)
@@ -535,6 +539,7 @@ func (client *Client) GetTradesAllPages(arguments ...args.Argument) ([]TradeData
 // List of accepted Arguments:
 //   - required: Market, Timeframe
 //   - optional: Page, Limit
+// https://developers.cryptomkt.com/es/#precios
 func (client *Client) GetPrices(arguments ...args.Argument) (*Prices, error) {
 	req, err := makeReq([]string{"market", "timeframe"}, arguments...)
 	if err != nil {
