@@ -1,10 +1,38 @@
 package conn
 
+import (
+	"bytes"
+	"strconv"
+)
+
 type Pagination struct {
 	Previous interface{}
 	Next     interface{}
 	Limit    int
 	Page     int
+}
+
+func (pagination *Pagination) String() string {
+	var b bytes.Buffer
+	b.WriteString("Pagination{")
+	b.WriteString("previous:")
+	if pagination.Previous != nil {
+		b.WriteString(strconv.FormatFloat(pagination.Previous.(float64), 'f', -1, 64))
+	} else {
+		b.WriteString("nil")
+	}
+	b.WriteString(" next:")
+	if pagination.Next != nil {
+		b.WriteString(strconv.FormatFloat(pagination.Next.(float64), 'f', -1, 64))
+	} else {
+		b.WriteString("nil")
+	}
+	b.WriteString(" limit:")
+	b.WriteString(strconv.Itoa(pagination.Limit))
+	b.WriteString(" page:")
+	b.WriteString(strconv.Itoa(pagination.Page))
+	b.WriteString("}")
+	return b.String()
 }
 
 type MarketListResponse struct {
