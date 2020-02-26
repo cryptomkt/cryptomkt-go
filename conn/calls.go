@@ -64,7 +64,7 @@ func (client *Client) GetTransactions(arguments ...args.Argument) (*TransactionL
 	if err != nil {
 		return nil, fmt.Errorf("Error in GetTransactions: %s", err)
 	}
-	resp, err := client.post("transactions", req)
+	resp, err := client.get("transactions", req)
 	if err != nil {
 		return nil, fmt.Errorf("error making the request: %s", err)
 	}
