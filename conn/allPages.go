@@ -100,42 +100,6 @@ func (client *Client) GetExecutedOrdersAllPages(arguments ...args.Argument) ([]O
 	return getAllOrders(oList), nil
 }
 
-// PaymentOrdersAllPages get all the payment orders between the two given dates.
-// Returns an array of PaymentOrder
-//
-// List of accepted Arguments:
-//   - required: StartDate, EndDate
-//   - optional: none
-func (client *Client) PaymentOrdersAllPages(arguments ...args.Argument) ([]PaymentOrder, error) {
-	req, err := makeReq([]string{"start_date", "end_date"}, arguments...)
-	if err != nil {
-		return nil, fmt.Errorf("Error in PaymentOrdersAllPages: %s", err)
-	}
-	neededArguments := []args.Argument{args.Page(0), args.Limit(100)}
-	argsMap := req.GetArguments()
-	val := argsMap["start_date"]
-	neededArguments = append(neededArguments, args.StartDate(val))
-	val = argsMap["end_date"]
-	neededArguments = append(neededArguments, args.EndDate(val))
-
-	poList, err := client.GetPaymentOrders(neededArguments...)
-	if err != nil {
-		return nil, fmt.Errorf("Error in GetPaymentOrders: %s", err)
-	}
-	allpo := make([]PaymentOrder, len(poList.Data))
-	copy(allpo, poList.Data)
-	for poList, err = poList.GetNext(); err == nil; poList, err = poList.GetNext() {
-		time.Sleep(2 * time.Second)
-		allpo = append(allpo, poList.Data...)
-		// When the data length raises 100 elements or more,
-		// it breaks. This "if" block limit the number of pages
-		if len(allpo) > 100 {
-			break
-		}
-	}
-	return allpo, nil
-}
-
 func getAllOrders(oList *OrderList) []Order {
 	allo := make([]Order, len(oList.Data))
 	copy(allo, oList.Data)

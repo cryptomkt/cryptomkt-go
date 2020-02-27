@@ -97,7 +97,7 @@ previousPage2, err := previousPage.GetPrevious()
 
 ```
 
-Also you can close and refresh and close orders directly from their objects
+Also you can close and refresh and close orders directly from their structures
 
 ```golang
 import (
@@ -113,10 +113,16 @@ client := conn.NewClient(apiKey,apiSecret)
 order, err := client.OrderStatus(args.Id("M103966"))
 
 // to update the order
-order.Refresh()
+order, err = order.Refresh()
+if err != nil {
+    fmt.Errorf("error while updating the order: %v", err)
+}
 
 // and to close it
-order.Close()
+order, err = order.Close()
+if err != nil {
+    fmt.Errorf("error while closing the order: %v", err)
+}
 ```
 
 ## API Calls Examples
@@ -348,24 +354,3 @@ if err != nil{
 }
 
 ```
-
-**Create Wallet**
-
-
-```golang
-import (
-    "github.com/cryptomkt/cryptomkt-go/conn"
-    "github.com/cryptomkt/cryptomkt-go/args"
-)
-client := conn.NewClient(apiKey, apiSecret)
-
-err := client.CreateWallet(
-    args.Id("P2023132"),
-    args.Token("xToY232aheSt8F"),
-    args.Wallet("ETH"),
-)
-if err != nil {
-    fmt.Errorf("Error creating the Wallet: %s", err)
-}
-```
-
