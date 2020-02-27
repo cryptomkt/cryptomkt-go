@@ -99,10 +99,18 @@ type BankAccount struct {
 type InstantResponse struct {
 	Status  string
 	Message string
-	Data    Quantity
+	Data    Instant
 }
 
-type Quantity struct {
-	Obtained string
-	Required string
+type Instant struct {
+	Obtained float64
+	Required float64
+}
+
+func (instant *Instant) String() string {
+	return "instant{obtained:" + 
+	strconv.FormatFloat(instant.Obtained, 'f', -1, 64) +
+	" required:" +
+	strconv.FormatFloat(instant.Required, 'f', -1, 64) + 
+	"}"
 }

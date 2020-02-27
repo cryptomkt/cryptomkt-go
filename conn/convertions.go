@@ -71,10 +71,10 @@ func (transaction *Transaction) ToMap() map[string]string {
 	return asMap
 }
 
-func (instant *Quantity) ToMap() map[string]string {
+func (instant *Instant) ToMap() map[string]string {
 	asMap := make(map[string]string)
-	asMap["obtained"] = instant.Obtained
-	asMap["required"] = instant.Required
+	asMap["obtained"] = strconv.FormatFloat(instant.Obtained, 'f', -1, 64)
+	asMap["required"] = strconv.FormatFloat(instant.Required, 'f', -1, 64) 
 	cleanMap(&asMap)
 	return asMap
 }

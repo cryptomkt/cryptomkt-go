@@ -1,7 +1,9 @@
 package conn
 
 import (
+	"bytes"
 	"fmt"
+
 	"github.com/cryptomkt/cryptomkt-go/args"
 )
 
@@ -19,10 +21,36 @@ type Book struct {
 	Data       []BookData
 }
 
+func (book *Book) String() string {
+	var b bytes.Buffer
+	b.WriteString("Book{")
+	b.WriteString("\n\tclient:")
+	b.WriteString(book.client.String())
+	b.WriteString("\n\tpagination:")
+	b.WriteString(book.pagination.String())
+	b.WriteString("\n\tdata:")
+	for _, bookData := range book.Data {
+		b.WriteString("\n")
+		b.WriteString(bookData.String())
+	}
+	b.WriteString("\n}")
+	return b.String()
+}
+
 type BookData struct {
 	Price     string
 	Amount    string
 	Timestamp string
+}
+
+func (bookData *BookData) String() string {
+	return "{price:" + 
+		bookData.Price + 
+		" amount:" + 
+		bookData.Amount + 
+		" Timestamp:" + 
+		bookData.Timestamp + 
+		"}"
 }
 
 // GetPrevious lets you go to the previous page if it exists, returns (*Book, nil) if

@@ -2,6 +2,7 @@ package conn
 
 import (
 	"math/rand"
+	"fmt"
 	"testing"
 	"time"
 
@@ -60,7 +61,9 @@ func TestBookGetNext(t *testing.T) {
 func TestGetBooks(t *testing.T) {
 	client := NewClient("NoKey", "NoSecret")
 	time.Sleep(3 * time.Second)
-	if _, err := client.GetBook(args.Market("ETHCLP"), args.Type("buy")); err != nil {
+	book, err := client.GetBook(args.Market("XLMCLP"), args.Type("sell"), args.Limit(100), args.Page(0))
+	if err != nil {
 		t.Errorf("failed to retrieve books, %s", err)
 	}
+	fmt.Println(book)
 }

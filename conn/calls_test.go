@@ -31,10 +31,11 @@ func TestGetAccount(t *testing.T) {
 	}
 	t.Run("", func(t *testing.T) {
 		time.Sleep(delay)
-		_, err := client.GetAccount()
+		account, err := client.GetAccount()
 		if err != nil {
 			t.Error(err)
 		}
+		fmt.Println(account)
 	})
 }
 
@@ -288,14 +289,14 @@ func TestGetInstant(t *testing.T) {
 	t.Run("0", func(t *testing.T) {
 		time.Sleep(delay)
 		instant, err := client.GetInstant(
-			args.Market("ETHCLP"),
-			args.Type("sell"),
-			args.Amount("10"),
-			args.Price("1000"))
+			args.Market("XLMCLP"),
+			args.Type("buy"),
+			args.Amount("100"))
 		if err != nil {
 			if !strings.Contains(err.Error(), "invalid_request") {
 				t.Error(err)
 			}
+			t.Error(err)
 		}
 		fmt.Println(instant)
 	})

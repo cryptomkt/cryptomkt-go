@@ -3,6 +3,8 @@ package conn
 import (
 	"encoding/json"
 	"fmt"
+	"strconv"
+	"time"
 
 	"github.com/cryptomkt/cryptomkt-go/args"
 	"github.com/cryptomkt/cryptomkt-go/requests"
@@ -177,24 +179,84 @@ func (client *Client) GetOrderStatus(arguments ...args.Argument) (*Order, error)
 }
 
 // GetInstant emulates an order in the current state of the Instant Exchange of CryptoMarket
-// Returns a Quantity struct holding the data.
+// Returns an Instant struct holding the data.
 //
 // List of accepted Arguments:
 //   - required: Market, Type, Amount
 //   - optional: none
 // https://developers.cryptomkt.com/#obtener-cantidad
-func (client *Client) GetInstant(arguments ...args.Argument) (*Quantity, error) {
+func (client *Client) GetInstant(arguments ...args.Argument) (*Instant, error) {
 	required := []string{"market", "type", "amount"}
-	resp, err := client.getReq("orders/instant/get", "GetInstant", required, arguments...)
+	req, err := makeReq(required, arguments...)
 	if err != nil {
-		return nil, fmt.Errorf("error making the request: %s", err)
+		return nil, fmt.Errorf("Error in GetInstant: %s", err)
 	}
-	var iResp InstantResponse
-	json.Unmarshal(resp, &iResp)
-	if iResp.Status == "error" {
-		return nil, fmt.Errorf("error from the server side: %s", iResp.Message)
+	bookArguments := req.GetArguments()
+	totalAmount, _ := strconv.ParseFloat(bookArguments["amount"], 64)
+	bookType := bookArguments["type"]
+	// si quiero vender, necesito el libro de los que compran
+	if bookType == "sell" {
+		bookType = "buy"
+	} else { 
+		//si quiero comprar, necesito el libro de los que venden
+		bookType = "sell"
+
 	}
-	return &iResp.Data, nil
+	var amountRequired float64
+	var amountObtained float64
+	for page, rest := 0, totalAmount; rest > 0; page++ {
+		// make a book request
+		bookReq, err := makeReq(
+			nil,
+			args.Market(bookArguments["market"]),
+			args.Type(bookType),
+			args.Page(page),
+			args.Limit(100),
+			)
+		if err != nil {
+			return nil, fmt.Errorf("Error in GetInstant: %s", err)
+		}
+		resp, err := client.getPublic("book", bookReq)
+		if err != nil {
+			return nil, fmt.Errorf("error making the request: %s", err)
+		}
+		var bResp BookResponse
+		json.Unmarshal(resp, &bResp)
+		if bResp.Status == "error" {
+			return nil, fmt.Errorf("error from the server side: %s", bResp.Message)
+		}
+		book := bResp.Data
+		for i := 0; i < len(book); i++{
+			price, _ := strconv.ParseFloat(book[i].Price, 64)
+			amount,_ := strconv.ParseFloat(book[i].Amount, 64)
+			if (rest - amount) < 0 {
+				amountObtained += rest * price
+				amountRequired += rest
+				rest = 0
+				break
+			} else { // rest - amount >= 0
+				amountObtained += amount * price
+				amountRequired += amount
+				rest -= amount
+			}
+		}
+		if bResp.Pagination.Next == nil {
+			break
+		}
+		time.Sleep(2 * time.Second)
+	}
+	// si quiero comprar crypto, el amountRequired es la cantidad en fiat,
+	// y el amount obtained es la cantidad en crypto, lo que corresponde
+	// al caso inverso del bookType, si bookType es sell, entonces yo quiero comprar.
+	if bookType == "sell" {
+		amountRequired, amountObtained = amountObtained, amountRequired
+	}
+	instant := Instant{
+		Obtained: amountObtained,
+		Required: amountRequired,
+	}
+	return &instant, nil
+	
 }
 
 // CreateOrder creates an order to buy or sell in a market of CryptoMarket
