@@ -73,12 +73,12 @@ if err != nil {
 }
 ```
 
-If we want to go over a long range of trade data of a market, we can call `client.GetTrades` to get a list of `Trades`, this list can be one page of many. When we read the data of one single page, to get the rest of the pages, we can call over and over `GetNext()` over the struct, until an `Next page does not exist` error is raised. Replace `GetObject` with the appropriate method. The structs that support this functionality so far are Trades, Book, Prices, Orders and Payments. Here is in code:
+If we want to go over a long range of trade data of a market, we can call `client.GetTrades` to get a list of `Trades`, this list can be one page of many. When we read the data of one single page, to get the rest of the pages, we can call over and over `GetNext()` over the struct, until an `Next page does not exist` error is raised. Replace `GetObject` with the appropriate method. The structs that support this functionality so far are Trades, Book, Prices and Orders. Here is in code:
 
 ```golang
 import (
-    "github.com/cryptomkt/cryptomkt-go/conn"
     "github.com/cryptomkt/cryptomkt-go/args"
+    "github.com/cryptomkt/cryptomkt-go/conn"
 )
 
 var apiKey string = "YourApiKey"
