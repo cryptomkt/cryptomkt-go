@@ -1,7 +1,9 @@
 package conn
 
 import (
+	"bytes"
 	"fmt"
+	"strconv"
 
 	"github.com/cryptomkt/cryptomkt-go/args"
 )
@@ -57,26 +59,26 @@ type Amount struct {
 // the new state of the order, after being closed.
 // Calls CancelOrder with the asociated client of the order.
 // https://developers.cryptomkt.com/es/#cancelar-una-orden
-func (o *Order) Close() error {
+func (o *Order) Close() (*Order, error) {
 	oClosed, err := o.client.CancelOrder(args.Id(o.Id))
 	if err != nil {
-		return fmt.Errorf("Close order %s failed: %s", o.Id, err)
+		return nil, fmt.Errorf("Close order %s failed: %s", o.Id, err)
 	}
-	o = oClosed
-	return nil
+	oClosed.client = o.client
+	return oClosed, nil
 }
 
 // Refresh refreshes the calling order, and changes it to be the actual
 // state of the order.
 // Calls GetOrderStatus with the asociated client of the order.
 // https://developers.cryptomkt.com/es/#estado-de-orden
-func (o *Order) Refresh() error {
+func (o *Order) Refresh() (*Order, error) {
 	oRefreshed, err := o.client.GetOrderStatus(args.Id(o.Id))
 	if err != nil {
-		return fmt.Errorf("Refresh order %s failed: %s", o.Id, err)
+		return nil, fmt.Errorf("Refresh order %s failed: %s", o.Id, err)
 	}
-	o = oRefreshed
-	return nil
+	oRefreshed.client = o.client
+	return oRefreshed, nil
 }
 
 // Close closes every order in the order list.
@@ -88,6 +90,7 @@ func (oList *OrderList) Close() error {
 		}
 		oList.Data[i] = *oClosed
 	}
+	oList.setClientInOrders()
 	return nil
 }
 
@@ -102,6 +105,7 @@ func (oList *OrderList) Refresh() error {
 		}
 		oList.Data[i] = *oRefreshed
 	}
+	oList.setClientInOrders()
 	return nil
 }
 
@@ -152,7 +156,86 @@ func (o *OrderList) GetNext() (*OrderList, error) {
 }
 
 func (oList *OrderList) setClientInOrders() {
-	for _, order := range oList.Data {
-		order.client = oList.client
+	for i, _ := range oList.Data {
+		oList.Data[i].client = oList.client
 	}
+}
+
+func (oList *OrderList) String() string {
+	var b bytes.Buffer
+	b.WriteString("OrderList{")
+
+	b.WriteString("\n\tclientAddr:")
+	b.WriteString(oList.client.String())
+
+	b.WriteString("\n\tcaller:")
+	b.WriteString(oList.caller)
+
+	b.WriteString("\n\tmarket:")
+	b.WriteString(oList.market)
+
+	b.WriteString("\n\tpagination:")
+	b.WriteString(oList.pagination.String())
+
+	b.WriteString("\n\torders:")
+
+	for _, order := range oList.Data {
+		b.WriteString("\n")
+		b.WriteString(order.String())
+	}
+	b.WriteString("\n}")
+	return b.String()
+}
+func (order *Order) String() string {
+	var b bytes.Buffer
+	b.WriteString("Order{")
+
+	b.WriteString("\n\tclientAddr:")
+	b.WriteString(order.client.String())
+
+	b.WriteString("\n\tId:")
+	b.WriteString(order.Id)
+
+	b.WriteString("\n\tstatus:")
+	b.WriteString(order.Status)
+
+	b.WriteString("\n\ttype:")
+	b.WriteString(order.Type)
+
+	b.WriteString("\n\tprice:")
+	b.WriteString(order.Price)
+
+	b.WriteString("\n\tamount:")
+	b.WriteString(order.Amount.String())
+
+	b.WriteString("\n\texecutionPrice:")
+	b.WriteString(order.ExecutionPrice)
+
+	b.WriteString("\n\tavgExecutionPrice:")
+	b.WriteString(strconv.Itoa(order.AvgExecutionPrice))
+
+	b.WriteString("\n\tmarket:")
+	b.WriteString(order.Market)
+
+	b.WriteString("\n\tcreatedAt:")
+	b.WriteString(order.CreatedAt)
+
+	b.WriteString("\n\tupdatedAt:")
+	b.WriteString(order.UpdatedAt)
+
+	b.WriteString("\n\texecutedAt:")
+	b.WriteString(order.ExecutedAt)
+
+	b.WriteString("\n}")
+	return b.String()
+}
+
+func (amount *Amount) String() string {
+	return "Amount{original:" +
+		amount.Original +
+		" remaining:" +
+		amount.Remaining +
+		" executed:" +
+		amount.Executed +
+		"}"
 }

@@ -64,7 +64,7 @@ func (client *Client) GetTransactions(arguments ...args.Argument) (*TransactionL
 	if err != nil {
 		return nil, fmt.Errorf("Error in GetTransactions: %s", err)
 	}
-	resp, err := client.post("transactions", req)
+	resp, err := client.get("transactions", req)
 	if err != nil {
 		return nil, fmt.Errorf("error making the request: %s", err)
 	}
@@ -97,7 +97,7 @@ func (client *Client) GetActiveOrders(arguments ...args.Argument) (*OrderList, e
 	if err != nil {
 		return nil, fmt.Errorf("Error in GetActiveOrders: %s", err)
 	}
-	resp, err := client.post("orders/active", req)
+	resp, err := client.get("orders/active", req)
 	if err != nil {
 		return nil, fmt.Errorf("error making the request: %s", err)
 	}
@@ -113,6 +113,7 @@ func (client *Client) GetActiveOrders(arguments ...args.Argument) (*OrderList, e
 		caller:     "active_orders",
 		market:     req.GetArguments()["market"],
 	}
+	orderList.setClientInOrders()
 	return &orderList, nil
 }
 
@@ -131,7 +132,7 @@ func (client *Client) GetExecutedOrders(arguments ...args.Argument) (*OrderList,
 	if err != nil {
 		return nil, fmt.Errorf("Error in GetExecutedOrders: %s", err)
 	}
-	resp, err := client.post("orders/executed", req)
+	resp, err := client.get("orders/executed", req)
 	if err != nil {
 		return nil, fmt.Errorf("error making the request: %s", err)
 	}
@@ -148,6 +149,7 @@ func (client *Client) GetExecutedOrders(arguments ...args.Argument) (*OrderList,
 		caller:     "executed_orders",
 		market:     req.GetArguments()["market"],
 	}
+	orderList.setClientInOrders()
 	return &orderList, nil
 }
 
@@ -382,7 +384,7 @@ func (client *Client) GetPaymentOrders(arguments ...args.Argument) (*PaymentOrde
 	if err != nil {
 		return nil, fmt.Errorf("Error in GetPaymentOrders: %s", err)
 	}
-	resp, err := client.post("payment/orders", req)
+	resp, err := client.get("payment/orders", req)
 	if err != nil {
 		return nil, fmt.Errorf("error making the request: %s", err)
 	}
@@ -411,7 +413,7 @@ func (client *Client) GetPaymentOrders(arguments ...args.Argument) (*PaymentOrde
 // https://developers.cryptomkt.com/#estado-de-orden-de-pago
 func (client *Client) GetPaymentStatus(arguments ...args.Argument) (*PaymentOrder, error) {
 	required := []string{"id"}
-	resp, err := client.postReq("payment/status", "GetPaymentStatus", required, arguments...)
+	resp, err := client.getReq("payment/status", "GetPaymentStatus", required, arguments...)
 	if err != nil {
 		return nil, fmt.Errorf("error making the request: %s", err)
 	}

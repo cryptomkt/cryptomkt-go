@@ -1,6 +1,7 @@
 package conn
 
 import (
+	"fmt"
 	"strings"
 	"testing"
 	"time"
@@ -28,8 +29,8 @@ func TestGetAccount(t *testing.T) {
 	if err != nil {
 		t.Errorf("%s", err)
 	}
-	time.Sleep(6 * time.Second)
 	t.Run("", func(t *testing.T) {
+		time.Sleep(delay)
 		_, err := client.GetAccount()
 		if err != nil {
 			t.Error(err)
@@ -42,13 +43,63 @@ func TestGetWallet(t *testing.T) {
 	if err != nil {
 		t.Errorf("%s", err)
 	}
-	time.Sleep(6 * time.Second)
 	t.Run("", func(t *testing.T) {
+		time.Sleep(delay)
 		_, err := client.GetBalance()
 		if err != nil {
 			t.Error(err)
 		}
 	})
+}
+func TestOrderFlow(t *testing.T) {
+	client, err := newDebugClient(keysfile)
+	if err != nil {
+		t.Errorf("%s", err)
+	}
+	time.Sleep(delay)
+	order, err := client.CreateOrder(
+		args.Market("XLMCLP"),
+		args.Type("sell"),
+		args.Price("100"),
+		args.Amount("1"),
+	)
+	if err != nil {
+		t.Errorf("error: %v", err)
+	}
+	fmt.Println(order.String())
+	time.Sleep(delay)
+	order, _ = order.Refresh()
+	fmt.Println(order.String())
+	time.Sleep(delay)
+	order, _ = order.Close()
+	fmt.Println(order.String())
+}
+
+func TestOrderListFlow(t *testing.T) {
+	client, err := newDebugClient(keysfile)
+	if err != nil {
+		t.Errorf("%s", err)
+	}
+	for _, v := range []string{"1", "2", "3", "4", "5"} {
+		time.Sleep(delay)
+		_, err := client.CreateOrder(
+			args.Market("XLMCLP"),
+			args.Type("sell"),
+			args.Price("100"+v),
+			args.Amount("1"),
+		)
+		if err != nil {
+			t.Errorf("error: %v", err)
+		}
+	}
+	oList, err := client.GetActiveOrders(args.Market("XLMCLP"))
+	fmt.Println(oList)
+	time.Sleep(delay)
+	oList.Refresh()
+	fmt.Println(oList)
+	time.Sleep(delay)
+	oList.Close()
+	fmt.Println(oList)
 }
 
 func TestTransactions(t *testing.T) {
@@ -56,16 +107,17 @@ func TestTransactions(t *testing.T) {
 	if err != nil {
 		t.Errorf("%s", err)
 	}
-	time.Sleep(6 * time.Second)
-	t.Run("", func(t *testing.T) {
-		_, err := client.GetTransactions(
-			args.Currency("ETH"))
+	t.Run("xlm", func(t *testing.T) {
+		time.Sleep(delay)
+		transactions, err := client.GetTransactions(
+			args.Currency("XLM"))
 		if err != nil {
 			t.Error(err)
 		}
+		fmt.Println(transactions)
 	})
-	time.Sleep(6 * time.Second)
 	t.Run("missing=Currency", func(t *testing.T) {
+		time.Sleep(delay)
 		_, err := client.GetTransactions()
 		if err == nil {
 			t.Errorf("no error rised, should rise missing Currency arg")
@@ -81,17 +133,18 @@ func TestActiveOrders(t *testing.T) {
 	if err != nil {
 		t.Errorf("%s", err)
 	}
-	time.Sleep(6 * time.Second)
-	t.Run("", func(t *testing.T) {
-		_, err := client.GetActiveOrders(
-			args.Market("ETHCLP"),
+	t.Run("xlm", func(t *testing.T) {
+		time.Sleep(delay)
+		activeOrders, err := client.GetActiveOrders(
+			args.Market("XLMCLP"),
 			args.Page(0))
 		if err != nil {
 			t.Error(err)
 		}
+		fmt.Println(activeOrders)
 	})
-	time.Sleep(6 * time.Second)
 	t.Run("", func(t *testing.T) {
+		time.Sleep(delay)
 		_, err := client.GetActiveOrders(
 			args.Market("ETHARS"),
 			args.Page(1))
@@ -99,8 +152,8 @@ func TestActiveOrders(t *testing.T) {
 			t.Error(err)
 		}
 	})
-	time.Sleep(6 * time.Second)
 	t.Run("missing=market", func(t *testing.T) {
+		time.Sleep(delay)
 		_, err := client.GetActiveOrders()
 		if err == nil {
 			t.Errorf("no error rised, should rise missing market arg")
@@ -117,19 +170,20 @@ func TestExecutedOrders(t *testing.T) {
 		t.Errorf("%s", err)
 	}
 
-	time.Sleep(6 * time.Second)
-	t.Run("", func(t *testing.T) {
-		_, err := client.GetExecutedOrders(
-			args.Market("ETHCLP"),
+	t.Run("0", func(t *testing.T) {
+		time.Sleep(delay)
+		orderList, err := client.GetExecutedOrders(
+			args.Market("XLMCLP"),
 			args.Page(0))
 		if err != nil {
 			if !strings.Contains(err.Error(), "invalid_type") {
 				t.Error(err)
 			}
 		}
+		fmt.Println(orderList)
 	})
-	time.Sleep(6 * time.Second)
 	t.Run("missing=market", func(t *testing.T) {
+		time.Sleep(delay)
 		_, err := client.GetExecutedOrders()
 		if err == nil {
 			t.Errorf("no error rised, should rise missing market arg")
@@ -145,19 +199,19 @@ func TestCreateOrder(t *testing.T) {
 	if err != nil {
 		t.Errorf("%s", err)
 	}
-	time.Sleep(6 * time.Second)
-	t.Run("", func(t *testing.T) {
-		_, err := client.CreateOrder(
-			args.Amount("0.3"),
-			args.Market("ETHCLP"),
-			args.Price("1000"),
-			args.Type("buy"))
+	t.Run("xlm", func(t *testing.T) {
+		time.Sleep(delay)
+		order, err := client.CreateOrder(
+			args.Amount("1"),
+			args.Market("XMLCLP"),
+			args.Price("100"),
+			args.Type("sell"))
 		if err != nil {
 			if !strings.Contains(err.Error(), "not_enough_balance") {
 				t.Error(err)
 			}
 		}
-
+		fmt.Println(order.String())
 	})
 }
 
@@ -166,8 +220,8 @@ func TestOrderStatus(t *testing.T) {
 	if err != nil {
 		t.Errorf("%s", err)
 	}
-	time.Sleep(6 * time.Second)
 	t.Run("", func(t *testing.T) {
+		time.Sleep(delay)
 		_, err := client.GetOrderStatus(
 			args.Id("M103975"))
 		if err != nil {
@@ -176,8 +230,8 @@ func TestOrderStatus(t *testing.T) {
 			}
 		}
 	})
-	time.Sleep(6 * time.Second)
 	t.Run("missing=id", func(t *testing.T) {
+		time.Sleep(delay)
 		_, err := client.GetOrderStatus()
 		if err == nil {
 			t.Errorf("no error rised, should rise missing id arg")
@@ -193,8 +247,8 @@ func TestCancelOrder(t *testing.T) {
 	if err != nil {
 		t.Errorf("%s", err)
 	}
-	time.Sleep(6 * time.Second)
 	t.Run("cancel order", func(t *testing.T) {
+		time.Sleep(delay)
 		_, err := client.CancelOrder(
 			args.Id("M103975"),
 		)
@@ -210,15 +264,16 @@ func TestCreateInstant(t *testing.T) {
 	if err != nil {
 		t.Errorf("%s", err)
 	}
-	time.Sleep(6 * time.Second)
 	t.Run("create instant", func(t *testing.T) {
+		time.Sleep(delay)
 		err := client.CreateInstant(
-			args.Market("ETHCLP"),
-			args.Type("buy"),
-			args.Amount("10000"),
+			args.Market("XLMCLP"),
+			args.Type("sell"),
+			args.Amount("1"),
 		)
 		if err != nil {
 			if !strings.Contains(err.Error(), "not_enough_balance") {
+				fmt.Println(err)
 				t.Error(err)
 			}
 		}
@@ -230,21 +285,23 @@ func TestGetInstant(t *testing.T) {
 	if err != nil {
 		t.Errorf("%s", err)
 	}
-	time.Sleep(6 * time.Second)
-	t.Run("", func(t *testing.T) {
-		_, err := client.GetInstant(
+	t.Run("0", func(t *testing.T) {
+		time.Sleep(delay)
+		instant, err := client.GetInstant(
 			args.Market("ETHCLP"),
 			args.Type("sell"),
-			args.Amount("19000"))
+			args.Amount("10"),
+			args.Price("1000"))
 		if err != nil {
 			if !strings.Contains(err.Error(), "invalid_request") {
 				t.Error(err)
 			}
 		}
+		fmt.Println(instant)
 	})
 
-	time.Sleep(6 * time.Second)
 	t.Run("missing=market and type", func(t *testing.T) {
+		time.Sleep(delay)
 		_, err := client.GetInstant(
 			args.Amount("123"),
 		)
@@ -256,8 +313,8 @@ func TestGetInstant(t *testing.T) {
 			t.Errorf("should advise the lack of market and type arguments, got %s", err)
 		}
 	})
-	time.Sleep(6 * time.Second)
 	t.Run("unsupported=type", func(t *testing.T) {
+		time.Sleep(delay)
 		_, err := client.GetInstant(
 			args.Price("2020"),
 			args.Amount("123"),
@@ -279,8 +336,8 @@ func TestRequestDeposit(t *testing.T) {
 	if err != nil {
 		t.Errorf("%s", err)
 	}
-	time.Sleep(6 * time.Second)
 	t.Run("", func(t *testing.T) {
+		time.Sleep(delay)
 		err := client.RequestDeposit(
 			args.BankAccount("213213"),
 			args.Amount("10234"),
@@ -298,8 +355,8 @@ func TestRequestWithdrawal(t *testing.T) {
 	if err != nil {
 		t.Errorf("%s", err)
 	}
-	time.Sleep(6 * time.Second)
 	t.Run("", func(t *testing.T) {
+		time.Sleep(delay)
 		err := client.RequestWithdrawal(
 			args.Amount("10234"),
 			args.BankAccount("213213"),
@@ -317,8 +374,8 @@ func TestTransfer(t *testing.T) {
 	if err != nil {
 		t.Errorf("%s", err)
 	}
-	time.Sleep(6 * time.Second)
 	t.Run("", func(t *testing.T) {
+		time.Sleep(delay)
 		err := client.Transfer(
 			args.Address("GDMXNQBJMS3FYI4PFSYCCB4"),
 			args.Amount("1200"),
@@ -338,8 +395,8 @@ func TestNewOrder(t *testing.T) {
 	if err != nil {
 		t.Errorf("%s", err)
 	}
-	time.Sleep(6 * time.Second)
 	t.Run("", func(t *testing.T) {
+		time.Sleep(delay)
 		_, err := client.NewOrder(
 			args.CallbackUrl(""),
 			args.ErrorUrl(""),
@@ -363,8 +420,8 @@ func TestCreateWallet(t *testing.T) {
 	if err != nil {
 		t.Errorf("%s", err)
 	}
-	time.Sleep(6 * time.Second)
 	t.Run("", func(t *testing.T) {
+		time.Sleep(delay)
 		_, err := client.CreateWallet(
 			args.Id("P2023132"),
 			args.Token("xToY232aheSt8F"),
@@ -383,8 +440,8 @@ func TestPaymentOrders(t *testing.T) {
 	if err != nil {
 		t.Errorf("%s", err)
 	}
-	time.Sleep(6 * time.Second)
 	t.Run("", func(t *testing.T) {
+		time.Sleep(delay)
 		_, err := client.GetPaymentOrders(
 			args.StartDate("01/03/2018"),
 			args.EndDate("08/03/2018"),
@@ -400,8 +457,8 @@ func TestGetPaymentStatus(t *testing.T) {
 	if err != nil {
 		t.Errorf("%s", err)
 	}
-	time.Sleep(6 * time.Second)
 	t.Run("", func(t *testing.T) {
+		time.Sleep(delay)
 		_, err := client.GetPaymentStatus(
 			args.Id("P13433"),
 		)

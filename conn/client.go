@@ -33,6 +33,10 @@ type Client struct {
 	httpClient *http.Client
 }
 
+func (client *Client) String() string {
+	return fmt.Sprintf("%#v", client)
+}
+
 // New builds a new client and returns a pointer to it.
 func NewClient(apiKey, apiSecret string) *Client {
 	client := &Client{
