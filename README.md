@@ -11,7 +11,7 @@ To install the sdk, run the `go get` command
 
 For further information about the sdk see the godoc
 
-The base api for this sdk can be foun in [here](https://developers.cryptomkt.com/)
+The base api for this sdk can be found in [here](https://developers.cryptomkt.com/)
 
 ## API Key
 
@@ -97,7 +97,7 @@ previousPage2, err := previousPage.GetPrevious()
 
 ```
 
-Also you can close and refresh and close orders directly from their objects
+Also you can close and refresh orders directly from their objects
 
 ```golang
 import (
