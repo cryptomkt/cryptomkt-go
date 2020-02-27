@@ -1,10 +1,11 @@
 package conn
 
 import (
-	"github.com/cryptomkt/cryptomkt-go/args"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/cryptomkt/cryptomkt-go/args"
 )
 
 func TestMarket(t *testing.T) {

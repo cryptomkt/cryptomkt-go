@@ -1,5 +1,7 @@
 package conn
 
+//Data structs needed for this sdk
+
 type Pagination struct {
 	Previous interface{}
 	Next     interface{}

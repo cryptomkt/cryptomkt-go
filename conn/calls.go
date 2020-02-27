@@ -55,8 +55,8 @@ func (client *Client) GetWallets() ([]Balance, error) {
 // corresponding pages.
 //
 // List of accepted Arguments:
-//   - required: Currency
-//   - optional: Page, Limit
+//   - required: Currency (string)
+//   - optional: Page (int), Limit (int)
 // https://developers.cryptomkt.com/#obtener-movimientos
 func (client *Client) GetTransactions(arguments ...args.Argument) (*TransactionList, error) {
 	required := []string{"currency"}
@@ -88,8 +88,8 @@ func (client *Client) GetTransactions(arguments ...args.Argument) (*TransactionL
 // OrderLists also supports Close() and Refresh(), to close or refresh all the orders of the list.
 //
 // List of accepted Arguments:
-//   - required: Market
-//   - optional: Page, Limit
+//   - required: Market (string)
+//   - optional: Page (int), Limit (int)
 // https://developers.cryptomkt.com/#ordenes-activas
 func (client *Client) GetActiveOrders(arguments ...args.Argument) (*OrderList, error) {
 	required := []string{"market"}
@@ -122,8 +122,8 @@ func (client *Client) GetActiveOrders(arguments ...args.Argument) (*OrderList, e
 // OrderLists also supports Close() and Refresh(), to close or refresh all the orders of the list.
 //
 // List of accepted Arguments:
-//   - required: Market
-//   - optional: Page, Limit
+//   - required: Market (string)
+//   - optional: Page (int), Limit (int)
 // https://developers.cryptomkt.com/#ordenes-ejecutadas
 func (client *Client) GetExecutedOrders(arguments ...args.Argument) (*OrderList, error) {
 	required := []string{"market"}
@@ -156,7 +156,7 @@ func (client *Client) GetExecutedOrders(arguments ...args.Argument) (*OrderList,
 // the order respectively.
 //
 // List of accepted Arguments:
-//   - required: Id
+//   - required: Id (string)
 //   - optional: none
 // https://developers.cryptomkt.com/#estado-de-orden
 func (client *Client) GetOrderStatus(arguments ...args.Argument) (*Order, error) {
@@ -178,7 +178,7 @@ func (client *Client) GetOrderStatus(arguments ...args.Argument) (*Order, error)
 // Returns a Quantity struct holding the data.
 //
 // List of accepted Arguments:
-//   - required: Market, Type, Amount
+//   - required: Market (string), Type (string), Amount (string)
 //   - optional: none
 // https://developers.cryptomkt.com/#obtener-cantidad
 func (client *Client) GetInstant(arguments ...args.Argument) (*Quantity, error) {
@@ -200,7 +200,7 @@ func (client *Client) GetInstant(arguments ...args.Argument) (*Quantity, error) 
 // the order respectively.
 //
 // List of accepted Arguments:
-//   - required: Amount, Market, Price, Type
+//   - required: Amount (string), Market (string), Price (string), Type (string)
 //   - optional: none
 // https://developers.cryptomkt.com/#crear-orden
 func (client *Client) CreateOrder(arguments ...args.Argument) (*Order, error) {
@@ -223,7 +223,7 @@ func (client *Client) CreateOrder(arguments ...args.Argument) (*Order, error) {
 // the order respectively.
 //
 // List of accepted Arguments:
-//   - required: Id
+//   - required: Id (string)
 //   - optional: none
 // https://developers.cryptomkt.com/#cancelar-una-orden
 func (client *Client) CancelOrder(arguments ...args.Argument) (*Order, error) {
@@ -245,7 +245,7 @@ func (client *Client) CancelOrder(arguments ...args.Argument) (*Order, error) {
 // Returns an error if something goes wrong
 //
 // List of accepted Arguments:
-//   - required: Market, Type, Amount
+//   - required: Market (string), Type (string), Amount (string)
 //   - optional: none
 // https://developers.cryptomkt.com/#crear-orden-2
 func (client *Client) CreateInstant(arguments ...args.Argument) error {
@@ -266,9 +266,9 @@ func (client *Client) CreateInstant(arguments ...args.Argument) error {
 // Returns an error if something goes wrong
 //
 // List of accepted Arguments:
-//   - required: Amount, BankAccount
-//   - required only for México, Brasil and European Union: Voucher
-//   - required only for México: Date, TrackingCode
+//   - required: Amount (string), BankAccount (string)
+//   - required only for México, Brasil and European Union: Voucher (file)
+//   - required only for México: Date (string dd/mm/yyyy), TrackingCode (string)
 // https://developers.cryptomkt.com/#notificar-deposito
 func (client *Client) RequestDeposit(arguments ...args.Argument) error {
 	required := []string{"amount", "bank_account"}
@@ -288,7 +288,7 @@ func (client *Client) RequestDeposit(arguments ...args.Argument) error {
 // Returns an error if something goes wrong
 //
 // List of accepted Arguments:
-//   - required: Amount, BankAccount
+//   - required: Amount (string), BankAccount (string)
 //   - optional: none
 // https://developers.cryptomkt.com/#notificar-retiro
 func (client *Client) RequestWithdrawal(arguments ...args.Argument) error {
@@ -309,8 +309,8 @@ func (client *Client) RequestWithdrawal(arguments ...args.Argument) error {
 // Returns an error if something goes wrong
 //
 // List of accepted Arguments:
-//   - required: Address, Amount, Currency
-//   - optional: Memo
+//   - required: Address (string), Amount (string) , Currency (string)
+//   - optional: Memo (string)
 // https://developers.cryptomkt.com/#transferir
 func (client *Client) Transfer(arguments ...args.Argument) error {
 	required := []string{"address", "amount", "currency"}
@@ -331,8 +331,8 @@ func (client *Client) Transfer(arguments ...args.Argument) error {
 // Returns a PaymentOrder struct that supports Refresh(), to update its information.
 //
 // List of accepted Arguments:
-//   - required: ToReceive, ToReceiveCurrency, PaymentReceiver
-//   - optional: ExternalId, CallbackUrl, ErrorUrl, SuccessUrl, RefundEmail, Language
+//   - required: ToReceive (double), ToReceiveCurrency (string), PaymentReceiver (string)
+//   - optional: ExternalId (string), CallbackUrl (string) , ErrorUrl (string), SuccessUrl (string), RefundEmail (string) , Language (string)
 // https://developers.cryptomkt.com/#crear-orden-de-pago
 func (client *Client) NewOrder(arguments ...args.Argument) (*PaymentOrder, error) {
 	required := []string{"to_receive", "to_receive_currency", "payment_receiver"}
@@ -352,7 +352,7 @@ func (client *Client) NewOrder(arguments ...args.Argument) (*PaymentOrder, error
 // Returns a PaymentOrder struct that supports Refresh(), to update its information.
 //
 // List of accepted Arguments:
-//   - required: Id, Token, Wallet
+//   - required: Id (string), Token (string), Wallet (string)
 //   - optional: none
 // https://developers.cryptomkt.com/#crear-billetera-de-orden-de-pago
 func (client *Client) CreateWallet(arguments ...args.Argument) (*PaymentOrder, error) {
@@ -373,8 +373,8 @@ func (client *Client) CreateWallet(arguments ...args.Argument) (*PaymentOrder, e
 // Returns a PaymentOrder struct that supports Refresh(), to update its information.
 //
 // List of accepted Arguments:
-//   - required: StartDate, EndDate
-//   - optional: Page, Limit
+//   - required: StartDate (string dd/mm/aaaa), EndDate (string dd/mm/yyyy)
+//   - optional: Page (int), Limit (int)
 // https://developers.cryptomkt.com/#listado-de-ordenes-de-pago
 func (client *Client) GetPaymentOrders(arguments ...args.Argument) (*PaymentOrderList, error) {
 	required := []string{"start_date", "end_date"}
@@ -406,7 +406,7 @@ func (client *Client) GetPaymentOrders(arguments ...args.Argument) (*PaymentOrde
 // Returns a PaymentOrder struct that supports Refresh(), to update its information.
 //
 // List of accepted Arguments:
-//   - required: Id
+//   - required: Id (string)
 //   - optional: none
 // https://developers.cryptomkt.com/#estado-de-orden-de-pago
 func (client *Client) GetPaymentStatus(arguments ...args.Argument) (*PaymentOrder, error) {
@@ -424,7 +424,6 @@ func (client *Client) GetPaymentStatus(arguments ...args.Argument) (*PaymentOrde
 }
 
 // Public Endpoints:
-
 
 // GetMarkets returns the available markets in cryptomarket as a string slice
 //
@@ -450,7 +449,7 @@ func (client *Client) GetMarkets() ([]string, error) {
 //
 // List of accepted Arguments:
 //   - required: none
-//   - optional: Market
+//   - optional: Market (string)
 // https://developers.cryptomkt.com/#ticker
 func (client *Client) GetTicker(arguments ...args.Argument) ([]Ticker, error) {
 	resp, err := client.getReq("ticker", "GetTicker", []string{}, arguments...)
@@ -472,8 +471,8 @@ func (client *Client) GetTicker(arguments ...args.Argument) ([]Ticker, error) {
 // you can call them by *Book.Data[indexYouWant].FieldYouWant
 //
 // List of accepted Arguments:
-//   - required: Market, Type
-//   - optional: Page, Limit
+//   - required: Market (string), Type (string)
+//   - optional: Page (int), Limit (int)
 // https://developers.cryptomkt.com/#ordenes
 func (client *Client) GetBook(arguments ...args.Argument) (*Book, error) {
 	required := []string{"market", "type"}
@@ -506,8 +505,8 @@ func (client *Client) GetBook(arguments ...args.Argument) (*Book, error) {
 // You can access them by *Trades.Data[indexYouWant].FieldYouWant
 //
 // List of accepted Arguments:
-//   - required: Market
-//   - optional: Start, End, Page, Limit
+//   - required: Market (string)
+//   - optional: Start (string YYYY-MM-DD), End (YYYY-MM-DD), Page (int), Limit (int)
 // https://developers.cryptomkt.com/#trades
 func (client *Client) GetTrades(arguments ...args.Argument) (*Trades, error) {
 	required := []string{"market"}
@@ -542,8 +541,8 @@ func (client *Client) GetTrades(arguments ...args.Argument) (*Trades, error) {
 // *Prices.Data.Ask[indexYouWant].FieldYouWant or *Prices.Data.Bid[indexYouWant].FieldYouWant
 //
 // List of accepted Arguments:
-//   - required: Market, Timeframe
-//   - optional: Page, Limit
+//   - required: Market (string), Timeframe (string)
+//   - optional: Page (int), Limit (int)
 // https://developers.cryptomkt.com/#precios
 func (client *Client) GetPrices(arguments ...args.Argument) (*Prices, error) {
 	required := []string{"market", "timeframe"}

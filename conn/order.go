@@ -2,8 +2,11 @@ package conn
 
 import (
 	"fmt"
+
 	"github.com/cryptomkt/cryptomkt-go/args"
 )
+
+// Orders structs for this sdk
 
 type OrderListResp struct {
 	Status     string

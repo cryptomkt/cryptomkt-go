@@ -2,8 +2,11 @@ package conn
 
 import (
 	"fmt"
+
 	"github.com/cryptomkt/cryptomkt-go/args"
 )
+
+// Payments structs and methods for this sdk
 
 type PaymentOrder struct {
 	client            *Client

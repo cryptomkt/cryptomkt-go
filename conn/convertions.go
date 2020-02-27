@@ -4,6 +4,7 @@ import (
 	"strconv"
 )
 
+// parseState returns messages based in the code *PaymentOrder provides
 func (paymentOrder *PaymentOrder) parseState() string {
 	switch paymentOrder.Status {
 	case -4:
@@ -26,6 +27,7 @@ func (paymentOrder *PaymentOrder) parseState() string {
 	return "Invalid state"
 }
 
+// cleanMap deletes keys with empty string
 func cleanMap(aMap *map[string]string) {
 	for k, v := range *aMap {
 		if v == "" {
@@ -34,6 +36,7 @@ func cleanMap(aMap *map[string]string) {
 	}
 }
 
+// ToMap converts a ticket object to a map
 func (ticker *Ticker) ToMap() map[string]string {
 	asMap := make(map[string]string)
 	asMap["high"] = ticker.High
@@ -48,6 +51,7 @@ func (ticker *Ticker) ToMap() map[string]string {
 	return asMap
 }
 
+// ToMap converts a balance object to a map
 func (balance *Balance) ToMap() map[string]string {
 	asMap := make(map[string]string)
 	asMap["wallet"] = balance.Wallet
@@ -57,6 +61,7 @@ func (balance *Balance) ToMap() map[string]string {
 	return asMap
 }
 
+// ToMap converts an order object to a map
 func (order *Order) ToMap() map[string]string {
 	asMap := make(map[string]string)
 	asMap["id"] = order.Id
@@ -76,6 +81,7 @@ func (order *Order) ToMap() map[string]string {
 	return asMap
 }
 
+// ToMap converts a PaymentOrder object to a map
 func (payment *PaymentOrder) ToMap() map[string]string {
 	asMap := make(map[string]string)
 	asMap["id"] = payment.Id
@@ -102,6 +108,7 @@ func (payment *PaymentOrder) ToMap() map[string]string {
 	return asMap
 }
 
+// ToMap converts a *Transaction object to a map
 func (transaction *Transaction) ToMap() map[string]string {
 	asMap := make(map[string]string)
 	asMap["id"] = transaction.Id
@@ -118,6 +125,7 @@ func (transaction *Transaction) ToMap() map[string]string {
 	return asMap
 }
 
+// ToMap converts a *Quantity object to a map
 func (instant *Quantity) ToMap() map[string]string {
 	asMap := make(map[string]string)
 	asMap["obtained"] = instant.Obtained
@@ -126,6 +134,7 @@ func (instant *Quantity) ToMap() map[string]string {
 	return asMap
 }
 
+// ToMap converts a *TradeData object to a map
 func (trade *TradeData) ToMap() map[string]string {
 	asMap := make(map[string]string)
 	asMap["market_taker"] = trade.MarketTaker

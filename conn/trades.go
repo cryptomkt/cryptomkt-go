@@ -2,8 +2,11 @@ package conn
 
 import (
 	"fmt"
+
 	"github.com/cryptomkt/cryptomkt-go/args"
 )
+
+// Trades structs and methods needed for this sdk
 
 type TradesResponse struct {
 	Status     string
