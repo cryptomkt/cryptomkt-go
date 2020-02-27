@@ -11,7 +11,7 @@ To install the sdk, run the `go get` command
 
 For further information about the sdk see the godoc
 
-The base api for this sdk can be foun in [here](https://developers.cryptomkt.com/)
+The base api for this sdk can be found in [here](https://developers.cryptomkt.com/)
 
 ## API Key
 

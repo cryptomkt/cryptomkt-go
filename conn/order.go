@@ -8,6 +8,8 @@ import (
 	"github.com/cryptomkt/cryptomkt-go/args"
 )
 
+// Orders structs for this sdk
+
 type OrderListResp struct {
 	Status     string
 	Message    string

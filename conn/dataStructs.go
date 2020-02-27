@@ -5,6 +5,7 @@ import (
 	"strconv"
 )
 
+//Data structs for this sdk
 type Pagination struct {
 	Previous interface{}
 	Next     interface{}
@@ -108,9 +109,9 @@ type Instant struct {
 }
 
 func (instant *Instant) String() string {
-	return "instant{obtained:" + 
-	strconv.FormatFloat(instant.Obtained, 'f', -1, 64) +
-	" required:" +
-	strconv.FormatFloat(instant.Required, 'f', -1, 64) + 
-	"}"
+	return "instant{obtained:" +
+		strconv.FormatFloat(instant.Obtained, 'f', -1, 64) +
+		" required:" +
+		strconv.FormatFloat(instant.Required, 'f', -1, 64) +
+		"}"
 }

@@ -15,8 +15,8 @@ import (
 // exactly 100 TradeData Data.
 //
 // List of accepted Arguments:
-//   - required: Market
-//   - optional: Start, End
+//   - required: Market (string)
+//   - optional: Start (string YYYY-MM-DD), End (string YYYY-MM-DD)
 // https://developers.cryptomkt.com/es/#trades
 func (client *Client) GetTradesAllPages(arguments ...args.Argument) ([]TradeData, error) {
 	req, err := makeReq([]string{"market"}, arguments...)
@@ -57,7 +57,7 @@ func (client *Client) GetTradesAllPages(arguments ...args.Argument) ([]TradeData
 // returns an array of orders.
 //
 // List of accepted Arguments:
-//   - required: Market
+//   - required: Market (string)
 //   - optional: none
 // https://developers.cryptomkt.com/es/#ordenes-activas
 func (client *Client) GetActiveOrdersAllPages(arguments ...args.Argument) ([]Order, error) {
@@ -80,7 +80,7 @@ func (client *Client) GetActiveOrdersAllPages(arguments ...args.Argument) ([]Ord
 // GetExecutedOrdersAllPages gets all executed orders of the client in a given market
 //
 // List of accepted Arguments:
-//   - required: Market
+//   - required: Market (string)
 //   - optional: none
 // https://developers.cryptomkt.com/es/#ordenes-ejecutadas
 func (client *Client) GetExecutedOrdersAllPages(arguments ...args.Argument) ([]Order, error) {
@@ -117,6 +117,10 @@ func getAllOrders(oList *OrderList) []Order {
 	return allo
 }
 
+// GetAllTransactions returns an array of transactions made in cryptomkt.
+//
+// List of arguments:
+//			required: currency (string)
 func (client *Client) GetAllTransactions(argus ...args.Argument) ([]Transaction, error) {
 	req, err := makeReq([]string{"currency"}, argus...)
 	if err != nil {

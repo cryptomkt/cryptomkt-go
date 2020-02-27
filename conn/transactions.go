@@ -6,6 +6,8 @@ import (
 	"github.com/cryptomkt/cryptomkt-go/args"
 )
 
+// Transactions structs needed for this sdk
+
 type TransactionsResponse struct {
 	client     *Client
 	Status     string
@@ -64,4 +66,14 @@ func (tList *TransactionList) GetNext() (*TransactionList, error) {
 		return nil, fmt.Errorf("error getting the next page: %s", err)
 	}
 	return tList, nil
+}
+
+// GetPage returns the actual page.
+func (tList *TransactionList) GetPage() int {
+	return tList.pagination.Page
+}
+
+// GetLimit returns the limit number of elements per page
+func (tList *TransactionList) GetLimit() int {
+	return tList.pagination.Limit
 }

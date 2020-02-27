@@ -44,12 +44,12 @@ type BookData struct {
 }
 
 func (bookData *BookData) String() string {
-	return "{price:" + 
-		bookData.Price + 
-		" amount:" + 
-		bookData.Amount + 
-		" Timestamp:" + 
-		bookData.Timestamp + 
+	return "{price:" +
+		bookData.Price +
+		" amount:" +
+		bookData.Amount +
+		" Timestamp:" +
+		bookData.Timestamp +
 		"}"
 }
 

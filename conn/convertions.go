@@ -4,7 +4,7 @@ import (
 	"strconv"
 )
 
-
+// cleanMap deletes keys with empty string
 func cleanMap(aMap *map[string]string) {
 	for k, v := range *aMap {
 		if v == "" {
@@ -13,6 +13,7 @@ func cleanMap(aMap *map[string]string) {
 	}
 }
 
+// ToMap converts a ticket object to a map
 func (ticker *Ticker) ToMap() map[string]string {
 	asMap := make(map[string]string)
 	asMap["high"] = ticker.High
@@ -27,6 +28,7 @@ func (ticker *Ticker) ToMap() map[string]string {
 	return asMap
 }
 
+// ToMap converts a balance object to a map
 func (balance *Balance) ToMap() map[string]string {
 	asMap := make(map[string]string)
 	asMap["wallet"] = balance.Wallet
@@ -36,6 +38,7 @@ func (balance *Balance) ToMap() map[string]string {
 	return asMap
 }
 
+// ToMap converts an order object to a map
 func (order *Order) ToMap() map[string]string {
 	asMap := make(map[string]string)
 	asMap["id"] = order.Id
@@ -74,11 +77,12 @@ func (transaction *Transaction) ToMap() map[string]string {
 func (instant *Instant) ToMap() map[string]string {
 	asMap := make(map[string]string)
 	asMap["obtained"] = strconv.FormatFloat(instant.Obtained, 'f', -1, 64)
-	asMap["required"] = strconv.FormatFloat(instant.Required, 'f', -1, 64) 
+	asMap["required"] = strconv.FormatFloat(instant.Required, 'f', -1, 64)
 	cleanMap(&asMap)
 	return asMap
 }
 
+// ToMap converts a *TradeData object to a map
 func (trade *TradeData) ToMap() map[string]string {
 	asMap := make(map[string]string)
 	asMap["market_taker"] = trade.MarketTaker

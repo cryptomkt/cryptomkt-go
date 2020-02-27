@@ -1,8 +1,9 @@
 package conn
 
+//test for order book
 import (
-	"math/rand"
 	"fmt"
+	"math/rand"
 	"testing"
 	"time"
 

@@ -38,6 +38,7 @@ func newDebugClient(filePath string) (*Client, error) {
 	return client, nil
 }
 
+// find finds a provided value in a slice.
 func find(slice []int, value int) bool {
 	for i := 0; i < len(slice); i++ {
 		if value == slice[i] {
@@ -47,6 +48,8 @@ func find(slice []int, value int) bool {
 	return false
 }
 
+// generate indexes generates randomly an amount of number
+// inside a range. The amount and the range is provided.
 func generateIndexes(cantidad int, rango int) []int {
 	rand.Seed(time.Now().UnixNano())
 	var resp []int = make([]int, cantidad)
