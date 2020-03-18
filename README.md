@@ -1,7 +1,7 @@
 # cryptomkt-go
 
 <!--- badges -->
-[![GitHub version](https://badge.fury.io/gh/cryptomkt%2Fcryptomkt-go.svg)](https://badge.fury.io/gh/cryptomkt%2Fcryptomkt-go)
+[![Go project version](https://badge.fury.io/go/github.com%2Fcryptomkt%2Fcryptomkt-go.svg)](https://badge.fury.io/go/github.com%2Fcryptomkt%2Fcryptomkt-go)
 
 cryptomkt-go is the SDK for cryptomkt in the GO programing language
 
