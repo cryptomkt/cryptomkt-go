@@ -189,7 +189,7 @@ func Timeframe(val string) Argument {
 //
 // Accepts: 1, 5, 15, 60, 240, 1440 or 10080 as strings.
 func TimeFrame(val string) Argument {
-	return TimeFrame(val)
+	return Timeframe(val)
 }
 
 // Price is an argument of a request.
