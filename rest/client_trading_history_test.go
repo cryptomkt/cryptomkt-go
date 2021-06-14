@@ -5,13 +5,13 @@ import (
 	"testing"
 	"time"
 
-	"github.com/cryptomkt/go-api/args"
+	"github.com/cryptomarket/cryptomarket-go/args"
 )
 
 func TestOrderHistory(t *testing.T) {
 	apiKeys := LoadKeys()
 	client := NewClient(apiKeys.APIKey, apiKeys.APISecret)
-	result, err := client.getOrderHistory(context.Background(), args.Limit(200))
+	result, err := client.GetOrderHistory(context.Background(), args.Limit(200))
 	if err != nil {
 		t.Error(err)
 	}
@@ -25,7 +25,7 @@ func TestOrderHistory(t *testing.T) {
 func TestGetOldOrder(t *testing.T) {
 	apiKeys := LoadKeys()
 	client := NewClient(apiKeys.APIKey, apiKeys.APISecret)
-	result, err := client.getOrders(context.Background(), args.ClientOrderID("0a027a4ae8f44934519b211cf0e8e52e"))
+	result, err := client.GetOrders(context.Background(), args.ClientOrderID("0a027a4ae8f44934519b211cf0e8e52e"))
 	if err != nil {
 		t.Error(err)
 	}
@@ -42,7 +42,7 @@ func TestContextDeadline(t *testing.T) {
 	d := time.Now().Add(1 * time.Millisecond)
 	ctx, cancelFunc := context.WithDeadline(context.Background(), d)
 	defer cancelFunc()
-	result, err := client.getOrders(ctx, args.ClientOrderID("0a027a4ae8f44934519b211cf0e8e52e"))
+	result, err := client.GetOrders(ctx, args.ClientOrderID("0a027a4ae8f44934519b211cf0e8e52e"))
 	if err != nil {
 		return
 	}
@@ -52,7 +52,7 @@ func TestContextDeadline(t *testing.T) {
 func TestGetTradesHistory(t *testing.T) {
 	apiKeys := LoadKeys()
 	client := NewClient(apiKeys.APIKey, apiKeys.APISecret)
-	result, err := client.getTradeHistory(context.Background(), args.Limit(199))
+	result, err := client.GetTradeHistory(context.Background(), args.Limit(199))
 	if err != nil {
 		t.Error(err)
 	}
@@ -63,10 +63,10 @@ func TestGetTradesHistory(t *testing.T) {
 	}
 }
 
-func TestGetTradesByOrder(t *testing.T) {
+func TestGetTradesByOrderID(t *testing.T) {
 	apiKeys := LoadKeys()
 	client := NewClient(apiKeys.APIKey, apiKeys.APISecret)
-	result, err := client.getTradesByOrder(context.Background(), args.OrderID(337789478188))
+	result, err := client.GetTradesByOrderID(context.Background(), args.OrderID(337789478188))
 	if err != nil {
 		t.Error(err)
 	}

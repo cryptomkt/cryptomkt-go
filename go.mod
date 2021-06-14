@@ -1,4 +1,4 @@
-module github.com/cryptomkt/go-api
+module github.com/cryptomarket/cryptomarket-go
 
 go 1.15
 

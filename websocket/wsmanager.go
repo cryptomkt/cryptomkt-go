@@ -10,9 +10,11 @@ import (
 )
 
 const addr string = "api.exchange.cryptomkt.com"
-const publicPath string = "/api/2/ws/public"
-const tradingPath string = "/api/2/ws/trading"
 
+
+// wsManager deals with the server communication, it sends and recieves data
+// the way to use it is to snd via its send channel and to recieve in a loop
+// via its rcv channel. creation and connection are separated. closable
 type wsManager struct {
 	streamPath string
 	conn       *websocket.Conn
@@ -21,18 +23,9 @@ type wsManager struct {
 	isOpen     bool
 }
 
-func newPublicWSManager() *wsManager {
+func newWSManager(path string) *wsManager {
 	return &wsManager{
-		streamPath: publicPath,
-		snd:        make(chan []byte, 1),
-		rcv:        make(chan []byte, 1),
-		isOpen:     false,
-	}
-}
-
-func newTradingWSManager() *wsManager {
-	return &wsManager{
-		streamPath: tradingPath,
+		streamPath: path,
 		snd:        make(chan []byte, 1),
 		rcv:        make(chan []byte, 1),
 		isOpen:     false,
@@ -80,6 +73,7 @@ func (ws *wsManager) sndLoop() {
 	}
 }
 
+// TODO: A close after a timeout since the send of the close message. => close even if the close response is not recieved
 func (ws *wsManager) rcvLoop() {
 	defer close(ws.rcv)
 	for {

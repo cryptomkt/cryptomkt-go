@@ -12,46 +12,100 @@ import "fmt"
 // in the example above.
 type Argument func(map[string]interface{})
 
+// SideType is an order side or a trade side of an order
+type SideType string
+
 const (
-	// SideSell is the "sell" side, for an order or for a trade
-	SideSell = "sell"
-	// SideBuy is the "buy" side, for an order or for a trade
-	SideBuy = "buy"
+	// SideTypeSell is the sell side for an order or a trade
+	SideTypeSell SideType = "sell"
+	// SideTypeBuy is the buy side for an order or a trade
+	SideTypeBuy SideType = "buy"
+)
 
-	// TypeLimit is the limit order type.
-	TypeLimit = "limit"
-	// TypeMarket is the market order type.
-	TypeMarket = "market"
-	// TypeStopLimit is the stop limit order type.
-	TypeStopLimit = "stopLimit"
-	// TypeStopMarket is the stop market order type.
-	TypeStopMarket = "stopMarket"
+// OrderType is a type of order
+type OrderType string
 
-	// TimeInForceGTC is Good Till Canceled
-	TimeInForceGTC = "GTC"
-	// TimeInForceIOC Inmediate or Cancel
-	TimeInForceIOC = "IOC"
-	// TimeInForceFOK is Fill Or Kill
-	TimeInForceFOK = "FOK"
-	// TimeInForceDAY is Day
-	TimeInForceDAY = "DAY"
-	// TimeInForceGTD is Good Till Date
-	TimeInForceGTD = "GTD"
+// OrderTypes
+const (
+	OrderTypeLimit      OrderType = "limit"
+	OrderTypeMarket     OrderType = "market"
+	OrderTypeStopLimit  OrderType = "stopLimit"
+	OrderTypeStopMarket OrderType = "stopMarket"
+)
 
-	// SortAsc is sorting for pagination, ascending order
-	SortAsc = "ASC"
-	// SortDesc is sorting for pagination, descending order
-	SortDesc = "DESC"
+// TimeInForceType is the time in force of an order
+type TimeInForceType string
 
-	// SortByTimestamp is the sorting field for pagination, sorting by timestamp
-	SortByTimestamp = "timestamp"
-	// SortByID is the sorting field for pagination, sorting by id
-	SortByID = "id"
+// types of time in force
+const (
+	TimeInForceTypeGTC TimeInForceType = "GTC" // Good Till Cancel
+	TimeInForceTypeIOC TimeInForceType = "IOC" // Immediate or Cancel
+	TimeInForceTypeFOK TimeInForceType = "FOK" // Fill or Kill
+	TimeInForceTypeDAY TimeInForceType = "Day" // valid during Day
+	TimeInForceTypeGTD TimeInForceType = "GTD" // Good Till Date
+)
 
+// SortType is the sorting direction of a query
+type SortType string
+
+const (
+	// SortTypeASC is the ascending sorting direction of a query
+	SortTypeASC SortType = "ASC"
+	// SortTypeDESC is the descending sorting direction of a query
+	SortTypeDESC SortType = "DESC"
+)
+
+// SortByType is the parameter for sorting
+type SortByType string
+
+const (
+	// SortByTypeTimestamp is the sorting field for pagination, sorting by timestamp
+	SortByTypeTimestamp SortByType = "timestamp"
+	// SortByTypeID is the sorting field for pagination, sorting by id
+	SortByTypeID SortByType = "id"
+)
+
+const (
 	// TransferByEmail signals the identifier type to transfer by.
 	TransferByEmail = "email"
 	// TransferByUsername signals the identifier type to transfer by.
 	TransferByUsername = "username"
+)
+
+// PeriodType is the period of a candle
+type PeriodType string
+
+// candle periods
+const (
+	PeriodType1Minutes  PeriodType = "M1"
+	PeriodType3Minutes  PeriodType = "M3"
+	PeriodType5Minutes  PeriodType = "M5"
+	PeriodType15Minutes PeriodType = "M15"
+	PeriodType30Minutes PeriodType = "M30"
+	PeriodType1Hours    PeriodType = "H1"
+	PeriodType4Hours    PeriodType = "H4"
+	PeriodType1Day      PeriodType = "D1"
+	PeriodType7Days     PeriodType = "D7"
+	PeriodType1Month    PeriodType = "1M"
+)
+
+// MarginType is the type of margin of a trade
+type MarginType string
+
+// types of margin
+const (
+	MarginTypeInclude MarginType = "include"
+	MarginTypeOnly    MarginType = "only"
+	MarginTypeIgnore  MarginType = "ignore"
+)
+
+// IdentifyByType for transfers
+type IdentifyByType string
+
+// identify by types
+const (
+	IdentifyByTypeEmail    IdentifyByType = "email"
+	IdentifyByTypeUsername IdentifyByType = "username"
 )
 
 // BuildParams makes a map with the Arguments functions,
@@ -103,14 +157,14 @@ func Symbol(val string) Argument {
 }
 
 // Sort returns a "sort" Argument
-func Sort(val string) Argument {
+func Sort(val SortType) Argument {
 	return func(params map[string]interface{}) {
-		params["side"] = val
+		params["sort"] = val
 	}
 }
 
-// By returns a "by" Argument
-func By(val string) Argument {
+// SortBy returns a "by" Argument
+func SortBy(val SortByType) Argument {
 	return func(params map[string]interface{}) {
 		params["by"] = val
 	}
@@ -152,7 +206,7 @@ func Volume(val string) Argument {
 }
 
 // Period returns a "period" Argument
-func Period(val string) Argument {
+func Period(val PeriodType) Argument {
 	return func(params map[string]interface{}) {
 		params["period"] = val
 	}
@@ -165,8 +219,15 @@ func ClientOrderID(val string) Argument {
 	}
 }
 
+// Wait returns a "wait" Argument
+func Wait(val int) Argument {
+	return func(params map[string]interface{}) {
+		params["wait"] = val
+	}
+}
+
 // Side returns a "side" Argument
-func Side(val string) Argument {
+func Side(val SideType) Argument {
 	return func(params map[string]interface{}) {
 		params["side"] = val
 	}
@@ -194,7 +255,7 @@ func StopPrice(val string) Argument {
 }
 
 // TimeInForce returns a "timeInForce" Argument
-func TimeInForce(val string) Argument {
+func TimeInForce(val TimeInForceType) Argument {
 	return func(params map[string]interface{}) {
 		params["timeInForce"] = val
 	}
@@ -222,7 +283,7 @@ func PostOnly(val bool) Argument {
 }
 
 // Margin returns a "margin" Argument
-func Margin(val string) Argument {
+func Margin(val MarginType) Argument {
 	return func(params map[string]interface{}) {
 		params["margin"] = val
 	}
@@ -298,15 +359,8 @@ func TransferType(val string) Argument {
 	}
 }
 
-// OrderType returns a "type" Argument
-func OrderType(val string) Argument {
-	return func(params map[string]interface{}) {
-		params["type"] = val
-	}
-}
-
 // Type returns a "type" Argument
-func Type(val string) Argument {
+func Type(val OrderType) Argument {
 	return func(params map[string]interface{}) {
 		params["type"] = val
 	}
@@ -320,7 +374,7 @@ func Identifier(val string) Argument {
 }
 
 // IdentifyBy returns a "by" Argument
-func IdentifyBy(val string) Argument {
+func IdentifyBy(val IdentifyByType) Argument {
 	return func(params map[string]interface{}) {
 		params["by"] = val
 	}

@@ -1,6 +1,8 @@
 package websocket
 
-import "github.com/cryptomkt/go-api/models"
+import (
+	"fmt"
+)
 
 type wsNotification struct {
 	ID     int64                  `json:"id"`
@@ -15,30 +17,25 @@ type wsResponse struct {
 		Symbol string
 		Period string
 	}
-	Error map[string]interface{}
 }
 
-type requestsChans struct {
-	ch    chan []byte
-	errCh chan error
+type withError struct {
+	Error APIError
 }
 
-func makeChans() *requestsChans {
-	return &requestsChans{
-		ch:    make(chan []byte),
-		errCh: make(chan error),
+// APIError is an error from the exchange
+type APIError map[string]interface{}
+
+func (errMap APIError) String() string {
+	errString := ""
+	if code, ok := errMap["code"]; ok {
+		errString += "(code=" + fmt.Sprint(code) + ")"
 	}
-}
-
-func (chans *requestsChans) close() {
-	close(chans.ch)
-	close(chans.errCh)
-}
-
-type orderbookSnapshot struct {
-	Symbol    string             `json:"symbol"`
-	Sequence  int64              `json:"sequence"`
-	Timestamp string             `json:"timestamp"`
-	Ask       []models.BookLevel `json:"ask"`
-	Bid       []models.BookLevel `json:"bid"`
+	if message, ok := errMap["message"]; ok {
+		errString += " " + message.(string)
+	}
+	if desc, ok := errMap["description"]; ok {
+		errString += ". " + desc.(string)
+	}
+	return errString
 }

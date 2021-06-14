@@ -18,9 +18,8 @@ func newChanCache() *chanCache {
 
 func (cache *chanCache) close() {
 	cache.chans.Range(func(key interface{}, val interface{}) bool {
-		reqChans := val.(*requestsChans)
-		close(reqChans.ch)
-		close(reqChans.errCh)
+		ch := val.(chan []byte)
+		close(ch)
 		return true
 	})
 }
@@ -36,15 +35,33 @@ func (cache *chanCache) nextID() int64 {
 	return id
 }
 
-func (cache *chanCache) store(chans *requestsChans) int64 {
+func (cache *chanCache) store(ch chan []byte) int64 {
 	id := cache.nextID()
-	cache.chans.Store(id, chans)
+	cache.chans.Store(id, ch)
 	return id
 }
 
-func (cache *chanCache) pop(id int64) (*requestsChans, bool) {
+func (cache *chanCache) pop(id int64) (chan []byte, bool) {
 	if val, ok := cache.chans.LoadAndDelete(id); ok {
-		return val.(*requestsChans), ok
+		return val.(chan []byte), ok
 	}
 	return nil, false
+}
+
+func (cache *chanCache) getSubcriptionCh(key string) (chan []byte, bool) {
+	if val, ok := cache.chans.Load(key); ok {
+		return val.(chan []byte), ok
+	}
+	return nil, false
+}
+
+func (cache *chanCache) storeSubscriptionCh(key string, ch chan []byte) {
+	if val, ok := cache.chans.Load(key); ok {
+		close(val.(chan []byte)) // close old channel
+	}
+	cache.chans.Store(key, ch)
+}
+
+func (cache *chanCache) deleteSubscriptionCh(key string) {
+	cache.chans.Delete(key)
 }

@@ -16,7 +16,7 @@ import (
 )
 
 var (
-	apiURL     = "https://api.exchange.cryptomkt.com"
+	apiURL     = "https://api.exchange.cryptomarket.com"
 	apiVersion = "/api/2/"
 )
 

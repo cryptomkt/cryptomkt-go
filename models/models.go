@@ -79,7 +79,7 @@ type Currency struct {
 	PayinEnabled        bool   `json:"payinEnabled"`
 	PayinPaymentID      bool   `json:"payinPaymentId"`
 	PayinConfirmations  int    `json:"payinConfirmations"`
-	PayoutEnabled       bool   `json:"payoutEnable"`
+	PayoutEnabled       bool   `json:"payoutEnabled"`
 	PayoutFee           string `json:"payoutFee"`
 	PayoutIsPaymentID   bool   `json:"payoutIsPaymentId"`
 	Delisted            bool   `json:"delisted"`

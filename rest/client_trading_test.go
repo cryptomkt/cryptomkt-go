@@ -4,14 +4,14 @@ import (
 	"context"
 	"testing"
 
-	"github.com/cryptomkt/go-api/args"
-	"github.com/cryptomkt/go-api/models"
+	"github.com/cryptomarket/cryptomarket-go/args"
+	"github.com/cryptomarket/cryptomarket-go/models"
 )
 
 func TestGetTradingBalance(t *testing.T) {
 	apiKeys := LoadKeys()
 	client := NewClient(apiKeys.APIKey, apiKeys.APISecret)
-	result, err := client.getTradingBalance(context.Background())
+	result, err := client.GetTradingBalance(context.Background())
 	if err != nil {
 		t.Error(err)
 	}
@@ -25,7 +25,7 @@ func TestGetTradingBalance(t *testing.T) {
 func TestGetActiveOrders(t *testing.T) {
 	apiKeys := LoadKeys()
 	client := NewClient(apiKeys.APIKey, apiKeys.APISecret)
-	result, err := client.getActiveOrders(context.Background())
+	result, err := client.GetActiveOrders(context.Background())
 	if err != nil {
 		t.Error(err)
 	}
@@ -39,7 +39,7 @@ func TestGetActiveOrders(t *testing.T) {
 func TestCreateOrder(t *testing.T) {
 	apiKeys := LoadKeys()
 	client := NewClient(apiKeys.APIKey, apiKeys.APISecret)
-	result, err := client.createOrder(context.Background(), args.Symbol("EOSETH"), args.Side("sell"), args.Quantity("0.01"), args.Price("9999"))
+	result, err := client.CreateOrder(context.Background(), args.Symbol("EOSETH"), args.Side("sell"), args.Quantity("0.01"), args.Price("9999"))
 	if err != nil {
 		t.Error(err)
 	}
@@ -51,7 +51,7 @@ func TestCreateOrder(t *testing.T) {
 func TestCancelAllOrders(t *testing.T) {
 	apiKeys := LoadKeys()
 	client := NewClient(apiKeys.APIKey, apiKeys.APISecret)
-	result, err := client.cancelAllOrders(context.Background(), args.Symbol("ETHBTC"))
+	result, err := client.CancelAllOrders(context.Background())
 	if err != nil {
 		t.Error(err)
 	}
@@ -65,21 +65,21 @@ func TestCancelAllOrders(t *testing.T) {
 func TestOrderFlow(t *testing.T) {
 	apiKeys := LoadKeys()
 	client := NewClient(apiKeys.APIKey, apiKeys.APISecret)
-	order, err := client.createOrder(context.Background(), args.Symbol("EOSETH"), args.Side("sell"), args.Quantity("0.01"), args.Price("9999"))
+	order, err := client.CreateOrder(context.Background(), args.Symbol("EOSETH"), args.Side("sell"), args.Quantity("0.01"), args.Price("9999"))
 	if err != nil {
 		t.Error(err)
 	}
 	if err = checkOrder(order); err != nil {
 		t.Error(err)
 	}
-	order, err = client.getActiveOrder(context.Background(), args.ClientOrderID(order.ClientOrderID))
+	order, err = client.GetActiveOrder(context.Background(), args.ClientOrderID(order.ClientOrderID))
 	if err != nil {
 		t.Error(err)
 	}
 	if err = checkOrder(order); err != nil {
 		t.Error(err)
 	}
-	order, err = client.cancelOrder(context.Background(), args.ClientOrderID(order.ClientOrderID))
+	order, err = client.CancelOrder(context.Background(), args.ClientOrderID(order.ClientOrderID))
 	if err != nil {
 		t.Error(err)
 	}
@@ -87,14 +87,14 @@ func TestOrderFlow(t *testing.T) {
 		t.Error(err)
 	}
 	if order.Status != models.OrderStatusCanceled {
-		t.Error("order not cancelled")
+		t.Error("order not Cancelled")
 	}
 }
 
 func TestGetTradingFee(t *testing.T) {
 	apiKeys := LoadKeys()
 	client := NewClient(apiKeys.APIKey, apiKeys.APISecret)
-	result, err := client.getTradingFee(context.Background(), args.Symbol("EOSETH"))
+	result, err := client.GetTradingFee(context.Background(), args.Symbol("EOSETH"))
 	if err != nil {
 		t.Error(err)
 	}

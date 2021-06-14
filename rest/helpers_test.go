@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 
-	"github.com/cryptomkt/go-api/models"
+	"github.com/cryptomarket/cryptomarket-go/models"
 )
 
 type APIKeys struct {
@@ -14,7 +14,7 @@ type APIKeys struct {
 }
 
 func LoadKeys() (apiKeys APIKeys) {
-	data, err := ioutil.ReadFile("../../keys.json")
+	data, err := ioutil.ReadFile("/home/ismael/cryptomarket/apis/keys.json")
 	if err != nil {
 		fmt.Print(err)
 	}
@@ -35,7 +35,7 @@ func checkNoNil(field interface{}, name string) (err error) {
 		}
 	default:
 		if field == nil {
-			err = errMsg 
+			err = errMsg
 		}
 	}
 	return

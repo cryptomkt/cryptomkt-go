@@ -4,13 +4,13 @@ import (
 	"context"
 	"testing"
 
-	"github.com/cryptomkt/go-api/args"
+	"github.com/cryptomarket/cryptomarket-go/args"
 )
 
 func TestGetAccountBalance(t *testing.T) {
 	apiKeys := LoadKeys()
 	client := NewClient(apiKeys.APIKey, apiKeys.APISecret)
-	result, err := client.getAccountBalance(context.Background())
+	result, err := client.GetAccountBalance(context.Background())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -27,7 +27,7 @@ func TestGetAccountBalance(t *testing.T) {
 func TestGetDepositCryptoAddress(t *testing.T) {
 	apiKeys := LoadKeys()
 	client := NewClient(apiKeys.APIKey, apiKeys.APISecret)
-	result, err := client.getDepositCryptoAddress(context.Background(), args.Currency("EOS"))
+	result, err := client.GetDepositCryptoAddress(context.Background(), args.Currency("EOS"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -39,7 +39,7 @@ func TestGetDepositCryptoAddress(t *testing.T) {
 func TestCreateDepositCryptoAddress(t *testing.T) {
 	apiKeys := LoadKeys()
 	client := NewClient(apiKeys.APIKey, apiKeys.APISecret)
-	result, err := client.createDepositCryptoAddress(context.Background(), args.Currency("EOS"))
+	result, err := client.CreateDepositCryptoAddress(context.Background(), args.Currency("EOS"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -51,7 +51,7 @@ func TestCreateDepositCryptoAddress(t *testing.T) {
 func TestGetLast10DepositCryptoAddress(t *testing.T) {
 	apiKeys := LoadKeys()
 	client := NewClient(apiKeys.APIKey, apiKeys.APISecret)
-	result, err := client.getLast10DepositCryptoAddresses(context.Background(), args.Currency("EOS"))
+	result, err := client.GetLast10DepositCryptoAddresses(context.Background(), args.Currency("EOS"))
 	if err != nil {
 		t.Error(err)
 	}
@@ -66,7 +66,7 @@ func TestGetLast10DepositCryptoAddress(t *testing.T) {
 func TestGetLast10UsedCryptoAddresses(t *testing.T) {
 	apiKeys := LoadKeys()
 	client := NewClient(apiKeys.APIKey, apiKeys.APISecret)
-	result, err := client.getLast10UsedCryptoAddresses(context.Background(), args.Currency("EOS"))
+	result, err := client.GetLast10UsedCryptoAddresses(context.Background(), args.Currency("EOS"))
 	if err != nil {
 		t.Error(err)
 	}
@@ -81,7 +81,7 @@ func TestGetLast10UsedCryptoAddresses(t *testing.T) {
 func TestGetEstimatesWithdrawFee(t *testing.T) {
 	apiKeys := LoadKeys()
 	client := NewClient(apiKeys.APIKey, apiKeys.APISecret)
-	result, err := client.getEstimatesWithdrawFee(context.Background(), args.Currency("EOS"), args.Amount("199"))
+	result, err := client.GetEstimatesWithdrawFee(context.Background(), args.Currency("EOS"), args.Amount("199"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -97,7 +97,7 @@ func TestTransferBalance(t *testing.T) {
 	symbol := "EOS"
 	amount := "0.01"
 
-	result, err := client.transferFromTradingToAccountBalance(bg, args.Currency(symbol), args.Amount(amount))
+	result, err := client.TransferMoneyFromTradingToAccountBalance(bg, args.Currency(symbol), args.Amount(amount))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -105,7 +105,7 @@ func TestTransferBalance(t *testing.T) {
 		t.Fatal("should have only id defined")
 	}
 
-	result, err = client.transferFromAccountToTradingBalance(bg, args.Currency(symbol), args.Amount(amount))
+	result, err = client.TransferMoneyFromAccountToTradingBalance(bg, args.Currency(symbol), args.Amount(amount))
 	if err != nil {
 		t.Error(err)
 	}
@@ -117,7 +117,7 @@ func TestTransferBalance(t *testing.T) {
 func TestGetTransactionHistory(t *testing.T) {
 	apiKeys := LoadKeys()
 	client := NewClient(apiKeys.APIKey, apiKeys.APISecret)
-	result, err := client.getTransactionHistory(context.Background(), args.Currency("EOS"))
+	result, err := client.GetTransactionHistory(context.Background(), args.Currency("EOS"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -135,7 +135,7 @@ func TestGetTransaction(t *testing.T) {
 	apiKeys := LoadKeys()
 	client := NewClient(apiKeys.APIKey, apiKeys.APISecret)
 	id := "7bb7abb6-c748-40ab-8070-9a7e4460fbde"
-	result, err := client.getTransaction(context.Background(), args.ID(id))
+	result, err := client.GetTransaction(context.Background(), args.ID(id))
 	if err != nil {
 		t.Error(err)
 	}
