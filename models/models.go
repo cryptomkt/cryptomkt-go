@@ -101,16 +101,16 @@ type Balance struct {
 
 // Ticker is a snapshot of a symbol
 type Ticker struct {
-	Symbol       string `json:"symbol"`
-	Ask          string `json:"ask"`
-	Bid          string `json:"bid"`
-	Last         string `json:"last"`
-	Low          string `json:"low"`
-	High         string `json:"high"`
-	Open         string `json:"open"`
-	Volume       string `json:"volume"`
+	Symbol      string `json:"symbol"`
+	Ask         string `json:"ask"`
+	Bid         string `json:"bid"`
+	Last        string `json:"last"`
+	Low         string `json:"low"`
+	High        string `json:"high"`
+	Open        string `json:"open"`
+	Volume      string `json:"volume"`
 	VolumeQuote string `json:"volumeQuote"`
-	Timestamp    string `json:"timestamp"`
+	Timestamp   string `json:"timestamp"`
 }
 
 // PublicTrade is the available information from public trades
@@ -201,7 +201,8 @@ type Trade struct {
 	PositionID    string   `json:"positionId"`
 	Pnl           string   `json:"pnl"`
 	Timestamp     string   `json:"timestamp"`
-	Liquidation   string   `json:"liquidation"`
+	Liquidation   bool     `json:"liquidation"`
+	Taker         bool     `json:"taker"`
 }
 
 // Transaction is a movement of currency,
