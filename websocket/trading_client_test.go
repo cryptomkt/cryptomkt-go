@@ -71,7 +71,7 @@ func TestOrderFlow(t *testing.T) {
 		done <- struct{}{}
 	}()
 	if err = <-errCh; err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 	<-done
 }
