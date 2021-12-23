@@ -42,7 +42,7 @@ func TestClientConcurrency(t *testing.T) {
 		close(errCh)
 	}()
 	for err := range errCh {
-		t.Error(err)
+		t.Fatal(err)
 	}
 	close(done)
 }

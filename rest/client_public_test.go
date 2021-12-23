@@ -12,22 +12,22 @@ func TestGetCurrencies(t *testing.T) {
 	t.Run("all currencies", func(t *testing.T) {
 		result, err := client.GetCurrencies(context.Background())
 		if err != nil {
-			t.Error(err)
+			t.Fatal(err)
 		}
 		for _, currency := range result {
 			if err = checkCurrency(&currency); err != nil {
-				t.Error(err)
+				t.Fatal(err)
 			}
 		}
 	})
 	t.Run("some currencies", func(t *testing.T) {
 		result, err := client.GetCurrencies(context.Background(), args.Currencies([]string{"EOS", "ETH"}))
 		if err != nil {
-			t.Error(err)
+			t.Fatal(err)
 		}
 		for _, currency := range result {
 			if err = checkCurrency(&currency); err != nil {
-				t.Error(err)
+				t.Fatal(err)
 			}
 		}
 	})
@@ -38,11 +38,11 @@ func TestGetCurrency(t *testing.T) {
 	t.Run("valid currency", func(t *testing.T) {
 		result, err := client.GetCurrency(context.Background(), args.Currency("EOS"))
 		if err != nil {
-			t.Error(err)
+			t.Fatal(err)
 			return
 		}
 		if err = checkCurrency(result); err != nil {
-			t.Error(err)
+			t.Fatal(err)
 		}
 	})
 	t.Run("invalid currency", func(t *testing.T) {
@@ -51,7 +51,7 @@ func TestGetCurrency(t *testing.T) {
 			return
 		}
 		if err = checkCurrency(result); err != nil {
-			t.Error(err)
+			t.Fatal(err)
 		}
 	})
 
@@ -69,24 +69,24 @@ func TestGetSymbols(t *testing.T) {
 	t.Run("all symbols", func(t *testing.T) {
 		result, err := client.GetSymbols(context.Background())
 		if err != nil {
-			t.Error(err)
+			t.Fatal(err)
 			return
 		}
 		for _, symbol := range result {
 			if err = checkSymbol(&symbol); err != nil {
-				t.Error(err)
+				t.Fatal(err)
 			}
 		}
 	})
 	t.Run("some symbols", func(t *testing.T) {
 		result, err := client.GetSymbols(context.Background(), args.Symbols([]string{"EOSETH", "ETHBTC"}))
 		if err != nil {
-			t.Error(err)
+			t.Fatal(err)
 			return
 		}
 		for _, symbol := range result {
 			if err = checkSymbol(&symbol); err != nil {
-				t.Error(err)
+				t.Fatal(err)
 			}
 		}
 	})
@@ -97,11 +97,11 @@ func TestGetSymbol(t *testing.T) {
 	t.Run("valid symbol", func(t *testing.T) {
 		result, err := client.GetSymbol(context.Background(), args.Symbol("EOSETH"))
 		if err != nil {
-			t.Error(err)
+			t.Fatal(err)
 			return
 		}
 		if err = checkSymbol(result); err != nil {
-			t.Error(err)
+			t.Fatal(err)
 		}
 	})
 	t.Run("invalid symbol", func(t *testing.T) {
@@ -122,11 +122,11 @@ func TestGetSymbol(t *testing.T) {
 		// should still work
 		result, err := client.GetSymbol(context.Background(), args.Symbol("ETHBTC"), args.Currency("EOS"), args.Offset(19))
 		if err != nil {
-			t.Error(err)
+			t.Fatal(err)
 			return
 		}
 		if err = checkSymbol(result); err != nil {
-			t.Error(err)
+			t.Fatal(err)
 		}
 	})
 }
@@ -136,7 +136,7 @@ func TestGetTickers(t *testing.T) {
 	t.Run("all tickers", func(t *testing.T) {
 		result, err := client.GetTickers(context.Background())
 		if err != nil {
-			t.Error(err)
+			t.Fatal(err)
 			return
 		}
 		nullTickers := map[string]bool{
@@ -164,19 +164,19 @@ func TestGetTickers(t *testing.T) {
 				continue
 			}
 			if err = checkTicker(&ticker); err != nil {
-				t.Error(err)
+				t.Fatal(err)
 			}
 		}
 	})
 	t.Run("some tickers", func(t *testing.T) {
 		result, err := client.GetTickers(context.Background(), args.Symbols([]string{"EOSETH", "ETHBTC"}))
 		if err != nil {
-			t.Error(err)
+			t.Fatal(err)
 			return
 		}
 		for _, ticker := range result {
 			if err = checkTicker(&ticker); err != nil {
-				t.Error(err)
+				t.Fatal(err)
 			}
 		}
 	})
@@ -187,11 +187,11 @@ func TestGetTicker(t *testing.T) {
 	t.Run("from valid symbol", func(t *testing.T) {
 		result, err := client.GetTicker(context.Background(), args.Symbol("EOSETH"))
 		if err != nil {
-			t.Error(err)
+			t.Fatal(err)
 			return
 		}
 		if err = checkTicker(result); err != nil {
-			t.Error(err)
+			t.Fatal(err)
 		}
 
 	})
@@ -209,13 +209,13 @@ func TestGetTrades(t *testing.T) {
 	t.Run("from all symbols, no arguments", func(t *testing.T) {
 		result, err := client.GetTrades(context.Background())
 		if err != nil {
-			t.Error(err)
+			t.Fatal(err)
 			return
 		}
 		for _, trades := range result {
 			for _, trade := range trades {
 				if err = checkPublicTrade(&trade); err != nil {
-					t.Error(err)
+					t.Fatal(err)
 				}
 			}
 		}
@@ -223,13 +223,13 @@ func TestGetTrades(t *testing.T) {
 	t.Run("from some symbols, limit at 2", func(t *testing.T) {
 		result, err := client.GetTrades(context.Background(), args.Symbols([]string{"EOSETH", "ETHBTC"}), args.Limit(2))
 		if err != nil {
-			t.Error(err)
+			t.Fatal(err)
 			return
 		}
 		for _, trades := range result {
 			for _, trade := range trades {
 				if err = checkPublicTrade(&trade); err != nil {
-					t.Error(err)
+					t.Fatal(err)
 				}
 			}
 		}
@@ -241,12 +241,12 @@ func TestGetTradesOfSymbol(t *testing.T) {
 	t.Run("from valid symbol", func(t *testing.T) {
 		result, err := client.GetTradesOfSymbol(context.Background(), args.Symbol("EOSETH"), args.Limit(2))
 		if err != nil {
-			t.Error(err)
+			t.Fatal(err)
 			return
 		}
 		for _, trade := range result {
 			if err = checkPublicTrade(&trade); err != nil {
-				t.Error(err)
+				t.Fatal(err)
 			}
 		}
 
@@ -261,12 +261,12 @@ func TestGetTradesOfSymbol(t *testing.T) {
 	t.Run("from one symbol, limit 10, filter by id", func(t *testing.T) {
 		result, err := client.GetTradesOfSymbol(context.Background(), args.Symbol("ETHBTC"), args.Limit(50), args.From("1085615118"), args.SortBy(args.SortByTypeID))
 		if err != nil {
-			t.Error(err)
+			t.Fatal(err)
 			return
 		}
 		for _, trade := range result {
 			if err = checkPublicTrade(&trade); err != nil {
-				t.Error(err)
+				t.Fatal(err)
 			}
 		}
 	})
@@ -277,24 +277,24 @@ func TestGetOrderbooks(t *testing.T) {
 	t.Run("from all symbols, no arguments", func(t *testing.T) {
 		result, err := client.GetOrderbooks(context.Background())
 		if err != nil {
-			t.Error(err)
+			t.Fatal(err)
 			return
 		}
 		for _, orderbook := range result {
 			if err = checkOrderbook(&orderbook); err != nil {
-				t.Error(err)
+				t.Fatal(err)
 			}
 		}
 	})
 	t.Run("from some symbols, limit at 2", func(t *testing.T) {
 		result, err := client.GetOrderbooks(context.Background(), args.Symbols([]string{"EOSETH", "ETHBTC"}), args.Limit(2))
 		if err != nil {
-			t.Error(err)
+			t.Fatal(err)
 			return
 		}
 		for _, orderbook := range result {
 			if err = checkOrderbook(&orderbook); err != nil {
-				t.Error(err)
+				t.Fatal(err)
 			}
 		}
 	})
@@ -305,11 +305,11 @@ func TestGetOrderbook(t *testing.T) {
 	t.Run("from valid symbol", func(t *testing.T) {
 		result, err := client.GetOrderbook(context.Background(), args.Symbol("EOSETH"), args.Limit(2))
 		if err != nil {
-			t.Error(err)
+			t.Fatal(err)
 			return
 		}
 		if err = checkOrderbook(result); err != nil {
-			t.Error(err)
+			t.Fatal(err)
 		}
 	})
 	t.Run("from invalid symbol", func(t *testing.T) {
@@ -322,11 +322,11 @@ func TestGetOrderbook(t *testing.T) {
 	t.Run("with volume", func(t *testing.T) {
 		result, err := client.GetOrderbook(context.Background(), args.Symbol("EOSETH"), args.Volume("3"))
 		if err != nil {
-			t.Error(err)
+			t.Fatal(err)
 			return
 		}
 		if err = checkOrderbook(result); err != nil {
-			t.Error(err)
+			t.Fatal(err)
 		}
 	})
 }
@@ -336,13 +336,13 @@ func TestGetCandles(t *testing.T) {
 	t.Run("from all symbols, no arguments", func(t *testing.T) {
 		result, err := client.GetCandles(context.Background())
 		if err != nil {
-			t.Error(err)
+			t.Fatal(err)
 			return
 		}
 		for _, candles := range result {
 			for _, candle := range candles {
 				if err = checkCandle(&candle); err != nil {
-					t.Error(err)
+					t.Fatal(err)
 				}
 			}
 		}
@@ -350,13 +350,13 @@ func TestGetCandles(t *testing.T) {
 	t.Run("from some symbols, limit at 2", func(t *testing.T) {
 		result, err := client.GetCandles(context.Background(), args.Symbols([]string{"EOSETH", "ETHBTC"}), args.Limit(2))
 		if err != nil {
-			t.Error(err)
+			t.Fatal(err)
 			return
 		}
 		for _, candles := range result {
 			for _, candle := range candles {
 				if err = checkCandle(&candle); err != nil {
-					t.Error(err)
+					t.Fatal(err)
 				}
 			}
 		}
@@ -368,12 +368,12 @@ func TestGetCandlesOfSymbol(t *testing.T) {
 	t.Run("from valid symbol", func(t *testing.T) {
 		result, err := client.GetCandlesOfSymbol(context.Background(), args.Symbol("EOSETH"), args.Limit(2))
 		if err != nil {
-			t.Error(err)
+			t.Fatal(err)
 			return
 		}
 		for _, candle := range result {
 			if err = checkCandle(&candle); err != nil {
-				t.Error(err)
+				t.Fatal(err)
 			}
 		}
 	})

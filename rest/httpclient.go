@@ -13,10 +13,12 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/cryptomarket/cryptomarket-go/args"
 )
 
 var (
-	apiURL     = "https://api.exchange.cryptomarket.com"
+	apiURL     = "https://api.exchange.cryptomkt.com"
 	apiVersion = "/api/2/"
 )
 
@@ -99,6 +101,22 @@ func buildQuery(params map[string]interface{}) string {
 			query.Add(key, v)
 		case int:
 			query.Add(key, strconv.Itoa(v))
+		case args.IdentifyByType:
+			query.Add(key, string(v))
+		case args.MarginType:
+			query.Add(key, string(v))
+		case args.OrderType:
+			query.Add(key, string(v))
+		case args.PeriodType:
+			query.Add(key, string(v))
+		case args.SideType:
+			query.Add(key, string(v))
+		case args.SortByType:
+			query.Add(key, string(v))
+		case args.SortType:
+			query.Add(key, string(v))
+		case args.TimeInForceType:
+			query.Add(key, string(v))
 		}
 	}
 	return query.Encode()

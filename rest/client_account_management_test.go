@@ -19,7 +19,7 @@ func TestGetAccountBalance(t *testing.T) {
 	}
 	for _, balance := range result {
 		if err = checkBalance(&balance); err != nil {
-			t.Error(err)
+			t.Fatal(err)
 		}
 	}
 }
@@ -53,7 +53,7 @@ func TestGetLast10DepositCryptoAddress(t *testing.T) {
 	client := NewClient(apiKeys.APIKey, apiKeys.APISecret)
 	result, err := client.GetLast10DepositCryptoAddresses(context.Background(), args.Currency("EOS"))
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 	// if len(result) == 0 is ok
 	for _, addr := range result {
@@ -68,7 +68,7 @@ func TestGetLast10UsedCryptoAddresses(t *testing.T) {
 	client := NewClient(apiKeys.APIKey, apiKeys.APISecret)
 	result, err := client.GetLast10UsedCryptoAddresses(context.Background(), args.Currency("EOS"))
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 	// if len(result) == 0 is ok
 	for _, addr := range result {
@@ -107,7 +107,7 @@ func TestTransferBalance(t *testing.T) {
 
 	result, err = client.TransferMoneyFromAccountToTradingBalance(bg, args.Currency(symbol), args.Amount(amount))
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 	if result.ID == "" {
 		t.Fatal("should have only id defined")
@@ -126,7 +126,7 @@ func TestGetTransactionHistory(t *testing.T) {
 	}
 	for _, transaction := range result {
 		if err = checkTransaction(&transaction); err != nil {
-			t.Error(err)
+			t.Fatal(err)
 		}
 	}
 }
@@ -137,9 +137,9 @@ func TestGetTransaction(t *testing.T) {
 	id := "7bb7abb6-c748-40ab-8070-9a7e4460fbde"
 	result, err := client.GetTransaction(context.Background(), args.ID(id))
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 	if err = checkTransaction(result); err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 }
