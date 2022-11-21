@@ -9,7 +9,6 @@ import (
 	"errors"
 	"io/ioutil"
 	"net/http"
-	"net/url"
 	"strconv"
 	"strings"
 	"time"
@@ -19,7 +18,7 @@ import (
 
 var (
 	apiURL     = "https://api.exchange.cryptomkt.com"
-	apiVersion = "/api/2/"
+	apiVersion = "/api/3/"
 )
 
 // httpclient handles all the http logic, leaving public only whats needed.
@@ -29,20 +28,22 @@ type httpclient struct {
 	client    *http.Client
 	apiKey    string
 	apiSecret string
+	window    int
 }
 
 // New creates a new httpclient
-func newHTTPClient(apiKey, apiSecret string) httpclient {
+func newHTTPClient(apiKey, apiSecret string, window int) httpclient {
 	return httpclient{
 		client:    &http.Client{},
 		apiKey:    apiKey,
 		apiSecret: apiSecret,
+		window:    window,
 	}
 }
 
 func (hclient httpclient) doRequest(cxt context.Context, method, endpoint string, params map[string]interface{}, public bool) (result []byte, err error) {
 	// build query
-	rawQuery := buildQuery(params)
+	rawQuery := args.BuildQuery(params)
 	// build request
 	var req *http.Request
 	if method == methodGet {
@@ -54,7 +55,6 @@ func (hclient httpclient) doRequest(cxt context.Context, method, endpoint string
 	if err != nil {
 		return nil, errors.New("CryptomarketSDKError: Can't build the request: " + err.Error())
 	}
-
 	req.Header.Add("User-Agent", "cryptomarket/go")
 	req.Header.Add("Content-type", "application/x-www-form-urlencoded")
 	// add auth header if is not a public call
@@ -76,48 +76,24 @@ func (hclient httpclient) doRequest(cxt context.Context, method, endpoint string
 }
 
 func (hclient httpclient) buildCredential(httpMethod, method, query string) string {
-	timestamp := strconv.FormatInt(time.Now().Unix(), 10)
-	msg := httpMethod + timestamp + apiVersion + method
+	timestamp := strconv.FormatInt(time.Now().Unix()*1000, 10)
+	msg := httpMethod + apiVersion + method
 	if len(query) != 0 {
 		if httpMethod == methodGet {
 			msg += "?"
 		}
 		msg += query
 	}
+	msg += timestamp
+	if hclient.window != 0 {
+		msg += strconv.FormatInt(int64(hclient.window), 10)
+	}
 	h := hmac.New(sha256.New, []byte(hclient.apiSecret))
 	h.Write([]byte(msg))
 	signature := hex.EncodeToString(h.Sum(nil))
-	return "HS256 " + base64.StdEncoding.EncodeToString([]byte(hclient.apiKey+":"+timestamp+":"+signature))
-}
-
-func buildQuery(params map[string]interface{}) string {
-	query := url.Values{}
-	for key, value := range params {
-		switch v := value.(type) {
-		case []string:
-			strs := strings.Join(v, ",")
-			query.Add(key, strs)
-		case string:
-			query.Add(key, v)
-		case int:
-			query.Add(key, strconv.Itoa(v))
-		case args.IdentifyByType:
-			query.Add(key, string(v))
-		case args.MarginType:
-			query.Add(key, string(v))
-		case args.OrderType:
-			query.Add(key, string(v))
-		case args.PeriodType:
-			query.Add(key, string(v))
-		case args.SideType:
-			query.Add(key, string(v))
-		case args.SortByType:
-			query.Add(key, string(v))
-		case args.SortType:
-			query.Add(key, string(v))
-		case args.TimeInForceType:
-			query.Add(key, string(v))
-		}
+	str := hclient.apiKey + ":" + signature + ":" + timestamp
+	if hclient.window != 0 {
+		str += (":" + strconv.FormatInt(int64(hclient.window), 10))
 	}
-	return query.Encode()
+	return "HS256 " + base64.StdEncoding.EncodeToString([]byte(str))
 }
