@@ -161,6 +161,8 @@ const (
 	ContingencyAON                      ContingencyType = "allOrNone"
 	ContingencyOneCancelOther           ContingencyType = "oneCancelOther"
 	ContingencyOCO                      ContingencyType = "oneCancelOther"
+	ContingencyOTO ContingencyType = "oneTriggerOther"
+	ContingencyOneTriggerOther ContingencyType = "oneTriggerOther"
 	ContingencyOneTriggerOneCancelOther ContingencyType = "oneTriggerOneCancelOther"
 	ContingencyOTOCO                    ContingencyType = "oneTriggerOneCancelOther"
 )

@@ -153,24 +153,28 @@ func (client *SpotTradingClient) CreateSpotOrder(
 //
 //  - ContingencyTypeAllOrNone (ContingencyTypeAON) (AON)
 //  - ContingencyTypeOneCancelOther (ContingencyTypeOCO) (OCO)
+//  - ContingencyOneTriggerOther (ContingencyTypeOTO) (OTO)
 //  - ContingencyOneTriggerOneCancelOther (ContingencyTypeOTOCO) (OTOCO)
 //
 // Restriction in the number of orders:
 //
 //  - An AON list must have 2 or 3 orders
 //  - An OCO list must have 2 or 3 orders
+//  - An OTO list must have 2 or 3 orders
 //  - An OTOCO must have 3 or 4 orders
 //
 // Symbol restrictions:
 //
 //  - For an AON order list, the symbol code of orders must be unique for each order in the list.
 //  - For an OCO order list, there are no symbol code restrictions.
+//  - For an OTO order list, there are no symbol code restrictions.
 //  - For an OTOCO order list, the symbol code of orders must be the same for all orders in the list (placing orders in different order books is not supported).
 //
 // ORDER_TYPE restrictions:
 //  - For an AON order list, orders must be OrderLimit or OrderMarket
 //  - For an OCO order list, orders must be OrderLimit, OrderStopLimit, OrderStopMarket, OrderTakeProfitLimit or OrderTakeProfitMarket.
 //  - An OCO order list cannot include more than one limit order (the same applies to secondary orders in an OTOCO order list).
+//  - For an OTO order list there are no order type restrictions.
 //  - For an OTOCO order list, the first order must be OrderLimit, OrderMarket, OrderStopLimit, OrderStopMarket, OrderTakeProfitLimit or OrderTakeProfitMarket.
 //  - For an OTOCO order list, the secondary orders have the same restrictions as an OCO order
 //  - Default is OrderTypeLimit
