@@ -2,7 +2,6 @@ package rest
 
 import (
 	"context"
-	"fmt"
 	"testing"
 
 	"github.com/cryptomarket/cryptomarket-go/args"
@@ -10,7 +9,7 @@ import (
 
 func beforeEach() (*Client, context.Context) {
 	apiKeys := LoadKeys()
-	return NewClient(apiKeys.APIKey, apiKeys.APISecret, 1000), context.Background()
+	return NewClient(apiKeys.APIKey, apiKeys.APISecret, 11_000), context.Background()
 }
 
 func TestGetWalletBalances(t *testing.T) {
@@ -47,7 +46,6 @@ func TestGetDepositCryptoAddresses(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	fmt.Println(result)
 	if err = checkList(checkCryptoAddress, result); err != nil {
 		t.Fatal(err)
 	}
@@ -69,7 +67,7 @@ func TestGetDepositCryptoAddressOfCurrency(t *testing.T) {
 
 func TestCreateDepositCryptoAddress(t *testing.T) {
 	client, bg := beforeEach()
-	result, err := client.CreateDepositCryptoAddress(bg, args.Currency("EOS"))
+	result, err := client.CreateDepositCryptoAddress(bg, args.Currency("BTC"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -110,7 +108,11 @@ func TestWithdrawCrypto(t *testing.T) {
 		args.Currency("ADA"),
 		args.Amount("0.1"),
 		args.Address(adaAddress.Address),
+		args.AutoCommit(true),
 	)
+	if err != nil {
+		t.Fatal(err)
+	}
 	if transactionID == "" {
 		t.Fatal("no transaction id")
 	}
@@ -146,7 +148,7 @@ func TestWithdrawCryptoRollback(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	transactionID, err := client.withdrawCrypto(bg,
+	transactionID, _ := client.withdrawCrypto(bg,
 		args.Currency("ADA"),
 		args.Amount("0.1"),
 		args.Address(adaAddress.Address),
@@ -166,12 +168,20 @@ func TestWithdrawCryptoRollback(t *testing.T) {
 
 func TestGetEstimateWithdrawFee(t *testing.T) {
 	client, bg := beforeEach()
-	result, err := client.GetEstimateWithdrawFee(bg, args.Currency("EOS"), args.Amount("199"))
+	result, err := client.GetEstimateWithdrawFee(bg, args.Currency("USDT"), args.Amount("1"), args.NetworkCode("TRX"))
 	if err != nil {
 		t.Fatal(err)
 	}
 	if result == "" {
 		t.Fatal("should have a result")
+	}
+}
+
+func TestGetEstimateWithdrawFees(t *testing.T) {
+	client, bg := beforeEach()
+	_, err := client.GetEstimateWithdrawFees(bg, args.Currency("USDT"), args.Amount("1"), args.NetworkCode("TRX"))
+	if err != nil {
+		t.Fatal(err)
 	}
 }
 
@@ -240,9 +250,7 @@ func TestTransferMoneyToAnotherUser(t *testing.T) {
 
 func TestGetTransactionHistory(t *testing.T) {
 	client, bg := beforeEach()
-	transactionsList := []args.TransactionTypeType{args.TransactionTypeDeposit}
-	result, err := client.GetTransactionHistory(bg, args.TransactionTypes(transactionsList...))
-	fmt.Println(result)
+	result, err := client.GetTransactionHistory(bg, args.TransactionTypes(args.TransactionTypeDeposit))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -255,7 +263,20 @@ func TestGetTransactionHistory(t *testing.T) {
 }
 
 func TestGetTransaction(t *testing.T) {
-	// see ruby sdk for further information
+	client, bg := beforeEach()
+	result, err := client.GetTransactionHistory(bg, args.TransactionTypes(args.TransactionTypeDeposit))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(result) == 0 {
+		t.Fatal("should have transactions")
+	}
+	transactionOfList := result[0]
+	transaction, err := client.GetTransaction(bg, args.ID(transactionOfList.Native.ID))
+	if err != nil {
+		t.Fatal(err)
+	}
+	checkTransaction(transaction)
 }
 
 func TestOffchainAvailable(t *testing.T) {

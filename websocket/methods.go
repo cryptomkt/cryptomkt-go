@@ -9,6 +9,9 @@ const (
 	methodSpotOrder            = "spot_order"
 	methodSpotOrders           = "spot_orders"
 
+	methodSubscribeSpotBalance   = "spot_balance_subscribe"
+	methodUnsubstribeSpotBalance = "spot_balance_unsubscribe"
+
 	methodGetSpotOrders       = "spot_get_orders"
 	methodCreateSpotOrder     = "spot_new_order"
 	methodCreateSpotOrderList = "spot_new_order_list"
@@ -37,6 +40,7 @@ const (
 	reports        = "reports"
 	transactions   = "transactions"
 	walletBalances = "walletBalances"
+	spotBalances   = "spotBalances"
 )
 
 var subscriptionMapping = map[string]string{
@@ -53,6 +57,10 @@ var subscriptionMapping = map[string]string{
 	methodSubscribeTransactions:   transactions,
 	methodUnsubscribeTransactions: transactions,
 	methodUpdateTransactions:      transactions,
+
+	methodSubscribeSpotBalance:   spotBalances,
+	methodUnsubstribeSpotBalance: spotBalances,
+	methodSpotBalance:            spotBalances,
 }
 
 func getSubscriptionKey(response wsResponse) (key string, ok bool) {

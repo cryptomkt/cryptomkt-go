@@ -36,9 +36,10 @@ type Client struct {
 // Requests to the exchange via this client use the args package for aguments.
 // All requests accept contexts for cancellation.
 // arguments:
-//  apiKey // the key of the user
-//  apiSecret // the secret key of the user
-//  window // the window of execution for requests to the server in milliseconds. Max is 60_000 (miliseconds). Use 0 for default window (10 seconds)
+//
+//	apiKey // the key of the user
+//	apiSecret // the secret key of the user
+//	window // the window of execution for requests to the server in milliseconds. Max is 60_000 (miliseconds). Use 0 for default window (10 seconds)
 func NewClient(apiKey, apiSecret string, window int) *Client {
 	return &Client{
 		hclient: newHTTPClient(apiKey, apiSecret, window),
@@ -61,14 +62,7 @@ func (client *Client) publicGet(
 	params map[string]interface{},
 	model interface{},
 ) error {
-	return client.doRequest(
-		ctx,
-		methodGet,
-		publicCall,
-		endpoint,
-		params,
-		model,
-	)
+	return client.doRequest(RequestData{ctx, methodGet, endpoint, params, publicCall}, model)
 }
 
 func (client *Client) privateGet(
@@ -77,14 +71,7 @@ func (client *Client) privateGet(
 	params map[string]interface{},
 	model interface{},
 ) error {
-	return client.doRequest(
-		ctx,
-		methodGet,
-		privateCall,
-		endpoint,
-		params,
-		model,
-	)
+	return client.doRequest(RequestData{ctx, methodGet, endpoint, params, privateCall}, model)
 }
 
 func (client *Client) post(
@@ -93,14 +80,7 @@ func (client *Client) post(
 	params map[string]interface{},
 	model interface{},
 ) error {
-	return client.doRequest(
-		ctx,
-		methodPost,
-		privateCall,
-		endpoint,
-		params,
-		model,
-	)
+	return client.doRequest(RequestData{ctx, methodPost, endpoint, params, privateCall}, model)
 }
 
 func (client *Client) put(
@@ -109,14 +89,7 @@ func (client *Client) put(
 	params map[string]interface{},
 	model interface{},
 ) error {
-	return client.doRequest(
-		ctx,
-		methodPut,
-		privateCall,
-		endpoint,
-		params,
-		model,
-	)
+	return client.doRequest(RequestData{ctx, methodPut, endpoint, params, privateCall}, model)
 }
 
 func (client *Client) patch(
@@ -125,14 +98,7 @@ func (client *Client) patch(
 	params map[string]interface{},
 	model interface{},
 ) error {
-	return client.doRequest(
-		ctx,
-		methodPatch,
-		privateCall,
-		endpoint,
-		params,
-		model,
-	)
+	return client.doRequest(RequestData{ctx, methodPatch, endpoint, params, privateCall}, model)
 }
 
 func (client *Client) delete(
@@ -141,31 +107,14 @@ func (client *Client) delete(
 	params map[string]interface{},
 	model interface{},
 ) error {
-	return client.doRequest(
-		ctx,
-		methodDelete,
-		privateCall,
-		endpoint,
-		params,
-		model,
-	)
+	return client.doRequest(RequestData{ctx, methodDelete, endpoint, params, privateCall}, model)
 }
 
 func (client *Client) doRequest(
-	ctx context.Context,
-	method string,
-	public bool,
-	endpoint string,
-	params map[string]interface{},
+	requestData RequestData,
 	model interface{},
 ) error {
-	data, err := client.hclient.doRequest(
-		ctx,
-		method,
-		endpoint,
-		params,
-		public,
-	)
+	data, err := client.hclient.makeRequest(requestData)
 	if err != nil {
 		return err
 	}
@@ -198,12 +147,13 @@ func (client *Client) handleResponseData(
 
 // GetCurrencies gets a map of all currencies or specified currencies. indexed by id
 //
-// Requires no API key Access Rights
+// # Requires no API key Access Rights
 //
 // https://api.exchange.cryptomkt.com/#currencies
 //
 // Arguments:
-//  Currencies([]CurrenciesType)  // Optional. A list of currencies ids
+//
+//	Currencies([]CurrenciesType)  // Optional. A list of currencies ids
 func (client *Client) GetCurrencies(
 	ctx context.Context,
 	arguments ...args.Argument,
@@ -215,12 +165,13 @@ func (client *Client) GetCurrencies(
 
 // GetCurrency gets the data of a currency
 //
-// Requires no API key Access Rights
+// # Requires no API key Access Rights
 //
 // https://api.exchange.cryptomkt.com/#currencies
 //
 // Arguments:
-//  Currency(string)  // A currency id
+//
+//	Currency(string)  // A currency id
 func (client *Client) GetCurrency(
 	ctx context.Context,
 	arguments ...args.Argument,
@@ -242,12 +193,13 @@ func (client *Client) GetCurrency(
 //
 // A symbol is the combination of the base currency (first one) and quote currency (second one)
 //
-// Requires no API key Access Rights
+// # Requires no API key Access Rights
 //
 // https://api.exchange.cryptomkt.com/#symbols
 //
 // Arguments:
-//  Symbols([]string)  // Optional. A list of symbol ids
+//
+//	Symbols([]string)  // Optional. A list of symbol ids
 func (client *Client) GetSymbols(
 	ctx context.Context,
 	arguments ...args.Argument,
@@ -261,12 +213,13 @@ func (client *Client) GetSymbols(
 //
 // A symbol is the combination of the base currency (first one) and quote currency (second one)
 //
-// Requires no API key Access Rights
+// # Requires no API key Access Rights
 //
 // https://api.exchange.cryptomkt.com/#symbols
 //
 // Arguments:
-//  Symbol(string)  // A symbol id
+//
+//	Symbol(string)  // A symbol id
 func (client *Client) GetSymbol(
 	ctx context.Context,
 	arguments ...args.Argument,
@@ -286,12 +239,13 @@ func (client *Client) GetSymbol(
 
 // GetTickers gets a map of tickers for all symbols or for specified symbols. indexed by symbol id
 //
-// Requires no API key Access Rights
+// # Requires no API key Access Rights
 //
 // https://api.exchange.cryptomkt.com/#tickers
 //
 // Arguments:
-//  Symbols([]string)  // Optional. A list of symbol ids
+//
+//	Symbols([]string)  // Optional. A list of symbol ids
 func (client *Client) GetTickers(
 	ctx context.Context,
 	arguments ...args.Argument,
@@ -303,12 +257,13 @@ func (client *Client) GetTickers(
 
 // GetTickerOfSymbol gets the ticker of a symbol
 //
-// Requires no API key Access Rights
+// # Requires no API key Access Rights
 //
 // https://api.exchange.cryptomkt.com/#tickers
 //
 // Arguments:
-//  Symbol(string)  // A symbol id
+//
+//	Symbol(string)  // A symbol id
 func (client *Client) GetTickerOfSymbol(
 	ctx context.Context,
 	arguments ...args.Argument,
@@ -328,13 +283,14 @@ func (client *Client) GetTickerOfSymbol(
 
 // GetPrices gets a map of quotation prices of currencies
 //
-// Requires no API key Access Rights
+// # Requires no API key Access Rights
 //
 // https://api.exchange.cryptomkt.com/#prices
 //
 // Arguments:
-//  To(string)  // Target currency code
-//  From(string)  // Optional. Source currency rate
+//
+//	To(string)  // Target currency code
+//	From(string)  // Optional. Source currency rate
 func (client *Client) GetPrices(
 	ctx context.Context,
 	arguments ...args.Argument,
@@ -349,18 +305,19 @@ func (client *Client) GetPrices(
 
 // GetPricesHistory get the quotation prices history
 //
-// Requires no API key Access Rights
+// # Requires no API key Access Rights
 //
 // https://api.exchange.cryptomkt.com/#prices
 //
 // Arguments:
-//  To(string)  // Target currency code
-//  From(string)  // Optional. Source currency rate
-//  Period(PeriodType)  // Optional. A valid tick interval. Period1Minute, Period3Minutes, Period5Minutes, Period15Minutes, Period30Minutes, Period1Hour, Period4Hours, Period1Day, Period7Days, Period1Month. Default is Period30Minutes
-//  Sort(SortType)  // Optional. Sort direction. SortASC or SortDESC. Default is SortDESC
-//  Since(string)  // Optional. Initial value of the queried interval. As Datetime
-//  Until(string)  // Optional. Last value of the queried interval. As Datetime
-//  Limit(int)  // Optional. Prices per currency pair. Defaul is 1. Min is 1. Max is 1000
+//
+//	To(string)  // Target currency code
+//	From(string)  // Optional. Source currency rate
+//	Period(PeriodType)  // Optional. A valid tick interval. Period1Minute, Period3Minutes, Period5Minutes, Period15Minutes, Period30Minutes, Period1Hour, Period4Hours, Period1Day, Period7Days, Period1Month. Default is Period30Minutes
+//	Sort(SortType)  // Optional. Sort direction. SortASC or SortDESC. Default is SortDESC
+//	Since(string)  // Optional. Initial value of the queried interval. As Datetime
+//	Until(string)  // Optional. Last value of the queried interval. As Datetime
+//	Limit(int)  // Optional. Prices per currency pair. Defaul is 1. Min is 1. Max is 1000
 func (client *Client) GetPricesHistory(
 	ctx context.Context,
 	arguments ...args.Argument,
@@ -375,12 +332,13 @@ func (client *Client) GetPricesHistory(
 
 // GetTickerLastPrices gets a map of the ticker's last prices for all symbols or for the specified symbols
 //
-// Requires no API key Access Rights
+// # Requires no API key Access Rights
 //
 // https://api.exchange.cryptomkt.com/#prices
 //
 // Arguments:
-//  Symbols([]string)  // Optional. A list of symbol ids
+//
+//	Symbols([]string)  // Optional. A list of symbol ids
 func (client *Client) GetTickerLastPrices(
 	ctx context.Context,
 	arguments ...args.Argument,
@@ -395,12 +353,13 @@ func (client *Client) GetTickerLastPrices(
 
 // GetTickerLastPriceOfSymbol gets the ticker's last price of a symbol
 //
-// Requires no API key Access Rights
+// # Requires no API key Access Rights
 //
 // https://api.exchange.cryptomkt.com/#prices
 //
 // Arguments:
-//  Symbol(string)  // A symbol id
+//
+//	Symbol(string)  // A symbol id
 func (client *Client) GetTickerLastPricesOfSymbol(
 	ctx context.Context,
 	arguments ...args.Argument,
@@ -420,19 +379,20 @@ func (client *Client) GetTickerLastPricesOfSymbol(
 
 // GetTrades gets a map of trades for all symbols or for specified symbols. indexed by symbol
 //
-// From param and Till param must have the same format, both id or both timestamp
+// # From param and Till param must have the same format, both id or both timestamp
 //
-// Requires no API key Access Rights
+// # Requires no API key Access Rights
 //
 // https://api.exchange.cryptomkt.com/#trades
 //
 // Arguments:
-//  Symbols([]string)  // Optional. A list of symbol ids
-//  SortBy(SortByType)  // Optional. Sorting parameter. SortByID or SortByTimestamp. Default is SortByTimestamp
-//  Sort(SortType)  // Optional. Sort direction. SortASC or SortDESC. Default is SortDESC
-//  From(string)  // Optional. Initial value of the queried interval
-//  Till(string)  // Optional. Last value of the queried interval
-//  Limit(int)  // Optional. Prices per currency pair. Defaul is 10. Min is 1. Max is 1000
+//
+//	Symbols([]string)  // Optional. A list of symbol ids
+//	SortBy(SortByType)  // Optional. Sorting parameter. SortByID or SortByTimestamp. Default is SortByTimestamp
+//	Sort(SortType)  // Optional. Sort direction. SortASC or SortDESC. Default is SortDESC
+//	From(string)  // Optional. Initial value of the queried interval
+//	Till(string)  // Optional. Last value of the queried interval
+//	Limit(int)  // Optional. Prices per currency pair. Defaul is 10. Min is 1. Max is 1000
 func (client *Client) GetTrades(
 	ctx context.Context,
 	arguments ...args.Argument,
@@ -444,18 +404,19 @@ func (client *Client) GetTrades(
 
 // GetTradesOfSymbol gets trades of a symbol
 //
-// From param and Till param must have the same format, both index of both timestamp
+// # From param and Till param must have the same format, both index of both timestamp
 //
 // https://api.exchange.cryptomarket.com/#trades
 //
 // Arguments:
-//  Symbol(string)  // A symbol id
-//  SortBy(SortByType)  // Optional. Sorting parameter. SortByID or SortByTimestamp. Default is SortByTimestamp
-//  Sort(SortType)  // Optional. Sort direction. SortASC or SortDESC. Default is SortDESC
-//  Since(string)  // Optional. Initial value of the queried interval
-//  Until(string)  // Optional. Last value of the queried interval
-//  Limit(int)  // Optional. Prices per currency pair. Defaul is 10. Min is 1. Max is 1000
-//  Offset(int)  // Optional. Default is 0. Min is 0. Max is 100000
+//
+//	Symbol(string)  // A symbol id
+//	SortBy(SortByType)  // Optional. Sorting parameter. SortByID or SortByTimestamp. Default is SortByTimestamp
+//	Sort(SortType)  // Optional. Sort direction. SortASC or SortDESC. Default is SortDESC
+//	Since(string)  // Optional. Initial value of the queried interval
+//	Until(string)  // Optional. Last value of the queried interval
+//	Limit(int)  // Optional. Prices per currency pair. Defaul is 10. Min is 1. Max is 1000
+//	Offset(int)  // Optional. Default is 0. Min is 0. Max is 100000
 func (client *Client) GetTradesOfSymbol(
 	ctx context.Context,
 	arguments ...args.Argument,
@@ -475,15 +436,16 @@ func (client *Client) GetTradesOfSymbol(
 
 // GetOrderBooks gets a map of orderbooks for all symbols or for the specified symbols
 //
-// An Order Book is an electronic list of buy and sell orders for a specific symbol, structured by price level
+// # An Order Book is an electronic list of buy and sell orders for a specific symbol, structured by price level
 //
-// Requires no API key Access Rights
+// # Requires no API key Access Rights
 //
 // https://api.exchange.cryptomkt.com/#order-books
 //
 // Arguments:
-//  Symbols([]string)  // Optional. A list of symbol ids
-//  Depth(int)  // Optional. Order Book depth. Default value is 100. Set to 0 to view the full Order Book
+//
+//	Symbols([]string)  // Optional. A list of symbol ids
+//	Depth(int)  // Optional. Order Book depth. Default value is 100. Set to 0 to view the full Order Book
 func (client *Client) GetOrderbooks(
 	ctx context.Context,
 	arguments ...args.Argument,
@@ -503,15 +465,16 @@ func (client *Client) GetOrderbooks(
 
 // GetOrderBookOfSymbol get order book of a symbol
 //
-// An Order Book is an electronic list of buy and sell orders for a specific symbol, structured by price level
+// # An Order Book is an electronic list of buy and sell orders for a specific symbol, structured by price level
 //
-// Requires no API key Access Rights
+// # Requires no API key Access Rights
 //
 // https://api.exchange.cryptomkt.com/#order-books
 //
 // Arguments:
-//  Symbol(string)  // A symbol id
-//  Depth(int)  // Optional. Order Book depth. Default value is 100. Set to 0 to view the full Order Book
+//
+//	Symbol(string)  // A symbol id
+//	Depth(int)  // Optional. Order Book depth. Default value is 100. Set to 0 to view the full Order Book
 func (client *Client) GetOrderBookOfSymbol(
 	ctx context.Context,
 	arguments ...args.Argument,
@@ -538,15 +501,16 @@ func (client *Client) GetOrderBookOfSymbol(
 
 // GetOrderBookVolumeOfSymbol get order book of a symbol with the desired volume for market depth search
 //
-// An Order Book is an electronic list of buy and sell orders for a specific symbol, structured by price level
+// # An Order Book is an electronic list of buy and sell orders for a specific symbol, structured by price level
 //
-// Requires no API key Access Rights
+// # Requires no API key Access Rights
 //
 // https://api.exchange.cryptomkt.com/#order-books
 //
 // Arguments:
-//  Symbol(string)  // A symbol id
-//  Volume(string)  // Desired volume for market depth search
+//
+//	Symbol(string)  // A symbol id
+//	Volume(string)  // Desired volume for market depth search
 func (client *Client) GetOrderBookVolumeOfSymbol(
 	ctx context.Context,
 	arguments ...args.Argument,
@@ -577,21 +541,22 @@ func (client *Client) GetOrderBookVolumeOfSymbol(
 
 // GetCandles gets a map of candles for all symbols or for specified symbols
 //
-// Candels are used for OHLC representation
+// # Candels are used for OHLC representation
 //
 // The result contains candles with non-zero volume only (no trades = no candles)
 //
-// Requires no API key Access Rights
+// # Requires no API key Access Rights
 //
 // https://api.exchange.cryptomkt.com/#candles
 //
 // Arguments:
-//  Symbols([]string)  // A list of symbol ids
-//  Period(PeriodType)  // Optional. A valid tick interval. Period1Minute, Period3Minutes, Period5Minutes, Period15Minutes, Period30Minutes, Period1Hour, Period4Hours, Period1Day, Period7Days, Period1Month. Default is Period30Minutes
-//  Sort(SortType)  // Optional. Sort direction. SortASC or SortDESC. Default is SortDESC
-//  From(string)  // Optional. Initial value of the queried interval. As DateTime
-//  Till(string)  // Optional. Last value of the queried interval. As DateTime
-//  Limit(int)  // Optional. Prices per currency pair. Defaul is 10. Min is 1. Max is 1000
+//
+//	Symbols([]string)  // A list of symbol ids
+//	Period(PeriodType)  // Optional. A valid tick interval. Period1Minute, Period3Minutes, Period5Minutes, Period15Minutes, Period30Minutes, Period1Hour, Period4Hours, Period1Day, Period7Days, Period1Month. Default is Period30Minutes
+//	Sort(SortType)  // Optional. Sort direction. SortASC or SortDESC. Default is SortDESC
+//	From(string)  // Optional. Initial value of the queried interval. As DateTime
+//	Till(string)  // Optional. Last value of the queried interval. As DateTime
+//	Limit(int)  // Optional. Prices per currency pair. Defaul is 10. Min is 1. Max is 1000
 func (client *Client) GetCandles(
 	ctx context.Context,
 	arguments ...args.Argument,
@@ -603,22 +568,23 @@ func (client *Client) GetCandles(
 
 // GetCandlesOfSymbol get candles of a symbol
 //
-// Candels are used for OHLC representation
+// # Candels are used for OHLC representation
 //
 // The result contains candles with non-zero volume only (no trades = no candles)
 //
-// Requires no API key Access Rights
+// # Requires no API key Access Rights
 //
 // https://api.exchange.cryptomkt.com/#candles
 //
 // Arguments:
-//  Symbol(string)  // A symbol id
-//  Period(PeriodType)  // Optional. A valid tick interval. Period1Minute, Period3Minutes, Period5Minutes, Period15Minutes, Period30Minutes, Period1Hour, Period4Hours, Period1Day, Period7Days, Period1Month. Default is Period30Minutes
-//  Sort(SortType)  // Optional. Sort direction. SortASC or SortDESC. Default is SortDESC
-//  From(string)  // Optional. Initial value of the queried interval. As DateTime
-//  Till(string)  // Optional. Last value of the queried interval. As DateTime
-//  Limit(int)  // Optional. Prices per currency pair. Defaul is 100. Min is 1. Max is 1000
-//  Offset(int)  // Optional. Default is 0. Min is 0. Max is 100000
+//
+//	Symbol(string)  // A symbol id
+//	Period(PeriodType)  // Optional. A valid tick interval. Period1Minute, Period3Minutes, Period5Minutes, Period15Minutes, Period30Minutes, Period1Hour, Period4Hours, Period1Day, Period7Days, Period1Month. Default is Period30Minutes
+//	Sort(SortType)  // Optional. Sort direction. SortASC or SortDESC. Default is SortDESC
+//	From(string)  // Optional. Initial value of the queried interval. As DateTime
+//	Till(string)  // Optional. Last value of the queried interval. As DateTime
+//	Limit(int)  // Optional. Prices per currency pair. Defaul is 100. Min is 1. Max is 1000
+//	Offset(int)  // Optional. Default is 0. Min is 0. Max is 100000
 func (client *Client) GetCandlesOfSymbol(
 	ctx context.Context,
 	arguments ...args.Argument,
@@ -659,7 +625,8 @@ func (client *Client) GetSpotTradingBalances(
 // https://api.exchange.cryptomkt.com/#get-spot-trading-balance
 //
 // Arguments:
-//  Currency(string)  // The currency code to query the balance
+//
+//	Currency(string)  // The currency code to query the balance
 func (client *Client) GetSpotTradingBalanceOfCurrency(
 	ctx context.Context,
 	arguments ...args.Argument,
@@ -688,7 +655,8 @@ func (client *Client) GetSpotTradingBalanceOfCurrency(
 // https://api.exchange.cryptomkt.com/#get-all-active-spot-orders
 //
 // Arguments:
-//  Symbol(string)  // Optional. A symbol for filtering the active spot orders
+//
+//	Symbol(string)  // Optional. A symbol for filtering the active spot orders
 func (client *Client) GetAllActiveSpotOrders(
 	ctx context.Context,
 	arguments ...args.Argument,
@@ -705,7 +673,8 @@ func (client *Client) GetAllActiveSpotOrders(
 // https://api.exchange.cryptomkt.com/#get-active-spot-orders
 //
 // Arguments:
-//  ClientOrderID(string)  // The client order id of the order
+//
+//	ClientOrderID(string)  // The client order id of the order
 func (client *Client) GetActiveSpotOrder(
 	ctx context.Context,
 	arguments ...args.Argument,
@@ -722,26 +691,27 @@ func (client *Client) GetActiveSpotOrder(
 
 // CreateSpotOrder creates a new spot order
 //
-// For fee, for price accuracy and quantity, and for order status information see the api docs
+// # For fee, for price accuracy and quantity, and for order status information see the api docs
 //
 // Requires the "Place/cancel orders" API key Access Right
 //
 // https://api.exchange.cryptomkt.com/#create-new-spot-order
 //
 // Arguments:
-//  Symbol(string)  // Trading symbol
-//  Side(SideType)  // Either SideBuy or SideSell
-//  Quantity(string)  // Order quantity
-//  ClientOrderID(string)  // Optional. If given must be unique within the trading day, including all active orders. If not given, is generated by the server
-//  Type(OrderType)  // Optional. OrderLimit, OrderMarket, OrderStopLimit, OrderStopMarket, OrderTakeProfitLimit or OrderTakeProfitMarket. Default is OrderLimit
-//  TimeInForce(TimeInForceType)  // Optional. TimeInForceGTC, TimeInForceIOC, TimeInForceFOK, TimeInForceDay, TimeInForceGTD. Default to TimeInForceGTC
-//  Price(string)  // Optional. Required for OrderLimit and OrderStopLimit. limit price of the order
-//  StopPrice(string)  // Optional. Required for OrderStopLimit and OrderStopMarket orders. stop price of the order
-//  ExpireTime(string)  // Optional. Required for orders with timeInForceGDT
-//  StrictValidate(bool)  // Optional. If False, the server rounds half down for tickerSize and quantityIncrement. Example of ETHBTC: tickSize = '0.000001', then price '0.046016' is valid, '0.0460165' is invalid
-//  PostOnly(bool)  // Optional. If True, your postOnly order causes a match with a pre-existing order as a taker, then the order will be cancelled
-//  TakeRate(string)  // Optional. Liquidity taker fee, a fraction of order volume, such as 0.001 (for 0.1% fee). Can only increase the fee. Used for fee markup.
-//  MakeRate(string)  // Optional. Liquidity provider fee, a fraction of order volume, such as 0.001 (for 0.1% fee). Can only increase the fee. Used for fee markup.
+//
+//	Symbol(string)  // Trading symbol
+//	Side(SideType)  // Either SideBuy or SideSell
+//	Quantity(string)  // Order quantity
+//	ClientOrderID(string)  // Optional. If given must be unique within the trading day, including all active orders. If not given, is generated by the server
+//	Type(OrderType)  // Optional. OrderLimit, OrderMarket, OrderStopLimit, OrderStopMarket, OrderTakeProfitLimit or OrderTakeProfitMarket. Default is OrderLimit
+//	TimeInForce(TimeInForceType)  // Optional. TimeInForceGTC, TimeInForceIOC, TimeInForceFOK, TimeInForceDay, TimeInForceGTD. Default to TimeInForceGTC
+//	Price(string)  // Optional. Required for OrderLimit and OrderStopLimit. limit price of the order
+//	StopPrice(string)  // Optional. Required for OrderStopLimit and OrderStopMarket orders. stop price of the order
+//	ExpireTime(string)  // Optional. Required for orders with timeInForceGDT
+//	StrictValidate(bool)  // Optional. If False, the server rounds half down for tickerSize and quantityIncrement. Example of ETHBTC: tickSize = '0.000001', then price '0.046016' is valid, '0.0460165' is invalid
+//	PostOnly(bool)  // Optional. If True, your postOnly order causes a match with a pre-existing order as a taker, then the order will be cancelled
+//	TakeRate(string)  // Optional. Liquidity taker fee, a fraction of order volume, such as 0.001 (for 0.1% fee). Can only increase the fee. Used for fee markup.
+//	MakeRate(string)  // Optional. Liquidity provider fee, a fraction of order volume, such as 0.001 (for 0.1% fee). Can only increase the fee. Used for fee markup.
 func (client *Client) CreateSpotOrder(
 	ctx context.Context,
 	arguments ...args.Argument,
@@ -761,18 +731,19 @@ func (client *Client) CreateSpotOrder(
 
 // ReplaceSpotOrder replaces a spot order
 //
-// For fee, for price accuracy and quantity, and for order status information see the api docs
+// # For fee, for price accuracy and quantity, and for order status information see the api docs
 //
 // Requires the "Place/cancel orders" API key Access Right
 //
 // https://api.exchange.cryptomkt.com/#replace-spot-order
 //
 // Arguments:
-//  ClientOrderID(string)  // client order id of the old order
-//  NewClientOrderID(string)  // client order id for the new order
-//  Quantity(string)  // Order quantity
-//  StrictValidate(bool)  // Price and quantity will be checked for incrementation within the symbol’s tick size and quantity step. See the symbol's TickSize and QuantityIncrement
-//  Price(string)  // Required for OrderLimit, OrderStopLimit, or OrderTakeProfitLimit. Order price
+//
+//	ClientOrderID(string)  // client order id of the old order
+//	NewClientOrderID(string)  // client order id for the new order
+//	Quantity(string)  // Order quantity
+//	StrictValidate(bool)  // Price and quantity will be checked for incrementation within the symbol’s tick size and quantity step. See the symbol's TickSize and QuantityIncrement
+//	Price(string)  // Required for OrderLimit, OrderStopLimit, or OrderTakeProfitLimit. Order price
 func (client *Client) ReplaceSpotOrder(
 	ctx context.Context,
 	arguments ...args.Argument,
@@ -796,40 +767,41 @@ func (client *Client) ReplaceSpotOrder(
 //
 // Types or contingency:
 //
-//  - ContingencyTypeAllOrNone (ContingencyTypeAON) (AON)
-//  - ContingencyTypeOneCancelOther (ContingencyTypeOCO) (OCO)
-//  - ContingencyOneTriggerOther (ContingencyTypeOTO) (OTO)
-//  - ContingencyOneTriggerOneCancelOther (ContingencyTypeOTOCO) (OTOCO)
+//   - ContingencyTypeAllOrNone (ContingencyTypeAON) (AON)
+//   - ContingencyTypeOneCancelOther (ContingencyTypeOCO) (OCO)
+//   - ContingencyOneTriggerOther (ContingencyTypeOTO) (OTO)
+//   - ContingencyOneTriggerOneCancelOther (ContingencyTypeOTOCO) (OTOCO)
 //
 // Restriction in the number of orders:
 //
-//  - An AON list must have 2 or 3 orders
-//  - An OCO list must have 2 or 3 orders
-//  - An OTO list must have 2 or 3 orders
-//  - An OTOCO must have 3 or 4 orders
+//   - An AON list must have 2 or 3 orders
+//   - An OCO list must have 2 or 3 orders
+//   - An OTO list must have 2 or 3 orders
+//   - An OTOCO must have 3 or 4 orders
 //
 // Symbol restrictions:
 //
-//  - For an AON order list, the symbol code of orders must be unique for each order in the list.
-//  - For an OCO order list, there are no symbol code restrictions.
-//  - For an OTO order list, there are no symbol code restrictions.
-//  - For an OTOCO order list, the symbol code of orders must be the same for all orders in the list (placing orders in different order books is not supported).
+//   - For an AON order list, the symbol code of orders must be unique for each order in the list.
+//   - For an OCO order list, there are no symbol code restrictions.
+//   - For an OTO order list, there are no symbol code restrictions.
+//   - For an OTOCO order list, the symbol code of orders must be the same for all orders in the list (placing orders in different order books is not supported).
 //
 // ORDER_TYPE restrictions:
-//  - For an AON order list, orders must be OrderLimit or OrderMarket
-//  - For an OCO order list, orders must be OrderLimit, OrderStopLimit, OrderStopMarket, OrderTakeProfitLimit or OrderTakeProfitMarket.
-//  - An OCO order list cannot include more than one limit order (the same applies to secondary orders in an OTOCO order list).
-//  - For an OTO order list there are no order type restrictions.
-//  - For an OTOCO order list, the first order must be OrderLimit, OrderMarket, OrderStopLimit, OrderStopMarket, OrderTakeProfitLimit or OrderTakeProfitMarket.
-//  - For an OTOCO order list, the secondary orders have the same restrictions as an OCO order
-//  - Default is OrderTypeLimit.
+//   - For an AON order list, orders must be OrderLimit or OrderMarket
+//   - For an OCO order list, orders must be OrderLimit, OrderStopLimit, OrderStopMarket, OrderTakeProfitLimit or OrderTakeProfitMarket.
+//   - An OCO order list cannot include more than one limit order (the same applies to secondary orders in an OTOCO order list).
+//   - For an OTO order list there are no order type restrictions.
+//   - For an OTOCO order list, the first order must be OrderLimit, OrderMarket, OrderStopLimit, OrderStopMarket, OrderTakeProfitLimit or OrderTakeProfitMarket.
+//   - For an OTOCO order list, the secondary orders have the same restrictions as an OCO order
+//   - Default is OrderTypeLimit.
 //
 // https://api.exchange.cryptomkt.com/#create-new-spot-order-list-2
 //
 // Arguments:
-//  ContingencyType(ContingencyTypeType) order list type.
-//  Orders(OrderRequest[]) the list of OrderRequests in the order list
-//  OrderListID(string) order list identifier. If not provided, it will be generated by the system. Must be equal to the client order id of the first order in the requests list.
+//
+//	ContingencyType(ContingencyTypeType) order list type.
+//	Orders(OrderRequest[]) the list of OrderRequests in the order list
+//	OrderListID(string) order list identifier. If not provided, it will be generated by the system. Must be equal to the client order id of the first order in the requests list.
 func (client *Client) CreateSpotOrderList(
 	ctx context.Context,
 	arguments ...args.Argument,
@@ -865,7 +837,8 @@ func (client *Client) CancelAllSpotOrders(
 // https://api.exchange.cryptomkt.com/#cancel-spot-order
 //
 // Arguments:
-//  ClientOrderID(string)  // client order id of the order to cancel
+//
+//	ClientOrderID(string)  // client order id of the order to cancel
 func (client *Client) CancelSpotOrder(
 	ctx context.Context,
 	arguments ...args.Argument,
@@ -909,7 +882,8 @@ func (client *Client) GetAllTradingCommissions(
 // https://api.exchange.cryptomkt.com/#get-trading-commission
 //
 // Arguments:
-//  Symbol(string)  // The symbol of the commission rate
+//
+//	Symbol(string)  // The symbol of the commission rate
 func (client *Client) GetTradingCommissionOfSymbol(
 	ctx context.Context,
 	arguments ...args.Argument,
@@ -937,7 +911,7 @@ func (client *Client) GetTradingCommissionOfSymbol(
 
 // GetSpotOrderHistory gets all the spot orders
 //
-// Orders without executions are deleted after 24 hours
+// # Orders without executions are deleted after 24 hours
 //
 // 'from' param and 'till' param must have the same format, both id or both timestamp
 //
@@ -946,13 +920,14 @@ func (client *Client) GetTradingCommissionOfSymbol(
 // https://api.exchange.cryptomkt.com/#spot-orders-history
 //
 // Arguments:
-//  Symbol(string)  // Optional. Filter orders by symbol
-//  SortBy(SortByType)  // Optional. Sorting parameter. SortByID or SortByTimestamp. Default is SortByTimestamp
-//  Sort(SortType)  // Optional. Sort direction. SortASC or SortDESC. Default is SortDESC
-//  From(string)  // Optional. Initial value of the queried interval
-//  Till(string)  // Optional. Last value of the queried interval
-//  Limit(int)  // Optional. Prices per currency pair. Defaul is 100. Max is 1000
-//  Offset(int)  // Optional. Default is 0. Max is 100000
+//
+//	Symbol(string)  // Optional. Filter orders by symbol
+//	SortBy(SortByType)  // Optional. Sorting parameter. SortByID or SortByTimestamp. Default is SortByTimestamp
+//	Sort(SortType)  // Optional. Sort direction. SortASC or SortDESC. Default is SortDESC
+//	From(string)  // Optional. Initial value of the queried interval
+//	Till(string)  // Optional. Last value of the queried interval
+//	Limit(int)  // Optional. Prices per currency pair. Defaul is 100. Max is 1000
+//	Offset(int)  // Optional. Default is 0. Max is 100000
 func (client *Client) GetSpotOrdersHistory(
 	ctx context.Context,
 	arguments ...args.Argument,
@@ -972,14 +947,15 @@ func (client *Client) GetSpotOrdersHistory(
 // https://api.exchange.cryptomkt.com/#spot-trades-history
 //
 // Arguments:
-//  OrderID(string)  // Optional. Order unique identifier as assigned by the exchange
-//  Symbol(string)  // Optional. Filter orders by symbol
-//  SortBy(SortByType)  // Optional. Sorting parameter. SortByID or SortByTimestamp. Default is SortByTimestamp
-//  Sort(SortType)  // Optional. Sort direction. SortASC or SortDESC. Default is SortDESC
-//  From(string)  // Optional. Initial value of the queried interval
-//  Till(string)  // Optional. Last value of the queried interval
-//  Limit(int)  // Optional. Prices per currency pair. Defaul is 100. Max is 1000
-//  Offset(int)  // Optional. Default is 0. Max is 100000
+//
+//	OrderID(string)  // Optional. Order unique identifier as assigned by the exchange
+//	Symbol(string)  // Optional. Filter orders by symbol
+//	SortBy(SortByType)  // Optional. Sorting parameter. SortByID or SortByTimestamp. Default is SortByTimestamp
+//	Sort(SortType)  // Optional. Sort direction. SortASC or SortDESC. Default is SortDESC
+//	From(string)  // Optional. Initial value of the queried interval
+//	Till(string)  // Optional. Last value of the queried interval
+//	Limit(int)  // Optional. Prices per currency pair. Defaul is 100. Max is 1000
+//	Offset(int)  // Optional. Default is 0. Max is 100000
 func (client *Client) GetSpotTradesHistory(
 	ctx context.Context,
 	arguments ...args.Argument,
@@ -1015,7 +991,8 @@ func (client *Client) GetWalletBallances(
 // https://api.exchange.cryptomkt.com/#wallet-balance
 //
 // Arguments:
-//  Currency(string)  // The currency code to query the balance
+//
+//	Currency(string)  // The currency code to query the balance
 func (client *Client) GetWalletBalanceOfCurrency(
 	ctx context.Context,
 	arguments ...args.Argument,
@@ -1060,7 +1037,10 @@ func (client *Client) GetDepositCryptoAddresses(
 // https://api.exchange.cryptomkt.com/#deposit-crypto-address
 //
 // Arguments:
-//  Currency(string)  // Currency to gets the address
+//
+//	Currency(string)  // currency to gets the address
+//	NetworkCode(String) // Optional. network code
+
 func (client *Client) GetDepositCryptoAddressOfCurrency(
 	ctx context.Context,
 	arguments ...args.Argument,
@@ -1080,12 +1060,17 @@ func (client *Client) GetDepositCryptoAddressOfCurrency(
 
 // CreateDepositCryptoAddress Creates a new address for a currency
 //
+// # Existing addresses of some tokens may still receive funds. For some tokens (e.g., Ethereum tokens), a single address is generated per base currency with additional identifiers which differ for each address: payment_id or public_key. As a result, generating a new address for such a token will change the current address for an entire base currency accordingly.
+//
 // Requires the "Payment information" API key Access Right
 //
 // https://api.exchange.cryptomkt.com/#deposit-crypto-address
 //
 // Arguments:
-//  Currency(string)  // currency to create a new address
+//
+//	Currency(string)  // currency to create a new address
+//	NetworkCode(String) // Optional. network code
+
 func (client *Client) CreateDepositCryptoAddress(
 	ctx context.Context,
 	arguments ...args.Argument,
@@ -1105,14 +1090,17 @@ func (client *Client) CreateDepositCryptoAddress(
 
 // GetLast10DepositCryptoAddresses gets the last 10 unique addresses used for deposit, by currency
 //
-// Addresses used a long time ago may be omitted, even if they are among the last 10 unique addresses
+// # Addresses used a long time ago may be omitted, even if they are among the last 10 unique addresses
 //
 // Requires the "Payment information" API key Access Right
 //
 // https://api.exchange.cryptomkt.com/#last-10-deposit-crypto-address
 //
 // Arguments:
-//  Currency(string)  // currency to gets the list of addresses
+//
+//	Currency(string)  // currency to gets the list of addresses
+//	NetworkCode(String) // Optional. network code
+
 func (client *Client) GetLast10DepositCryptoAddresses(
 	ctx context.Context,
 	arguments ...args.Argument,
@@ -1132,14 +1120,17 @@ func (client *Client) GetLast10DepositCryptoAddresses(
 
 // GetLast10WithdrawalCryptoAddresses gets the last 10 unique addresses used for withdrawals, by currency
 //
-// Addresses used a long time ago may be omitted, even if they are among the last 10 unique addresses
+// # Addresses used a long time ago may be omitted, even if they are among the last 10 unique addresses
 //
 // Requires the "Payment information" API key Access Right
 //
 // https://api.exchange.cryptomkt.com/#last-10-withdrawal-crypto-addresses
 //
 // Arguments:
-//  Currency(string)  // currency to gets the list of addresses
+//
+//	Currency(string)  // currency to gets the list of addresses
+//	NetworkCode(String) // Optional. network code
+
 func (client *Client) GetLast10WithdrawalCryptoAddresses(
 	ctx context.Context,
 	arguments ...args.Argument,
@@ -1169,21 +1160,23 @@ func (client *Client) GetLast10WithdrawalCryptoAddresses(
 //
 // Successful response to the request does not necessarily mean the resulting transaction got executed immediately. It has to be processed first and may eventually be rolled back
 //
-// To see whether a transaction has been finalized, call GetTransaction() with the corresponding ID
+// # To see whether a transaction has been finalized, call GetTransaction() with the corresponding ID
 //
 // Requires the "Withdraw cryptocurrencies" API key Access Right
 //
 // https://api.exchange.cryptomkt.com/#withdraw-crypto
 //
 // Arguments:
-//  Currency(string)  // currency code of the crypto to withdraw
-//  Amount(string)  // amount to be sent to the specified address
-//  Address(string)  // address identifier
-//  PaymentID(string)  // Optional.
-//  IncludeFee(bool)  // Optional. If true then the amount includes fees. Default is false
-//  AutoCommit(bool)  // Optional. If false then you should commit or rollback the transaction in an hour. Used in two phase commit schema. Default is true
-//  UseOffchain(UseOffchainType)  // Optional. Whether the withdrawal may be comitted offchain. Accepted values are UseOffchainNever, UseOffchainOptionaly and UseOffChainRequired
-//  PublicComment(string)  // Optional. Maximum lenght is 255
+//
+//	Currency(string)  // currency code of the crypto to withdraw
+//	NetworkCode(String) // Optional. network code
+//	Amount(string)  // amount to be sent to the specified address
+//	Address(string)  // address identifier
+//	PaymentID(string)  // Optional.
+//	IncludeFee(bool)  // Optional. If true then the amount includes fees. Default is false
+//	AutoCommit(bool)  // Optional. If false then you should commit or rollback the transaction in an hour. Used in two phase commit schema. Default is true
+//	UseOffchain(UseOffchainType)  // Optional. Whether the withdrawal may be comitted offchain. Accepted values are UseOffchainNever, UseOffchainOptionaly and UseOffChainRequired
+//	PublicComment(string)  // Optional. Maximum lenght is 255
 func (client *Client) withdrawCrypto(
 	ctx context.Context,
 	arguments ...args.Argument,
@@ -1210,7 +1203,8 @@ func (client *Client) withdrawCrypto(
 // https://api.exchange.cryptomkt.com/#withdraw-crypto-commit-or-rollback
 //
 // Arguments:
-//  ID(string)  // the withdrawal transaction identifier
+//
+//	ID(string)  // the withdrawal transaction identifier
 func (client *Client) WithdrawCryptoCommit(
 	ctx context.Context,
 	arguments ...args.Argument,
@@ -1237,7 +1231,8 @@ func (client *Client) WithdrawCryptoCommit(
 // https://api.exchange.cryptomkt.com/#withdraw-crypto-commit-or-rollback
 //
 // Arguments:
-//  ID(string)  // the withdrawal transaction identifier
+//
+//	ID(string)  // the withdrawal transaction identifier
 func (client *Client) WithdrawCryptoRollback(
 	ctx context.Context,
 	arguments ...args.Argument,
@@ -1257,6 +1252,34 @@ func (client *Client) WithdrawCryptoRollback(
 	return
 }
 
+// GetEstimateWithdrawalFees gets a list of estimates of the withdrawal fee of a currency
+//
+// Requires the "Payment information" API key Access Right
+//
+// https://api.exchange.cryptomkt.com/#estimate-withdraw-fee
+//
+// Arguments:
+//
+//	Currency(string)  // the currency code for withdrawal
+//	Amount(string)  // the expected withdraw amount
+//	NetworkCode(String) // Optional. network code
+func (client *Client) GetEstimateWithdrawFees(
+	ctx context.Context,
+	arguments ...args.Argument,
+) (result []models.FeeResponse, err error) {
+	params, err := args.BuildParams(
+		arguments,
+		internal.ArgNameCurrency,
+		internal.ArgNameAmount,
+	)
+	if err != nil {
+		return
+	}
+	response := []models.FeeResponse{}
+	err = client.privateGet(ctx, endpointEstimateWithdrawFee, params, &response)
+	return response, err
+}
+
 // GetEstimateWithdrawalFee gets an estimate of the withdrawal fee
 //
 // Requires the "Payment information" API key Access Right
@@ -1264,8 +1287,10 @@ func (client *Client) WithdrawCryptoRollback(
 // https://api.exchange.cryptomkt.com/#estimate-withdraw-fee
 //
 // Arguments:
-//  Currency(string)  // the currency code for withdrawal
-//  Amount(string)  // the expected withdraw amount
+//
+//	Currency(string)  // the currency code for withdrawal
+//	Amount(string)  // the expected withdraw amount
+//	NetworkCode(String) // Optional. network code
 func (client *Client) GetEstimateWithdrawFee(
 	ctx context.Context,
 	arguments ...args.Argument,
@@ -1280,8 +1305,7 @@ func (client *Client) GetEstimateWithdrawFee(
 	}
 	response := models.FeeResponse{}
 	err = client.privateGet(ctx, endpointEstimateWithdrawFee, params, &response)
-	result = response.Fee
-	return
+	return response.Fee, err
 }
 
 // ConvertBetweenCurrencies Converts between currencies
@@ -1289,16 +1313,18 @@ func (client *Client) GetEstimateWithdrawFee(
 // Successful response to the request does not necessarily mean the resulting transaction got executed immediately. It has to be processed first and may eventually be rolled back
 //
 // To see whether a transaction has been finalized, call
-//  getTransaction(id string)
+//
+//	getTransaction(id string)
 //
 // Requires the "Payment information" API key Access Right
 //
 // https://api.exchange.cryptomkt.com/#convert-between-currencies
 //
 // Arguments:
-//  FromCurrency(string)  // currency code of origin
-//  ToCurrency(string)  // currency code of destiny
-//  Amount(string)  // the amount to be converted
+//
+//	FromCurrency(string)  // currency code of origin
+//	ToCurrency(string)  // currency code of destiny
+//	Amount(string)  // the amount to be converted
 func (client *Client) ConvertBetweenCurrencies(
 	ctx context.Context,
 	arguments ...args.Argument,
@@ -1325,7 +1351,8 @@ func (client *Client) ConvertBetweenCurrencies(
 // https://api.exchange.cryptomkt.com/#check-if-crypto-address-belongs-to-current-account
 //
 // Arguments:
-//  Address(string)  // address to check
+//
+//	Address(string)  // address to check
 func (client *Client) CheckIfCryptoAddressBelongsToCurrentAccount(
 	ctx context.Context,
 	arguments ...args.Argument,
@@ -1347,17 +1374,18 @@ func (client *Client) CheckIfCryptoAddressBelongsToCurrentAccount(
 
 // TransferBetweenWalletAndExchange Transfer funds between account types
 //
-// Source param and Destination params must be different account types
+// # Source param and Destination params must be different account types
 //
 // Requires the "Payment information" API key Access Right
 //
 // https://api.exchange.cryptomkt.com/#transfer-between-wallet-and-exchange
 //
 // Arguments:
-//  Currency(string)  // currency code for transfering
-//  Amount(string)  // amount to be transfered
-//  Source(AccountType)  // transfer source account type. Either AccountWallet or AccountSpot
-//  Destination(AccountType)  // transfer source account type. Either AccountWallet or AccountSpot
+//
+//	Currency(string)  // currency code for transfering
+//	Amount(string)  // amount to be transfered
+//	Source(AccountType)  // transfer source account type. Either AccountWallet or AccountSpot
+//	Destination(AccountType)  // transfer source account type. Either AccountWallet or AccountSpot
 func (client *Client) TransferBetweenWalletAndExchange(
 	ctx context.Context,
 	arguments ...args.Argument,
@@ -1396,10 +1424,11 @@ func (client *Client) TransferBetweenWalletAndExchange(
 // https://api.exchange.cryptomkt.com/#transfer-money-to-another-user
 //
 // Arguments:
-//  Currency(string)  // currency code
-//  Amount(string)  // amount to be transfered
-//  IdentifyBy(IdentifyByType)  // type of identifier. Either IdentifyByEmail or IdentifyByUsername
-//  Identifier(string)  // the email or username of the recieving user
+//
+//	Currency(string)  // currency code
+//	Amount(string)  // amount to be transfered
+//	IdentifyBy(IdentifyByType)  // type of identifier. Either IdentifyByEmail or IdentifyByUsername
+//	Identifier(string)  // the email or username of the recieving user
 func (client *Client) TransferMoneyToAnotherUser(
 	ctx context.Context,
 	arguments ...args.Argument,
@@ -1423,29 +1452,30 @@ func (client *Client) TransferMoneyToAnotherUser(
 //
 // Important:
 //
-//  - The list of supported transaction types may be expanded in future versions
+//   - The list of supported transaction types may be expanded in future versions
 //
-//  - Some transaction subtypes are reserved for future use and do not purport to provide any functionality on the platform
+//   - Some transaction subtypes are reserved for future use and do not purport to provide any functionality on the platform
 //
-//  - The list of supported transaction subtypes may be expanded in future versions
+//   - The list of supported transaction subtypes may be expanded in future versions
 //
 // Requires the "Payment information" API key Access Right
 //
 // https://api.exchange.cryptomkt.com/#get-transactions-history
 //
 // Arguments:
-//  TransactionIds([]string)  // Optional. List of transaction identifiers to query
-//  TransactionTypes([]TransactionType)  // Optional. List of types to query. valid types are: TransactionDeposit, TransactionWithdraw, TransactionTransfer and TransactionSwap
-//  TransactionSubTypes([]TransactionSubType)  // Optional. List of subtypes to query. valid subtypes are: TransactionSubTypeUnclassified, TransactionSubTypeBlockchain,  TransactionSubTypeAffiliate,  TransactionSubtypeOffchain, TransactionSubTypeFiat, TransactionSubTypeSubAccount, TransactionSubTypeWalletToSpot, TransactionSubTypeSpotToWallet, TransactionSubTypeChainSwitchFrom and TransactionSubTypeChainSwitchTo
-//  TransactionStatuses([]TransactionStatusType)  // Optional. List of statuses to query. valid subtypes are: TransactionStatusCreated, TransactionStatusPending, TransactionStatusFailed, TransactionStatusSuccess and TransactionStatusRolledBack
-//  SortBy(SortByType)  // Optional. sorting parameter. SortByCreatedAt or SortByID. Default is SortByCreatedAt
-//  From(string)  // Optional. Interval initial value when ordering by CreatedAt. As Datetime.
-//  Till(string)  // Optional. Interval end value when ordering by CreatedAt. As Datetime.
-//  IDFrom(string)  // Optional. Interval initial value when ordering by id. Min is 0
-//  IDTill(string)  // Optional. Interval end value when ordering by id. Min is 0
-//  Sort(SortType)  // Optional. Sort direction. SortASC or SortDESC. Default is SortDESC
-//  Limit(int)  // Optional. Transactions per query. Defaul is 100. Max is 1000
-//  Offset(int)  // Optional. Default is 0. Max is 100000
+//
+//	TransactionIds([]string)  // Optional. List of transaction identifiers to query
+//	TransactionTypes([]TransactionType)  // Optional. List of types to query. valid types are: TransactionDeposit, TransactionWithdraw, TransactionTransfer and TransactionSwap
+//	TransactionSubTypes([]TransactionSubType)  // Optional. List of subtypes to query. valid subtypes are: TransactionSubTypeUnclassified, TransactionSubTypeBlockchain,  TransactionSubTypeAffiliate,  TransactionSubtypeOffchain, TransactionSubTypeFiat, TransactionSubTypeSubAccount, TransactionSubTypeWalletToSpot, TransactionSubTypeSpotToWallet, TransactionSubTypeChainSwitchFrom and TransactionSubTypeChainSwitchTo
+//	TransactionStatuses([]TransactionStatusType)  // Optional. List of statuses to query. valid subtypes are: TransactionStatusCreated, TransactionStatusPending, TransactionStatusFailed, TransactionStatusSuccess and TransactionStatusRolledBack
+//	SortBy(SortByType)  // Optional. sorting parameter. SortByCreatedAt or SortByID. Default is SortByCreatedAt
+//	From(string)  // Optional. Interval initial value when ordering by CreatedAt. As Datetime.
+//	Till(string)  // Optional. Interval end value when ordering by CreatedAt. As Datetime.
+//	IDFrom(string)  // Optional. Interval initial value when ordering by id. Min is 0
+//	IDTill(string)  // Optional. Interval end value when ordering by id. Min is 0
+//	Sort(SortType)  // Optional. Sort direction. SortASC or SortDESC. Default is SortDESC
+//	Limit(int)  // Optional. Transactions per query. Defaul is 100. Max is 1000
+//	Offset(int)  // Optional. Default is 0. Max is 100000
 func (client *Client) GetTransactionHistory(
 	ctx context.Context,
 	arguments ...args.Argument,
@@ -1465,7 +1495,8 @@ func (client *Client) GetTransactionHistory(
 // https://api.exchange.cryptomkt.com/#get-transactions-history
 //
 // Arguments:
-//  ID(string)  // The identifier of the transaction
+//
+//	ID(string)  // The identifier of the transaction
 func (client *Client) GetTransaction(
 	ctx context.Context,
 	arguments ...args.Argument,
@@ -1490,9 +1521,10 @@ func (client *Client) GetTransaction(
 // https://api.exchange.cryptomkt.com/#check-if-offchain-is-available
 //
 // Arguments:
-//  Currency(string)  // currency code
-//  Address(string)  // address identifier
-//  PaymentID(string)  // Optional.
+//
+//	Currency(string)  // currency code
+//	Address(string)  // address identifier
+//	PaymentID(string)  // Optional.
 func (client *Client) CheckIfOffchainIsAvailable(
 	ctx context.Context,
 	arguments ...args.Argument,
@@ -1523,12 +1555,13 @@ func (client *Client) CheckIfOffchainIsAvailable(
 // https://api.exchange.cryptomkt.com/#get-amount-locks
 //
 // Arguments:
-//  Currency(string)  // Optional. Currency code
-//  Active(bool)  // Optional. value showing whether the lock is active
-//  Limit(int)  // Optional. Dafault is 100. Min is 0. Max is 1000
-//  Offset(int)  // Optional. Default is 0. Min is 0
-//  From(string)  // Optional. Interval initial value. As Datetime
-//  Till(string)  // Optional. Interval end value. As Datetime
+//
+//	Currency(string)  // Optional. Currency code
+//	Active(bool)  // Optional. value showing whether the lock is active
+//	Limit(int)  // Optional. Dafault is 100. Min is 0. Max is 1000
+//	Offset(int)  // Optional. Default is 0. Min is 0
+//	From(string)  // Optional. Interval initial value. As Datetime
+//	Till(string)  // Optional. Interval end value. As Datetime
 func (client *Client) GetAmountLocks(
 	ctx context.Context,
 	arguments ...args.Argument,
@@ -1576,15 +1609,15 @@ func (client *Client) GetSubAccounts(
 //
 // - use API keys
 //
-//
-// For any sub-account listed, all orders will be canceled and all funds will be transferred form the Trading balance
+// # For any sub-account listed, all orders will be canceled and all funds will be transferred form the Trading balance
 //
 // Requires no API key Access Rights. Requires to be authenticated
 //
 // https://api.exchange.cryptomkt.com/#freeze-sub-account
 //
 // Arguments:
-//  SubAccountIDs(...string)  // A list of sub account ids. Ids as hexadecimal code
+//
+//	SubAccountIDs(...string)  // A list of sub account ids. Ids as hexadecimal code
 func (client *Client) FreezeSubAccounts(
 	ctx context.Context,
 	arguments ...args.Argument,
@@ -1605,7 +1638,8 @@ func (client *Client) FreezeSubAccounts(
 // https://api.exchange.cryptomkt.com/#activate-sub-account
 //
 // Arguments:
-//  SubAccountIDs(...string)  // currency code of the sub-accounts to activate. Ids as hexadecimal code
+//
+//	SubAccountIDs(...string)  // currency code of the sub-accounts to activate. Ids as hexadecimal code
 func (client *Client) ActivateSubAccounts(
 	ctx context.Context,
 	arguments ...args.Argument,
@@ -1626,10 +1660,11 @@ func (client *Client) ActivateSubAccounts(
 // https://api.exchange.cryptomkt.com/#transfer-funds
 //
 // Arguments:
-//  SubAccountID(string)  // id of the sub-account to transfer with the super-account
-//  Amount(string)  // amount of funds to transfer
-//  Currency(string)  // currency of transfer
-//  TransferType(TransferTypeType)  // TransferToSubAccount or TransferFromSubAccount
+//
+//	SubAccountID(string)  // id of the sub-account to transfer with the super-account
+//	Amount(string)  // amount of funds to transfer
+//	Currency(string)  // currency of transfer
+//	TransferType(TransferTypeType)  // TransferToSubAccount or TransferFromSubAccount
 func (client *Client) TransferFunds(
 	ctx context.Context,
 	arguments ...args.Argument,
@@ -1650,7 +1685,8 @@ func (client *Client) TransferFunds(
 // https://api.exchange.cryptomkt.com/#get-acl-settings
 //
 // Arguments:
-//  SubAccountIDs(...string)  // A list of sub account ids. Ids as hexadecimal code
+//
+//	SubAccountIDs(...string)  // A list of sub account ids. Ids as hexadecimal code
 func (client *Client) GetACLSettings(
 	ctx context.Context,
 	arguments ...args.Argument,
@@ -1669,19 +1705,20 @@ func (client *Client) GetACLSettings(
 
 // ChangeACLSettings changes the ACL settings of subaccounts and returns a list of acl settings of the changed sub-accounts
 //
-// Disables or enables withdrawals for a sub-account
+// # Disables or enables withdrawals for a sub-account
 //
 // Requires the "Payment information" API key Access Right
 //
 // https://api.exchange.cryptomkt.com/#change-acl-settings
 //
 // Arguments:
-//  SubAccountIDs(...string)  // currency code for transfering
-//  DepositAddressGenerationEnabled(bool)	// Optional. value indicaiting permission for deposits
-//  WithdrawEnabled(bool)  // Optional. value indicating permission for withdrawals
-//  Description(string)  // Optional. Textual description.
-//  CreatedAt(string)  // Optional. ACL creation time
-//  UpdatedAt(string)  // Optional. ACL update time
+//
+//	SubAccountIDs(...string)  // currency code for transfering
+//	DepositAddressGenerationEnabled(bool)	// Optional. value indicaiting permission for deposits
+//	WithdrawEnabled(bool)  // Optional. value indicating permission for withdrawals
+//	Description(string)  // Optional. Textual description.
+//	CreatedAt(string)  // Optional. ACL creation time
+//	UpdatedAt(string)  // Optional. ACL update time
 func (client *Client) ChangeACLSettings(
 	ctx context.Context,
 	arguments ...args.Argument,
@@ -1706,7 +1743,8 @@ func (client *Client) ChangeACLSettings(
 // https://api.exchange.cryptomkt.com/#get-sub-account-balance
 //
 // Arguments:
-//  SubAccountID(string)  // id of the sub-account to get the balances
+//
+//	SubAccountID(string)  // id of the sub-account to get the balances
 func (client *Client) GetSubAccountBalances(
 	ctx context.Context,
 	arguments ...args.Argument,
@@ -1726,8 +1764,10 @@ func (client *Client) GetSubAccountBalances(
 // https://api.exchange.cryptomkt.com/#get-sub-account-crypto-address
 //
 // Arguments:
-//  SubAccountID(string)  // the sub-account id
-//  Currency(string)  // the currency code of the crypto address
+//
+//	SubAccountID(string)  // the sub-account id
+//	Currency(string)  // the currency code of the crypto address
+//	NetworkCode(String) // Optional. network code
 func (client *Client) GetSubAccountCryptoAddress(
 	ctx context.Context,
 	arguments ...args.Argument,

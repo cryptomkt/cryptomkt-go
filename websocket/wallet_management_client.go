@@ -20,9 +20,10 @@ type WalletManagementClient struct {
 // cryptomarket server is successful and if the authentication is successful.
 // return error otherwise.
 // Arguments:
-//  apiKey // The API key
-//  apiSecret // The API secret
-//  window // Maximum difference between the creation of the request and the moment of request processing in milliseconds. Max is 60_000. Defaul is 10_000 (use 0 as argument for default)
+//
+//	apiKey // The API key
+//	apiSecret // The API secret
+//	window // Maximum difference between the creation of the request and the moment of request processing in milliseconds. Max is 60_000. Defaul is 10_000 (use 0 as argument for default)
 func NewWalletManagementClient(apiKey, apiSecret string, window int) (*WalletManagementClient, error) {
 	client := &WalletManagementClient{
 		clientBase: clientBase{
@@ -34,7 +35,7 @@ func NewWalletManagementClient(apiKey, apiSecret string, window int) (*WalletMan
 
 	// connect to streaming
 	if err := client.wsManager.connect(); err != nil {
-		return nil, fmt.Errorf("Error in websocket client connection: %s", err)
+		return nil, fmt.Errorf("error in websocket client connection: %s", err)
 	}
 	// handle incomming data
 	go client.handle(client.wsManager.rcv)
@@ -66,7 +67,8 @@ func (client *WalletManagementClient) GetWalletBalances(
 // https://api.exchange.cryptomkt.com/#request-wallet-balance
 //
 // Arguments:
-//  Currency(string)  // The currency code to query the balance
+//
+//	Currency(string)  // The currency code to query the balance
 func (client *WalletManagementClient) GetWalletBalanceOfCurrency(
 	ctx context.Context,
 	arguments ...args.Argument,
@@ -91,27 +93,28 @@ func (client *WalletManagementClient) GetWalletBalanceOfCurrency(
 //
 // Important:
 //
-//  - The list of supported transaction types may be expanded in future versions
+//   - The list of supported transaction types may be expanded in future versions
 //
-//  - Some transaction subtypes are reserved for future use and do not purport to provide any functionality on the platform
+//   - Some transaction subtypes are reserved for future use and do not purport to provide any functionality on the platform
 //
-//  - The list of supported transaction subtypes may be expanded in future versions
+//   - The list of supported transaction subtypes may be expanded in future versions
 //
 // https://api.exchange.cryptomkt.com/#get-transactions
 //
 // Arguments:
-//  TransactionIds([]string)  // Optional. List of transaction identifiers to query
-//  TransactionTypes([]TransactionType)  // Optional. List of types to query. valid types are: TransactionDeposit, TransactionWithdraw, TransactionTransfer and TransactionSwap
-//  TransactionSubTypes([]TransactionSubType)  // Optional. List of subtypes to query. valid subtypes are: TransactionSubTypeUnclassified, TransactionSubTypeBlockchain,  TransactionSubTypeAffiliate,  TransactionSubtypeOffchain, TransactionSubTypeFiat, TransactionSubTypeSubAccount, TransactionSubTypeWalletToSpot, TransactionSubTypeSpotToWallet, TransactionSubTypeChainSwitchFrom and TransactionSubTypeChainSwitchTo
-//  TransactionStatuses([]TransactionStatusType)  // Optional. List of statuses to query. valid subtypes are: TransactionStatusCreated, TransactionStatusPending, TransactionStatusFailed, TransactionStatusSuccess and TransactionStatusRolledBack
-//  SortBy(SortByType)  // Optional. sorting parameter. SortByCreatedAt or SortByID. Default is SortByCreatedAt
-//  From(string)  // Optional. Interval initial value when ordering by CreatedAt. As Datetime.
-//  Till(string)  // Optional. Interval end value when ordering by CreatedAt. As Datetime.
-//  IDFrom(string)  // Optional. Interval initial value when ordering by id. Min is 0
-//  IDTill(string)  // Optional. Interval end value when ordering by id. Min is 0
-//  Sort(SortType)  // Optional. Sort direction. SortASC or SortDESC. Default is SortDESC
-//  Limit(int64)  // Optional. Transactions per query. Defaul is 100. Max is 1000
-//  Offset(int64)  // Optional. Default is 0. Max is 100000
+//
+//	TransactionIds([]string)  // Optional. List of transaction identifiers to query
+//	TransactionTypes([]TransactionType)  // Optional. List of types to query. valid types are: TransactionDeposit, TransactionWithdraw, TransactionTransfer and TransactionSwap
+//	TransactionSubTypes([]TransactionSubType)  // Optional. List of subtypes to query. valid subtypes are: TransactionSubTypeUnclassified, TransactionSubTypeBlockchain,  TransactionSubTypeAffiliate,  TransactionSubtypeOffchain, TransactionSubTypeFiat, TransactionSubTypeSubAccount, TransactionSubTypeWalletToSpot, TransactionSubTypeSpotToWallet, TransactionSubTypeChainSwitchFrom and TransactionSubTypeChainSwitchTo
+//	TransactionStatuses([]TransactionStatusType)  // Optional. List of statuses to query. valid subtypes are: TransactionStatusCreated, TransactionStatusPending, TransactionStatusFailed, TransactionStatusSuccess and TransactionStatusRolledBack
+//	SortBy(SortByType)  // Optional. sorting parameter. SortByCreatedAt or SortByID. Default is SortByCreatedAt
+//	From(string)  // Optional. Interval initial value when ordering by CreatedAt. As Datetime.
+//	Till(string)  // Optional. Interval end value when ordering by CreatedAt. As Datetime.
+//	IDFrom(string)  // Optional. Interval initial value when ordering by id. Min is 0
+//	IDTill(string)  // Optional. Interval end value when ordering by id. Min is 0
+//	Sort(SortType)  // Optional. Sort direction. SortASC or SortDESC. Default is SortDESC
+//	Limit(int64)  // Optional. Transactions per query. Defaul is 100. Max is 1000
+//	Offset(int64)  // Optional. Default is 0. Max is 100000
 func (client *WalletManagementClient) GetTransactions(
 	ctx context.Context,
 	arguments ...args.Argument,
@@ -163,7 +166,6 @@ func (client *WalletManagementClient) SubscribeToTransactions() (notificationCh 
 // UnsubscribeToTransactions stop recieving the feed of transactions changes
 //
 // https://api.exchange.cryptomkt.com/#subscribe-to-transactions
-//
 func (client *WalletManagementClient) UnsubscribeToTransactions() error {
 	return client.doUnsubscription(methodUnsubscribeTransactions, nil, nil)
 }

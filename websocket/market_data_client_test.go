@@ -3,6 +3,7 @@ package websocket
 import (
 	"context"
 	"fmt"
+	"strconv"
 	"testing"
 	"time"
 
@@ -121,11 +122,21 @@ func TestClosingClientClosesAllChannels(t *testing.T) {
 func TestAsteriscIfNoSymbols(t *testing.T) {
 	client, _ := NewMarketDataClient()
 	defer client.Close()
-	subscription, _ := client.SubscribeToMiniTicker()
+	subscription, _ := client.SubscribeToMiniTicker(args.TickerSpeed(args.TickerSpeed1s))
 	if len(subscription.Symbols) == 0 {
 		t.Fail()
 	}
 }
+
+func TestMissingParam(t *testing.T) {
+	client, _ := NewMarketDataClient()
+	defer client.Close()
+	_, err := client.SubscribeToMiniTicker()
+	if err == nil {
+		t.Fail()
+	}
+}
+
 func TestTradesSubscription(t *testing.T) {
 	client, saver := beforeEachMarketDataTest()
 	subscription, err := client.SubscribeToTrades(args.Symbols([]string{"EOSETH", "ETHBTC"}), args.Limit(10))
@@ -207,7 +218,8 @@ func TestMiniTickerInBatchSubscription(t *testing.T) {
 func TestTickerSubscription(t *testing.T) {
 	client, saver := beforeEachMarketDataTest()
 	subscription, err := client.SubscribeToTicker(
-		args.TickerSpeed(args.TickerSpeed1s),
+		args.TickerSpeed(args.TickerSpeed3s),
+		args.Symbols([]string{"BTCUSDT", "ETHBTC"}),
 	)
 	if err != nil {
 		t.Fatal(err)
@@ -265,7 +277,7 @@ func TestPartialOrderbookSubscription(t *testing.T) {
 	subscription, err := client.SubscribeToPartialOrderbook(
 		args.Symbols([]string{"EOSETH"}),
 		args.WSDepth(args.WSDepth10),
-		args.OrderBookSpeed(args.OrderBookSpeed1000ms),
+		args.OrderBookSpeed(args.OrderBookSpeed500ms),
 	)
 	if err != nil {
 		t.Fatal(err)
@@ -276,6 +288,32 @@ func TestPartialOrderbookSubscription(t *testing.T) {
 		defer saver.close()
 		for notification := range subscription.NotificationCh {
 			checkOrderbookFeed(obchecker, saver, &notification.Data)
+		}
+	}()
+	afterEach(t, client, saver, subscription.NotificationChannel)
+}
+
+func TestPartialOrderbookSubscriptionOrderbookSequence(t *testing.T) {
+	client, saver := beforeEachMarketDataTest()
+	subscription, err := client.SubscribeToPartialOrderbook(
+		args.Symbols([]string{"EOSETH"}),
+		args.WSDepth(args.WSDepth10),
+		args.OrderBookSpeed(args.OrderBookSpeed500ms),
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+	saver.strSaveCh() <- fmt.Sprint(subscription.Symbols)
+	obchecker := new(OBChecker)
+	go func() {
+		defer saver.close()
+		for notification := range subscription.NotificationCh {
+			for _, ob := range notification.Data {
+				if err := obchecker.checkOrderbook(&ob); err != nil {
+					saver.errSaveCh() <- err
+				}
+				saver.strSaveCh() <- strconv.FormatInt(ob.SequenceNumber, 10)
+			}
 		}
 	}()
 	afterEach(t, client, saver, subscription.NotificationChannel)
@@ -346,7 +384,13 @@ func TestGetActiveSubscriptions(t *testing.T) {
 		args.Symbols([]string{"EOSETH"}),
 		args.OrderBookSpeed(args.OrderBookSpeed1000ms),
 	)
+	if err != nil {
+		t.Fatal(err)
+	}
 	_, err = client.SubscribeToTrades(args.Symbols([]string{"ETHBTC"}))
+	if err != nil {
+		t.Fatal(err)
+	}
 	<-time.After(3 * time.Second)
 	result, err := client.GetActiveSubscriptions(
 		context.Background(),

@@ -14,11 +14,14 @@ type APIKeys struct {
 }
 
 func LoadKeys() (apiKeys APIKeys) {
-	data, err := ioutil.ReadFile("/home/ismael/cryptomarket/keys-v3.json")
+	data, err := ioutil.ReadFile("../../../keys.json")
 	if err != nil {
 		fmt.Print(err)
 	}
 	err = json.Unmarshal(data, &apiKeys)
+	if err != nil {
+		fmt.Print(err)
+	}
 	return
 }
 

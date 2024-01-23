@@ -31,13 +31,13 @@ func (client *clientBase) handle(rcvCh chan []byte) {
 	for data := range rcvCh {
 		resp := wsResponse{}
 		json.Unmarshal(data, &resp)
-		if key, ok := getSubscriptionKey(resp); ok {
-			client.chanCache.sendViaSubscriptionCh(key, data)
+		if ch, ok := client.chanCache.pop(resp.ID); ok {
+			ch <- data
+			close(ch)
 			continue
 		}
-		if ch, ok := client.chanCache.pop(resp.ID); ok {
-			defer close(ch)
-			ch <- data
+		if key, ok := getSubscriptionKey(resp); ok {
+			client.chanCache.sendViaSubscriptionCh(key, data)
 			continue
 		}
 	}

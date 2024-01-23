@@ -1,7 +1,6 @@
 package args
 
 import (
-	"encoding/json"
 	"fmt"
 	"net/url"
 	"strconv"
@@ -415,25 +414,24 @@ func IDFrom(val string) Argument {
 }
 
 type OrderRequest struct {
-	ClientOrderID  string          `json:"client_order_id"`
-	Symbol         string          `json:"symbol"`
-	Side           SideType        `json:"side"`
-	Type           OrderType       `json:"type"`
-	TimeInForce    TimeInForceType `json:"time_in_force"`
-	Quantity       string          `json:"quantity"`
-	Price          string          `json:"price"`
-	StopPrice      string          `json:"stop_price"`
-	ExpireTime     string          `json:"expire_time"`
-	StrictValidate bool            `json:"strict_validate"`
-	PostOnly       bool            `json:"post_only"`
-	MakeRate       string          `json:"make_rate"`
-	TakeRate       string          `json:"take_rate"`
+	ClientOrderID  string          `json:"client_order_id,omitempty"`
+	Symbol         string          `json:"symbol,omitempty"`
+	Side           SideType        `json:"side,omitempty"`
+	Type           OrderType       `json:"type,omitempty"`
+	TimeInForce    TimeInForceType `json:"time_in_force,omitempty"`
+	Quantity       string          `json:"quantity,omitempty"`
+	Price          string          `json:"price,omitempty"`
+	StopPrice      string          `json:"stop_price,omitempty"`
+	ExpireTime     string          `json:"expire_time,omitempty"`
+	StrictValidate bool            `json:"strict_validate,omitempty"`
+	PostOnly       bool            `json:"post_only,omitempty"`
+	MakeRate       string          `json:"make_rate,omitempty"`
+	TakeRate       string          `json:"take_rate,omitempty"`
 }
 
 func Orders(val []OrderRequest) Argument {
 	return func(params map[string]interface{}) {
-		data, _ := json.Marshal(val)
-		params[internal.ArgNameOrders] = string(data)
+		params[internal.ArgNameOrders] = val
 	}
 }
 
@@ -503,6 +501,12 @@ func UpdatedAt(val string) Argument {
 	}
 }
 
+func NetworkCode(val string) Argument {
+	return func(params map[string]interface{}) {
+		params[internal.ArgNameNetworkCode] = val
+	}
+}
+
 type SubscriptionType string
 
 func SubscriptionTypeTrades() SubscriptionType {
@@ -552,5 +556,11 @@ func SubscriptionTypeOrderbookTopInBatch(speed OrderBookSpeedType) SubscriptionT
 func Subscription(val SubscriptionType) Argument {
 	return func(params map[string]interface{}) {
 		params[internal.ArgNameSubscription] = val
+	}
+}
+
+func Mode(val SubscriptionModeType) Argument {
+	return func(params map[string]interface{}) {
+		params[internal.ArgNameMode] = val
 	}
 }

@@ -117,6 +117,9 @@ func TestOrderFlow(t *testing.T) {
 
 func TestReportsSubscription(t *testing.T) {
 	client, saver, bg, err := beforeEachTradingClientTest()
+	if err != nil {
+		t.Fatal(err)
+	}
 	notificationCh, err := client.SubscribeToReports()
 	if err != nil {
 		t.Fatal(err)
@@ -199,7 +202,9 @@ func TestGetActiveSpotOrdersAndCancelAllSpotOrders(t *testing.T) {
 	}
 }
 
-func TestCreateSpotOrderList(t *testing.T) {}
+func TestCreateSpotOrderList(t *testing.T) {
+	// TODO
+}
 
 func TestGetSpotTradingBalances(t *testing.T) {
 	client, saver, bg, err := beforeEachTradingClientTest()

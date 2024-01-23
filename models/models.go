@@ -213,10 +213,11 @@ type MetaTransaction struct {
 
 // CryptoAddress is an crypto address
 type CryptoAddress struct {
-	Currency  string `json:"currency"`
-	Address   string `json:"address"`
-	PaymentID string `json:"payment_id"`
-	PublicKey string `json:"publicKey"`
+	Currency    string `json:"currency"`
+	Address     string `json:"address"`
+	PaymentID   string `json:"payment_id"`
+	PublicKey   string `json:"publicKey"`
+	NetworkCode string `json:"network_code"`
 }
 
 // PayoutCryptoAddress is for external crypto addresses
@@ -326,7 +327,8 @@ type BooleanResponse struct {
 }
 
 type FeeResponse struct {
-	Fee string `json:"fee"`
+	Fee         string `json:"fee"`
+	NetworkCode string `json:"networkCode"`
 }
 
 type SubAccount struct {

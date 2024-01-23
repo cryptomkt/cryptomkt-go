@@ -3,9 +3,7 @@ package websocket
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
-	"math/big"
-	"time"
+	"os"
 
 	"github.com/cryptomarket/cryptomarket-go/models"
 )
@@ -16,11 +14,14 @@ type APIKeys struct {
 }
 
 func LoadKeys() (apiKeys APIKeys) {
-	data, err := ioutil.ReadFile("/home/ismael/cryptomarket/keys-v3.json")
+	data, err := os.ReadFile("/home/ismael/cryptomarket/keys-v3.json")
 	if err != nil {
 		fmt.Print(err)
 	}
 	err = json.Unmarshal(data, &apiKeys)
+	if err != nil {
+		fmt.Print(err)
+	}
 	return
 }
 
@@ -116,54 +117,6 @@ func (saver *saver) close() {
 	close(saver.strSaver.save)
 }
 
-const format string = "2006-01-02T15:04:05.000Z07:00"
-
-//   "2021-01-20T20:01:00.612Z"
-type timeFlowChecker struct {
-	oldTime *time.Time
-}
-
-func newTimeFlowChecker() *timeFlowChecker {
-	return &timeFlowChecker{}
-}
-
-func (checker *timeFlowChecker) checkNextTime(newTimestamp string) (err error) {
-	if checker.oldTime == nil {
-		newTime, err := time.Parse(format, newTimestamp)
-		if err != nil {
-			return err
-		}
-		checker.oldTime = &newTime
-		return nil
-	}
-	newTime, err := time.Parse(format, newTimestamp)
-	if err != nil {
-		return err
-	}
-	if checker.oldTime.After(newTime) {
-		checker.oldTime = &newTime
-		err = fmt.Errorf("wrong time flow, got %v first instead of %v", checker.oldTime, newTime)
-	}
-	checker.oldTime = &newTime
-	return nil
-}
-
-type sequenceFlowChecker struct {
-	sequence int64
-}
-
-func newSequenceFlowChecker() *sequenceFlowChecker {
-	return &sequenceFlowChecker{}
-}
-
-func (checker *sequenceFlowChecker) checkNextSequence(nextSequence int64) (err error) {
-	if checker.sequence != 0 && nextSequence <= checker.sequence {
-		err = fmt.Errorf("wrong sequence, old:%v\tnew:%v", checker.sequence, nextSequence)
-	}
-	checker.sequence = nextSequence
-	return
-}
-
 func checkNoNil(field interface{}, name string) error {
 	if field == nil {
 		return fmt.Errorf("null field: %s", name)
@@ -189,42 +142,6 @@ func checkFields(fields map[string]interface{}) (err error) {
 		}
 	}
 	return nil
-}
-
-func checkCurrency(model *models.Currency) (err error) {
-	fields := map[string]interface{}{
-		"fullName":        model.FullName,
-		"payinEnabled":    model.PayinEnabled,
-		"payoutEnabled":   model.PayoutEnabled,
-		"transferEnabled": model.TransferEnabled,
-	}
-	return checkFields(fields)
-}
-
-func checkSymbol(model *models.Symbol) (err error) {
-	fields := map[string]interface{}{
-		"clientOrderID":      model.BaseCurrency,
-		"quote currency":     model.QuoteCurrency,
-		"fee currency":       model.FeeCurrency,
-		"quantity increment": model.QuantityIncrement,
-		"tick size":          model.TickSize,
-	}
-	return checkFields(fields)
-}
-
-func checkTicker(model *models.Ticker) (err error) {
-	fields := map[string]interface{}{
-		"ask":         model.Ask,
-		"bid":         model.Bid,
-		"close":       model.Close,
-		"low":         model.Low,
-		"high":        model.High,
-		"open":        model.Open,
-		"volume":      model.Volume,
-		"volumeQuote": model.VolumeQuote,
-		"timestamp":   model.Timestamp,
-	}
-	return checkFields(fields)
 }
 
 func checkMiniTicker(model *models.MiniTicker) (err error) {
@@ -271,29 +188,11 @@ func checkWSTrade(model *models.WSTrade) (err error) {
 	return checkFields(fields)
 }
 
-func checkBookLevel(model *models.BookLevel) (err error) {
-	fields := map[string]interface{}{
-		"price": model.Price,
-		"size":  model.Amount,
-	}
-	err = checkFields(fields)
-	if err != nil {
-		return
-	}
-	size, _ := new(big.Float).SetString(model.Amount)
-	zero, _ := new(big.Float).SetString("0.00")
-	if size.Cmp(zero) == 0 {
-		fmt.Println(model)
-		return fmt.Errorf("zero level")
-	}
-	return nil
-}
-
 type OBChecker struct {
 	lastSequence int64
 }
 
-func (obchecker *OBChecker) checkOrderbookV2(model *models.WSOrderbook) (err error) {
+func (obchecker *OBChecker) checkOrderbook(model *models.WSOrderbook) (err error) {
 	fields := map[string]interface{}{
 		"timestamp": model.Timestamp,
 		"ask":       model.Ask,
@@ -371,39 +270,6 @@ func checkCommission(model *models.TradingCommission) (err error) {
 	return checkFields(fields)
 }
 
-func checkOrder(model *models.Order) (err error) {
-	fields := map[string]interface{}{
-		"id":            model.ID,
-		"clientOrderId": model.ClientOrderID,
-		"symbol":        model.Symbol,
-		"side":          model.Side,
-		"status":        model.Status,
-		"type":          model.Type,
-		"timeInForce":   model.TimeInForce,
-		"quantity":      model.Quantity,
-		"price":         model.Price,
-		"cumQuantity":   model.QuantityCumulative,
-		"createdAt":     model.CreatedAt,
-		"updatedAt":     model.UpdatedAt,
-	}
-	return checkFields(fields)
-}
-
-func checkTrade(model *models.Trade) (err error) {
-	fields := map[string]interface{}{
-		"id":            model.ID,
-		"orderId":       model.OrderID,
-		"clientOrderId": model.ClientOrderID,
-		"symbol":        model.Symbol,
-		"side":          model.Side,
-		"quantity":      model.Quantity,
-		"price":         model.Price,
-		"fee":           model.Fee,
-		"timestamp":     model.Timestamp,
-	}
-	return checkFields(fields)
-}
-
 func checkTransaction(model *models.Transaction) (err error) {
 	fields := map[string]interface{}{
 		"id":        model.ID,
@@ -432,17 +298,6 @@ func checkReport(model *models.Report) (err error) {
 		"reportType":         model.ReportType,
 	}
 	return checkFields(fields)
-}
-
-func checkWSTradeFeed(saver *saver, feed *models.WSTradeFeed) {
-	saver.strSaveCh() <- fmt.Sprint(feed)
-	for _, tradeList := range *feed {
-		for _, wsTrade := range tradeList {
-			if err := checkWSTrade(&wsTrade); err != nil {
-				saver.errSaveCh() <- err
-			}
-		}
-	}
 }
 
 func checkCandleFeed(saver *saver, feed *models.WSCandleFeed) {
@@ -477,7 +332,7 @@ func checkWSTickerFeed(saver *saver, feed *models.WSTickerFeed) {
 func checkOrderbookFeed(obchecker *OBChecker, saver *saver, feed *models.WSOrderbookFeed) {
 	saver.strSaveCh() <- fmt.Sprint(feed)
 	for _, ob := range *feed {
-		if err := obchecker.checkOrderbookV2(&ob); err != nil {
+		if err := obchecker.checkOrderbook(&ob); err != nil {
 			saver.errSaveCh() <- err
 		}
 	}

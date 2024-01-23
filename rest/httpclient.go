@@ -1,24 +1,25 @@
 package rest
 
 import (
+	"bytes"
 	"context"
-	"crypto/hmac"
-	"crypto/sha256"
-	"encoding/base64"
-	"encoding/hex"
+	"encoding/json"
 	"errors"
-	"io/ioutil"
+	"io"
 	"net/http"
-	"strconv"
 	"strings"
-	"time"
 
 	"github.com/cryptomarket/cryptomarket-go/args"
 )
 
-var (
-	apiURL     = "https://api.exchange.cryptomkt.com"
-	apiVersion = "/api/3/"
+const (
+	apiURL                  = "https://api.exchange.cryptomkt.com"
+	apiVersion              = "/api/3/"
+	headerContentType       = "Content-type"
+	headerUserAgent         = "User-Agent"
+	userAgentCryptomarketGo = "cryptomarket/go"
+	applicationJson         = "application/json"
+	applicationUrlEncoded   = "application/x-www-form-urlencoded"
 )
 
 // httpclient handles all the http logic, leaving public only whats needed.
@@ -41,59 +42,85 @@ func newHTTPClient(apiKey, apiSecret string, window int) httpclient {
 	}
 }
 
-func (hclient httpclient) doRequest(cxt context.Context, method, endpoint string, params map[string]interface{}, public bool) (result []byte, err error) {
-	// build query
-	rawQuery := args.BuildQuery(params)
-	// build request
-	var req *http.Request
-	if method == methodGet {
-		req, err = http.NewRequestWithContext(cxt, method, apiURL+apiVersion+endpoint, nil)
-		req.URL.RawQuery = rawQuery
-	} else {
-		req, err = http.NewRequestWithContext(cxt, method, apiURL+apiVersion+endpoint, strings.NewReader(rawQuery))
-	}
-	if err != nil {
-		return nil, errors.New("CryptomarketSDKError: Can't build the request: " + err.Error())
-	}
-	req.Header.Add("User-Agent", "cryptomarket/go")
-	req.Header.Add("Content-type", "application/x-www-form-urlencoded")
-	// add auth header if is not a public call
-	if !public {
-		req.Header.Add("Authorization", hclient.buildCredential(method, endpoint, rawQuery))
-	}
+type RequestData struct {
+	cxt      context.Context
+	method   string
+	endpoint string
+	params   map[string]interface{}
+	public   bool
+}
 
-	// make request
-	resp, err := hclient.client.Do(req)
+func (hclient httpclient) makeRequest(requestData RequestData) (result []byte, err error) {
+	request, err := hclient.buildRequest(requestData)
+	if err != nil {
+		return nil, err
+	}
+	response, err := hclient.client.Do(request)
 	if err != nil {
 		return nil, errors.New("CryptomarketSDKError: Can't make the request: " + err.Error())
 	}
-	defer resp.Body.Close()
-	body, err := ioutil.ReadAll(resp.Body)
+	defer response.Body.Close()
+	return readResponse(response)
+}
+
+func (hclient httpclient) buildRequest(requestData RequestData) (*http.Request, error) {
+	if requestData.method == methodPost {
+		return hclient.buildPostRequest(requestData)
+	}
+	rawQuery := args.BuildQuery(requestData.params)
+	if requestData.method == methodGet {
+		return hclient.buildGetRequest(requestData, rawQuery)
+	}
+	return hclient.buildOtherRequest(requestData, rawQuery)
+}
+
+func (hclient httpclient) buildGetRequest(requestData RequestData, rawQuery string) (*http.Request, error) {
+	request, err := hclient.buildRequestHelper(requestData, nil, rawQuery)
+	if err != nil {
+		return nil, err
+	}
+	request.URL.RawQuery = rawQuery
+	return request, nil
+}
+
+func (hclient httpclient) buildPostRequest(requestData RequestData) (*http.Request, error) {
+	requestBody, err := json.Marshal(requestData.params)
+	if err != nil {
+		return nil, errors.New("CryptxomarketSDKError: Can't build the request: " + err.Error())
+	}
+	request, err := hclient.buildRequestHelper(requestData, bytes.NewReader(requestBody), string(requestBody))
+	if err != nil {
+		return nil, err
+	}
+	request.Header.Add(headerContentType, applicationJson)
+	return request, err
+}
+
+func (hclient httpclient) buildOtherRequest(requestData RequestData, urlEncodedQuery string) (*http.Request, error) {
+	request, err := hclient.buildRequestHelper(requestData, strings.NewReader(urlEncodedQuery), urlEncodedQuery)
+	if err != nil {
+		return nil, err
+	}
+	request.Header.Add(headerContentType, applicationUrlEncoded)
+	return request, err
+}
+
+func (hclient httpclient) buildRequestHelper(requestData RequestData, body io.Reader, query string) (*http.Request, error) {
+	request, err := http.NewRequestWithContext(requestData.cxt, requestData.method, apiURL+apiVersion+requestData.endpoint, body)
+	if err != nil {
+		return nil, errors.New("CryptomarketSDKError: Can't build the request: " + err.Error())
+	}
+	request.Header.Add(headerUserAgent, userAgentCryptomarketGo)
+	if !requestData.public {
+		request.Header.Add("Authorization", hclient.getCredentialForRequest(request, query))
+	}
+	return request, nil
+}
+
+func readResponse(resp *http.Response) ([]byte, error) {
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, errors.New("CryptomarketSDKError: Can't read the response body: " + err.Error())
 	}
 	return body, nil
-}
-
-func (hclient httpclient) buildCredential(httpMethod, method, query string) string {
-	timestamp := strconv.FormatInt(time.Now().Unix()*1000, 10)
-	msg := httpMethod + apiVersion + method
-	if len(query) != 0 {
-		if httpMethod == methodGet {
-			msg += "?"
-		}
-		msg += query
-	}
-	msg += timestamp
-	if hclient.window != 0 {
-		msg += strconv.FormatInt(int64(hclient.window), 10)
-	}
-	h := hmac.New(sha256.New, []byte(hclient.apiSecret))
-	h.Write([]byte(msg))
-	signature := hex.EncodeToString(h.Sum(nil))
-	str := hclient.apiKey + ":" + signature + ":" + timestamp
-	if hclient.window != 0 {
-		str += (":" + strconv.FormatInt(int64(hclient.window), 10))
-	}
-	return "HS256 " + base64.StdEncoding.EncodeToString([]byte(str))
 }

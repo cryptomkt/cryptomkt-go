@@ -139,3 +139,20 @@ func TestGetTradingCommision(t *testing.T) {
 		t.Fatal(err)
 	}
 }
+
+func TestCreateOrderList(t *testing.T) {
+	client, bg := beforeEach()
+	result, err := client.CreateSpotOrderList(bg,
+		args.Contingency(args.ContingencyAllOrNone),
+		args.Orders([]args.OrderRequest{
+			{Symbol: "EOSETH", Side: "sell", Price: "2000", Quantity: "0.2", TimeInForce: args.TimeInForceFOK},
+			{Symbol: "EOSBTC", Side: "sell", Price: "2000", Quantity: "0.1", TimeInForce: args.TimeInForceFOK}}))
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, order := range result {
+		if err = checkOrder(&order); err != nil {
+			t.Fatal(err)
+		}
+	}
+}

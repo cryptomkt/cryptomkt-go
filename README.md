@@ -210,12 +210,10 @@ all the arguments for the clients are in the args package, as well as the custom
 
 # Checkout our other SDKs
 
-<!-- agregar links -->
+[python sdk](https://github.com/cryptomkt/cryptomkt-python)
 
-python sdk
+[nodejs sdk](https://github.com/cryptomkt/cryptomkt-node)
 
-nodejs sdk
+[java sdk](https://github.com/cryptomkt/cryptomkt-java)
 
-java sdk
-
-ruby sdk
+[ruby sdk](https://github.com/cryptomkt/cryptomkt-ruby)

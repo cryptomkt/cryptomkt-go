@@ -71,6 +71,8 @@ const (
 	ArgNameDescription          string = "description"
 	ArgNameCreatedAt            string = "created_at"
 	ArgNameUpdatedAt            string = "updated_at"
+	ArgNameNetworkCode          string = "network_code"
+	ArgNameMode                 string = "mode"
 
 	ArgNameDepositAddressGenerationEnabled string = "deposit_address_generation_enabled"
 )

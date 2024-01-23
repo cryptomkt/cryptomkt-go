@@ -161,8 +161,8 @@ const (
 	ContingencyAON                      ContingencyType = "allOrNone"
 	ContingencyOneCancelOther           ContingencyType = "oneCancelOther"
 	ContingencyOCO                      ContingencyType = "oneCancelOther"
-	ContingencyOTO ContingencyType = "oneTriggerOther"
-	ContingencyOneTriggerOther ContingencyType = "oneTriggerOther"
+	ContingencyOTO                      ContingencyType = "oneTriggerOther"
+	ContingencyOneTriggerOther          ContingencyType = "oneTriggerOther"
 	ContingencyOneTriggerOneCancelOther ContingencyType = "oneTriggerOneCancelOther"
 	ContingencyOTOCO                    ContingencyType = "oneTriggerOneCancelOther"
 )
@@ -210,4 +210,11 @@ type TransferTypeType string
 const (
 	TransferToSubAccount   TransferTypeType = "to_sub_account"
 	TransferFromSubAccount TransferTypeType = "from_sub_account"
+)
+
+type SubscriptionModeType string
+
+const (
+	SubscriptionModeUpdates SubscriptionModeType = "updates"
+	SubscriptionModeBatches SubscriptionModeType = "batches"
 )

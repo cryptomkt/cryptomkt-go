@@ -36,7 +36,7 @@ func NewMarketDataClient() (*MarketDataClient, error) {
 	// connect to streaming
 	err := client.wsManager.connect()
 	if err != nil {
-		return nil, fmt.Errorf("Error in websocket client connection: %s", err)
+		return nil, fmt.Errorf("error in websocket client connection: %s", err)
 	}
 	// handle incomming data
 	go client.handle(client.wsManager.rcv)
@@ -203,13 +203,14 @@ func addAsteriscIfNoSymbols(params *map[string]interface{}) {
 //
 // normal subscriptions have one update message per symbol
 //
-// Requires no API key Access Rights
+// # Requires no API key Access Rights
 //
 // https://api.exchange.cryptomkt.com/#subscribe-to-trades
 //
 // Arguments:
-//  Symbols([]string)  // Optional. A list of symbol ids
-//  Limit(int64)  // Number of historical entries returned in the first feed. Min is 0. Max is 1000. Default is 0
+//
+//	Symbols([]string)  // Optional. A list of symbol ids
+//	Limit(int64)  // Number of historical entries returned in the first feed. Min is 0. Max is 1000. Default is 0
 func (client *MarketDataClient) SubscribeToTrades(
 	arguments ...args.Argument,
 ) (subscription *models.Subscription[models.WSTradeFeed], err error) {
@@ -239,14 +240,15 @@ func (client *MarketDataClient) SubscribeToTrades(
 //
 // normal subscriptions have one update message per symbol
 //
-// Requires no API key Access Rights
+// # Requires no API key Access Rights
 //
 // https://api.exchange.cryptomkt.com/#subscribe-to-candles
 //
 // Arguments:
-//  Period(PeriodType)  // Optional. A valid tick interval. 'M1' (one minute), 'M3', 'M5', 'M15', 'M30', 'H1' (one hour), 'H4', 'D1' (one day), 'D7', '1M' (one month). Default is 'M30'
-//  Symbols([]string)  // Optional. A list of symbol ids
-//  Limit(int64)  // Number of historical entries returned in the first feed. Min is 0. Max is 1000. Default is 0
+//
+//	Period(PeriodType)  // Optional. A valid tick interval. 'M1' (one minute), 'M3', 'M5', 'M15', 'M30', 'H1' (one hour), 'H4', 'D1' (one day), 'D7', '1M' (one month). Default is 'M30'
+//	Symbols([]string)  // Optional. A list of symbol ids
+//	Limit(int64)  // Number of historical entries returned in the first feed. Min is 0. Max is 1000. Default is 0
 func (client *MarketDataClient) SubscribeToCandles(
 	arguments ...args.Argument,
 ) (subscription *models.Subscription[models.WSCandleFeed], err error) {
@@ -276,13 +278,14 @@ func (client *MarketDataClient) SubscribeToCandles(
 //
 // normal subscriptions have one update message per symbol
 //
-// Requires no API key Access Rights
+// # Requires no API key Access Rights
 //
 // https://api.exchange.cryptomkt.com/#subscribe-to-mini-ticker
 //
 // Arguments:
-//  TickerSpeed(TickerSpeedType)  // The speed of the feed. TickerSpeed1s or TickerSpeed3s
-//  Symbols([]string)  // Optional. A list of symbol ids
+//
+//	TickerSpeed(TickerSpeedType)  // The speed of the feed. TickerSpeed1s or TickerSpeed3s
+//	Symbols([]string)  // Optional. A list of symbol ids
 func (client *MarketDataClient) SubscribeToMiniTicker(
 	arguments ...args.Argument,
 ) (subscription *models.Subscription[models.MiniTickerFeed], err error) {
@@ -313,13 +316,14 @@ func (client *MarketDataClient) SubscribeToMiniTicker(
 //
 // batch subscriptions have a joined update for all symbols
 //
-// Requires no API key Access Rights
+// # Requires no API key Access Rights
 //
 // https://api.exchange.cryptomkt.com/#subscribe-to-mini-ticker-in-batches
 //
 // Arguments:
-//  TickerSpeed(TickerSpeedType)  // The speed of the feed. TickerSpeed1s or TickerSpeed3s
-//  Symbols([]string)  // Optional. A list of symbol ids
+//
+//	TickerSpeed(TickerSpeedType)  // The speed of the feed. TickerSpeed1s or TickerSpeed3s
+//	Symbols([]string)  // Optional. A list of symbol ids
 func (client *MarketDataClient) SubscribeToMiniTickerInBatches(
 	arguments ...args.Argument,
 ) (subscription *models.Subscription[models.MiniTickerFeed], err error) {
@@ -350,13 +354,14 @@ func (client *MarketDataClient) SubscribeToMiniTickerInBatches(
 //
 // normal subscriptions have one update message per symbol
 //
-// Requires no API key Access Rights
+// # Requires no API key Access Rights
 //
 // https://api.exchange.cryptomkt.com/#subscribe-to-ticker
 //
 // Arguments:
-//  TickerSpeed(TickerSpeedType)  // The speed of the feed. TickerSpeed1s or TickerSpeed3s
-//  Symbols([]string)  // Optional. A list of symbol ids
+//
+//	TickerSpeed(TickerSpeedType)  // The speed of the feed. TickerSpeed1s or TickerSpeed3s
+//	Symbols([]string)  // Optional. A list of symbol ids
 func (client *MarketDataClient) SubscribeToTicker(
 	arguments ...args.Argument,
 ) (subscription *models.Subscription[models.WSTickerFeed], err error) {
@@ -365,7 +370,6 @@ func (client *MarketDataClient) SubscribeToTicker(
 		return nil, err
 	}
 	addAsteriscIfNoSymbols(&params)
-	fmt.Println(params)
 	channel := fmt.Sprintf(internal.ChannelTicker, params[internal.ArgNameSpeed])
 	response, err := client.doChannelSubscription(
 		methodSubscribe,
@@ -388,13 +392,14 @@ func (client *MarketDataClient) SubscribeToTicker(
 //
 // batch subscriptions have a joined update for all symbols
 //
-// Requires no API key Access Rights
+// # Requires no API key Access Rights
 //
 // https://api.exchange.cryptomkt.com/#subscribe-to-ticker-in-batches
 //
 // Arguments:
-//  TickerSpeed(TickerSpeedType)  // The speed of the feed. TickerSpeed1s or TickerSpeed3s
-//  Symbols([]string)  // Optional. A list of symbol ids
+//
+//	TickerSpeed(TickerSpeedType)  // The speed of the feed. TickerSpeed1s or TickerSpeed3s
+//	Symbols([]string)  // Optional. A list of symbol ids
 func (client *MarketDataClient) SubscribeToTickerInBatches(
 	arguments ...args.Argument,
 ) (subscription *models.Subscription[models.WSTickerFeed], err error) {
@@ -425,12 +430,13 @@ func (client *MarketDataClient) SubscribeToTickerInBatches(
 //
 // normal subscriptions have one update message per symbol
 //
-// Requires no API key Access Rights
+// # Requires no API key Access Rights
 //
 // https://api.exchange.cryptomkt.com/#subscribe-to-full-order-book
 //
 // Arguments:
-//  Symbols([]string)  // Optional. A list of symbol ids
+//
+//	Symbols([]string)  // Optional. A list of symbol ids
 func (client *MarketDataClient) SubscribeToFullOrderbook(
 	arguments ...args.Argument,
 ) (subscription *models.Subscription[models.WSOrderbookFeed], err error) {
@@ -460,14 +466,15 @@ func (client *MarketDataClient) SubscribeToFullOrderbook(
 //
 // normal subscriptions have one update message per symbol
 //
-// Requires no API key Access Rights
+// # Requires no API key Access Rights
 //
 // https://api.exchange.cryptomkt.com/#subscribe-to-partial-order-book
 //
 // Arguments:
-//  OrderBookSpeed(OrderBookSpeedType)  // The speed of the feed. OrderBookSpeedType100ms, OrderBookSpeedType500ms or OrderBookSpeedType1000ms
-//  WSDepth(WSDepthType)  // The depth of the partial orderbook, WSDepth5, WSDepth10 or WSDepth20
-//  Symbols([]string)  // Optional. A list of symbol ids
+//
+//	OrderBookSpeed(OrderBookSpeedType)  // The speed of the feed. OrderBookSpeedType100ms, OrderBookSpeedType500ms or OrderBookSpeedType1000ms
+//	WSDepth(WSDepthType)  // The depth of the partial orderbook, WSDepth5, WSDepth10 or WSDepth20
+//	Symbols([]string)  // Optional. A list of symbol ids
 func (client *MarketDataClient) SubscribeToPartialOrderbook(
 	arguments ...args.Argument,
 ) (subscription *models.Subscription[models.WSOrderbookFeed], err error) {
@@ -498,14 +505,13 @@ func (client *MarketDataClient) SubscribeToPartialOrderbook(
 //
 // batch subscriptions have a joined update for all symbols
 //
-//
-//
 // https://api.exchange.cryptomkt.com/#subscribe-to-partial-order-book-in-batches
 //
 // Arguments:
-//  OrderBookSpeed(OrderBookSpeedType)  // The speed of the feed. OrderBookSpeedType100ms, OrderBookSpeedType500ms or OrderBookSpeedType1000ms
-//  WSDepth(WSDepthType)  // The depth of the partial orderbook, WSDepth5, WSDepth10 or WSDepth20
-//  Symbols([]string)  // Optional. A list of symbol ids
+//
+//	OrderBookSpeed(OrderBookSpeedType)  // The speed of the feed. OrderBookSpeedType100ms, OrderBookSpeedType500ms or OrderBookSpeedType1000ms
+//	WSDepth(WSDepthType)  // The depth of the partial orderbook, WSDepth5, WSDepth10 or WSDepth20
+//	Symbols([]string)  // Optional. A list of symbol ids
 func (client *MarketDataClient) SubscribeToPartialOrderbookInBatchers(
 	arguments ...args.Argument,
 ) (subscription *models.Subscription[models.WSOrderbookFeed], err error) {
@@ -540,13 +546,12 @@ func (client *MarketDataClient) SubscribeToPartialOrderbookInBatchers(
 //
 // normal subscriptions have one update message per symbol
 //
-//
-//
 // https://api.exchange.cryptomkt.com/#subscribe-to-top-of-book
 //
 // Arguments:
-//  OrderBookSpeed(OrderBookSpeedType)  // The speed of the feed. OrderBookSpeedType100ms, OrderBookSpeedType500ms or OrderBookSpeedType1000ms
-//  Symbols([]string)  // Optional. A list of symbol ids
+//
+//	OrderBookSpeed(OrderBookSpeedType)  // The speed of the feed. OrderBookSpeedType100ms, OrderBookSpeedType500ms or OrderBookSpeedType1000ms
+//	Symbols([]string)  // Optional. A list of symbol ids
 func (client *MarketDataClient) SubscribeToOrderbookTop(
 	arguments ...args.Argument,
 ) (subscription *models.Subscription[models.OrderbookTopFeed], err error) {
@@ -577,13 +582,12 @@ func (client *MarketDataClient) SubscribeToOrderbookTop(
 //
 // batch subscriptions have a joined update for all symbols
 //
-//
-//
 // https://api.exchange.cryptomkt.com/#subscribe-to-top-of-book-in-batches
 //
 // Arguments:
-//  OrderBookSpeed(OrderBookSpeedType)  // The speed of the feed. OrderBookSpeedType100ms, OrderBookSpeedType500ms or OrderBookSpeedType1000ms
-//  Symbols([]string)  // Optional. A list of symbol ids
+//
+//	OrderBookSpeed(OrderBookSpeedType)  // The speed of the feed. OrderBookSpeedType100ms, OrderBookSpeedType500ms or OrderBookSpeedType1000ms
+//	Symbols([]string)  // Optional. A list of symbol ids
 func (client *MarketDataClient) SubscribeToOrderbookTopInBatchers(
 	arguments ...args.Argument,
 ) (subscription *models.Subscription[models.OrderbookTopFeed], err error) {
