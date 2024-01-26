@@ -3,7 +3,7 @@ package models
 import (
 	"fmt"
 
-	"github.com/cryptomarket/cryptomarket-go/args"
+	"github.com/cryptomkt/cryptomkt-go/args"
 )
 
 type Currency struct {

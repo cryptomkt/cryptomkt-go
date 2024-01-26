@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/cryptomarket/cryptomarket-go/internal"
+	"github.com/cryptomkt/cryptomkt-go/internal"
 )
 
 // Argument are functions that serves as arguments for the diferent

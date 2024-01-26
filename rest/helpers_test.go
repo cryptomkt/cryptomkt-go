@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 
-	"github.com/cryptomarket/cryptomarket-go/models"
+	"github.com/cryptomkt/cryptomkt-go/models"
 )
 
 type APIKeys struct {

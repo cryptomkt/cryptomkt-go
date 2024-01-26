@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/cryptomarket/cryptomarket-go/args"
+	"github.com/cryptomkt/cryptomkt-go/args"
 )
 
 func beforeEachTradingClientTest() (
