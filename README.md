@@ -14,7 +14,7 @@ To install the Cryptomarket client
 
 # Documentation
 
-This sdk makes use of the [api version 2](https://api.exchange.cryptomkt.com/v2) of cryptomarket
+This sdk makes use of the [api version 3](https://api.exchange.cryptomkt.com/#about-cryptomarket-api) of cryptomarket
 
 # Quick Start
 
