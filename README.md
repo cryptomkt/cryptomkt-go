@@ -1,359 +1,219 @@
-# cryptomkt-go
+# CryptoMarket-go
 
-<!--- badges -->
-[![Go project version](https://badge.fury.io/go/github.com%2Fcryptomkt%2Fcryptomkt-go.svg)](https://badge.fury.io/go/github.com%2Fcryptomkt%2Fcryptomkt-go)
+[main page](https://www.cryptomkt.com/)
 
-cryptomkt-go is the SDK for cryptomkt in the GO programing language
+[sign up in CryptoMarket](https://www.cryptomkt.com/account/register).
 
-## Installation
-To install the sdk, run the `go get` command
+# Installation
 
-`go get github.com/cryptomkt/cryptomkt-go`
-
-## Documentation
-
-For further information about the sdk see the godoc
-
-The base api for this sdk can be found in [here](https://developers.cryptomkt.com/)
-
-## API Key
-
-To make use of the sdk, you need to [enable an API key](https://www.cryptomkt.com/platform/account#api_tab) in the cryptomkt account you'll be using.
-
-If you don't have an account yet, sign up [here](https://www.cryptomkt.com/account/register)
-
-Once you enable an API key, you'll get two keys that are needed to make a client to connect with cryptomkt. All calls are done with this client.
-
-```golang
-import (
-    "github.com/cryptomkt/cryptomkt-go/conn"
-)
-client := conn.NewClient(apiKey, apiSecret)
-```
-
-## Configuring Calls
-Arguments are needed for most of the calls you can make. For each new call, you'll pass a different set of configuration arguments. All arguments are in the `args` package
-
-Each call specifies which arguments are required and which ones are optional. you can find this information in the documentation or in the [api page](https://developers.cryptomkt.com/) of Cryptomkt. Also, an error mentioning the unmeeted required arguments is given when an incomplete call is done.
-
-As an example, to create a buy order in the ETHCLP market, we can use CreateOrder, which requires the Amount, Market, Price and Type arguments and have no optional arguments.
-
-```golang
-import (
-    "github.com/cryptomkt/cryptomkt-go/conn"
-    "github.com/cryptomkt/cryptomkt-go/args"
-)
-client := conn.NewClient(apiKey, apiSecret)
-
-order, err := client.CreateOrder(
-    args.Amount(0.3),
-    args.Market("ETHCLP"),
-    args.Price(1000),
-    args.Type("buy"),
-)
-// if we forgot a required argument, this error will tell us
-if err != nil {
-    fmt.Errorf("Error making an order: %s", err)
-}
-```
-
-## Calls to the API
-
-Calls have multiple return formats.
-All calls return at least one informative error if something goes wrong, as an unmeeted argument, an invalid apiKey or a "not_enough_balance" as a replay from the server if you try to buy more than your money can take.
-
-```golang
-import (
-    "github.com/cryptomkt/cryptomkt-go/conn"
-    "github.com/cryptomkt/cryptomkt-go/args"
-)
-client := conn.NewClient(apiKey, apiSecret)
-
-//account is a pointer to a struct that matches the account information
-account, err := client.GetAccount()
-if err != nil {
-    fmt.Errorf("Error getting the account: %s", err)
-}
-```
-
-If we want to go over a long range of trade data of a market, we can call `client.GetTrades` to get a list of `Trades`, this list can be one page of many. When we read the data of one single page, to get the rest of the pages, we can call over and over `GetNext()` over the struct, until an `Next page does not exist` error is raised. Replace `GetObject` with the appropriate method. The structs that support this functionality so far are Trades, Book, Prices and Orders. Here is in code:
-
-```golang
-import (
-    "github.com/cryptomkt/cryptomkt-go/args"
-    "github.com/cryptomkt/cryptomkt-go/conn"
-)
-
-var apiKey string = "YourApiKey"
-var apiSecret string = "YourApiSecretKey"
-
-client := conn.NewClient(apiKey,apiSecret)
-
-response, err := client.GetObject(args.Argument1(value1), args.Argument2(value2), ...)
-
-nextPage, err := reponse.GetNext()
-previousPage, err := response.GetPrevious()
-
-// You can call these methods from its response if the page exists
-nextPage2, err := nextPage.GetNext()
-previousPage2, err := previousPage.GetPrevious()
+To install the Cryptomarket client
 
 ```
-
-Also you can close and refresh and close orders directly from their structures
-
-```golang
-import (
-    "github.com/cryptomkt/cryptomkt-go/conn"
-    "github.com/cryptomkt/cryptomkt-go/args"
-)
-
-var apiKey string = "YourApiKey"
-var apiSecret string = "YourApiSecretKey"
-
-client := conn.NewClient(apiKey,apiSecret)
-
-order, err := client.OrderStatus(args.Id("M103966"))
-
-// to update the order
-order, err = order.Refresh()
-if err != nil {
-    fmt.Errorf("error while updating the order: %v", err)
-}
-
-// and to close it
-order, err = order.Close()
-if err != nil {
-    fmt.Errorf("error while closing the order: %v", err)
-}
+ go get github.com/cryptomarket/cryptomarket-go
 ```
 
-## API Calls Examples
+# Documentation
 
+This sdk makes use of the [api version 3](https://api.exchange.cryptomkt.com/#about-cryptomarket-api) of cryptomarket
 
-### Public endpoints
+# Quick Start
 
-Responses from client methods are pointers to its structures.
+## rest client
 
-**Listing available markets**
-
-```golang
+```go
 import (
-    "github.com/cryptomkt/cryptomkt-go/conn"
+	"context"
+
+  "github.com/cryptomarket/cryptomarket-go/args"
+  "github.com/cryptomarket/cryptomarket-go/rest"
 )
-var apiKey string = "YourApiKey"
-var apiSecret string = "YourApiSecretKey"
 
-client := conn.NewClient(apiKey, apiSecret)
+// instance a client
+let apiKey="AB32B3201"
+let apiSecret="21b12401"
+// default window
+let window = 0
+// or some other window in miliseconds
+window = 25000
 
-// marketList is a list of enabled markets
-marketList, err := client.GetMarkets()
-if err != nil {
-    fmt.Errorf("Error getting the market list: %s", err)
-}
+client := rest.NewClient(apiKey, apiSecret, window)
+ctx := context.Background()
+
+// get currencies
+currencies, err := client.GetCurrencies(ctx)
+
+// get order books
+orderBook, err := client.GetOrderBook(ctx, args.Symbol("EOSETH"))
+
+// get your wallet balances
+accountBalanceList, err := client.GetWalletBalances(ctx)
+
+// get your trading balances
+tradingBalanceList, err := client.GetSpotTradingBalances(ctx)
+
+// move balance from wallet to spot trading
+result, err := client.TransferMoneyFromAccountBalanceToTradingBalance(
+  ctx,
+  args.Currency("ETH"),
+  args.Amount("3.2"),
+  args.Source(args.AccountWallet),
+  args.Destination(args.AccountSpot),
+)
+
+// get your active orders
+ordersList, _ := client.GetAllActiveSpotOrders(ctx, args.Symbol("EOSETH"))
+
+// create a new order
+order, err := client.CreateSpotOrder(ctx, args.Symbol("EOSETH"), args.Side(args.SideTypeBuy), args.Quantity("10"), args.Price("10"))
 ```
 
-**Getting tickers of active markets**
+## websocket clients
 
-```golang
-import (
-    "github.com/cryptomkt/cryptomkt-go/conn"
-    "github.com/cryptomkt/cryptomkt-go/args"
+there are three websocket clients, `MarketDataClient`, the `SpotTradingClient` and the `WalletManagementClient`. The `MarketDataClient` is public, while the others require authentication to be used.
+
+websocket subscriptions make use of notification channels. To close the notification channel of a subscription, remember to call the corrensponding Unsubscription.
+
+### MarketDataClient
+
+Unsubscription for the MarketDataClient are called from the subscription structure, as seen in the examples. Keep in mind that this stop the client from processing the messages, but the server will continue to send them. To completely stop recieving messages is recomended to close the MarketDataClient.
+
+```go
+// instance a client
+client, err := NewMarketDataClient()
+// close the client
+defer client.Close()
+// subscribe to public trades
+subscription, err := client.SubscribeToTrades(
+  args.Symbols([]string{"EOSETH", "ETHBTC"}),
+  args.Limit(10),
 )
+subscribedSymbols := subscription.Symbols
+go func() {
+  for notification := range subscription.NotificationCh {
+      notificationType := notification.NotificationType
+      if notificationType == args.NotificationSnapshot {
+        fmt.Println('is a snapshot')
+      }
+      if notificationType == args.NotificationUpdate {
+        fmt.Println('is an update')
+      }
+      for _, tradeList := range notification.Data {
+        for _, trade := range tradeList {
+          fmt.Println(trade)
+      }
+    }
+  }
+}()
+// unsubscribe
+UnsubscribeTo(subscription.NotificationChannel)
 
-var apiKey string = "YourApiKey"
-var apiSecret string = "YourApiSecretKey"
-
-client := conn.NewClient(apiKey, apiSecret)
-
-// Here you get the ticker list for the ethereum chilean pesos market. It is 
-// your choice to give the Market argument
-ticker, err := client.GetTicker(args.Market("ETHCLP"))
-
-if err != nil {
-    fmt.Errorf("Error getting the ticker, %s", err)
-}else{
-    // here you have the data
-    fmt.Println(ticker.Data)
-}
-
-// or, if you prefer, you can get all markets tickers
-allTickers, err := client.GetTicker()
-if err != nil{
-    fmt.Errorf("Error getting all tickers, %s", err)
-}else{
-    fmt.Println(allTickers.Data)
-}
+// subscribe to symbol tickers
+subscription, err = client.SubscribeToTicker(
+  args.Symbols([]string{"EOSETH"}),
+  args.TickerSpeed(args.TickerSpeed1s),
+)
+go func() {
+  for notification := range subscription.NotificationCh {
+    notificationType := notification.NotificationType
+    if notificationType == args.NotificationData {
+      fmt.Println('is always a data notification')
+    }
+    fmt.Println("tickers")
+    for symbol, ticker := range notification.Data {
+      fmt.Println("["+symbol+"]="+ ticker)
+    }
+  }
+}()
+// unsubscribe
+UnsubscribeTo(subscription.NotificationChannel)
 ```
 
-**Getting active orders book**
+### SpotTradingClient
 
-```golang
-import (
-    "github.com/cryptomkt/cryptomkt-go/conn"
-    "github.com/cryptomkt/cryptomkt-go/args"
+```go
+// instance a client with default window of 10 seconds
+client, err := NewSpotTradingClient(APIKey, APISecret, 0)
+// close the client
+defer client.Close()
+
+// subscribe to order reports
+notificationCh, err := client.SubscribeToReports()
+go func() {
+  for notification := range notificationCh {
+    for _, report := range notification.Data {
+      fmt.Println(report)
+    }
+  }
+}()
+// unsubscribe from order reports
+client.UnsubscribeToReports()
+
+clientOrderID := fmt.Sprint(time.Now().Unix())
+
+// create an order
+client.CreateSpotOrder(
+  context.Background(),
+  args.Symbol("EOSETH"),
+  args.Side(args.SideSell),
+  args.Price("1000"),
+  args.Quantity("0.01"),
+  args.ClientOrderID(clientOrderID),
 )
 
-var apiKey string = "YourApiKey"
-var apiSecret string = "YourApiSecretKey"
-
-client := conn.NewClient(apiKey,apiSecret)
-
-// Here you call with the requiered (Market and Type) arguments. See here: https://developers.cryptomkt.com/es/#ordenes
-// or the documentation for more info 
-book,err := client.GetBook(args.Market("ETHCLP"), args.Type("buy"))
-if err != nil{
-    fmt.Errorf("Error getting orders book, %s", err)
-}else{
-    fmt.Println(book.Data)
-}
+// candel an order
+client.CancelSpotOrder(
+  context.Background(),
+  args.ClientOrderID(clientOrderID),
+)
 
 ```
 
-**Getting trades list**
+### WalletManagementClient
 
-```golang
-import (
-    "github.com/cryptomkt/cryptomkt-go/conn"
-    "github.com/cryptomkt/cryptomkt-go/args"
-)
+```go
+// instance a client with 20 seconds of window
+client, err := NewWalletManagementClient(APIKey, APISecret, 20_000)
+// close the client
+defer client.Close()
 
-var apiKey string = "YourApiKey"
-var apiSecret string = "YourApiSecretKey"
+// subscribe to wallet transactions
+notificationCh, err := client.SubscribeToTransactions()
+go func() {
+  for notification := range notificationCh {
+    transaction := notification.Data
+    fmt.Println(transaction)
+  }
+}()
 
-client := conn.NewClient(apiKey,apiSecret)
+// unsubscribe from wallet transactions
+err = client.UnsubscribeToTransactions()
 
-// Here you call trades from bitcoin argentinean pesos market. 
-// You can see the optional arguments here: https://developers.cryptomkt.com/es/#trades 
-// or in the documentation
-trades,err:= client.GetTrades(args.Market("BTCARS"))
-if err != nil {
-     fmt.Errorf("Error getting trades, %s", err)
-}
-```
-
-**Getting prices list**
-```golang
-import (
-    "github.com/cryptomkt/cryptomkt-go/conn"
-    "github.com/cryptomkt/cryptomkt-go/args"
-)
-
-var apiKey string = "YourApiKey"
-var apiSecret string = "YourApiSecretKey"
-
-client := conn.NewClient(apiKey,apiSecret)
-
-// Here you call prices from ethereum chilean pesos market and 
-// a timeframe of 60 minutes. Optional args here: https://developers.cryptomkt.com/es/#precios
-// or in the documentation
-prices,err := client.GetPrices(args.Market("ETHCLP"),args.TimeFrame("60"))
-if err != nil{
-    fmt.Errorf("Error getting prices, %s", err)
-}else{
-    fmt.Println(prices.Data)
-}
-```
-
-
-### Authenticated endpoints
-
-**Get account info**
-
-```golang
-import (
-    "github.com/cryptomkt/cryptomkt-go/conn"
-)
-client := conn.NewClient(apiKey, apiSecret)
-
-//account is pointer to a struct with the account info
-account, err := client.Account()
-if err != nil {
-    fmt.Errorf("Error getting account: %s", err)
-}
-```
-
-
-**Create order**
-
-```golang
-import (
-    "github.com/cryptomkt/cryptomkt-go/conn"
-    "github.com/cryptomkt/cryptomkt-go/args"
-)
-client := conn.NewClient(apiKey, apiSecret)
-
-order, err := client.CreateOrder(
-    args.Amount(0.3),
-    args.Market("ETHCLP"),
-    args.Price(1000),
-    args.Type("buy"))
-if err != nil {
-    fmt.Errorf("Error making an order: %s", err)
-}
-```
-
-**Active Orders**
-```golang
-import (
-    "github.com/cryptomkt/cryptomkt-go/conn"
-    "github.com/cryptomkt/cryptomkt-go/args"
-)
-client := conn.NewClient(apiKey, apiSecret)
-
-// See the optional args here https://developers.cryptomkt.com/es/#ordenes-de-mercado
-// or in the documentation
-orders,err := client.GetActiveOrders(args.Market("BTCARS")) 
-if err != nil{
-    fmt.Errorf("Error getting active orders, %s", err)
-}
-```
-
-**Executed Orders**
-
-```golang
-import (
-    "github.com/cryptomkt/cryptomkt-go/conn"
-    "github.com/cryptomkt/cryptomkt-go/args"
-)
-client := conn.NewClient(apiKey, apiSecret)
-
-// See the optional args here https://developers.cryptomkt.com/es/#ordenes-de-mercado
-// or in the documentation
-orders,err := client.GetExecutedOrders(args.Market("BTCARS")) 
-if err != nil{
-    fmt.Errorf("Error getting executed orders, %s", err)
-}
-```
-
-**Order Status**
-```golang
-import (
-    "github.com/cryptomkt/cryptomkt-go/conn"
-    "github.com/cryptomkt/cryptomkt-go/args"
-)
-client := conn.NewClient(apiKey, apiSecret)
-
-// See the optional args here https://developers.cryptomkt.com/es/#ordenes-de-mercado
-// or in the documentation
-orders,err := client.GetOrderStatus(args.Id("YourId")) 
-if err != nil{
-    fmt.Errorf("Error getting order status, %s", err)
-}
-```
-**Cancel Order**
-
-```golang
-import (
-    "github.com/cryptomkt/cryptomkt-go/conn"
-    "github.com/cryptomkt/cryptomkt-go/args"
-)
-client := conn.NewClient(apiKey, apiSecret)
-
-order,err := client.CancelOrder(args.Id("YourId"))
-
-if err != nil{
-    fmt.Errorf("Error canceling order, %s", err)
+// get wallet balances
+balances, err := client.GetWalletBalances(context.Background())
+for _, balance := range balances {
+  fmt.Println(balance)
 }
 
+// transfer assets from wallet account and spot account
+restClient.TransferBetweenWalletAndExchange(
+  context.Background(),
+  args.Amount("0.2"),
+  args.Currency("EOS"),
+  args.Source(args.AccountWallet),
+  args.Destination(args.AccountSpot),
+)
 ```
+
+## arguments and constants of interest
+
+all the arguments for the clients are in the args package, as well as the custom types for the arguments. check the package documentation, and the method documentation of the clients for more info.
+
+# Checkout our other SDKs
+
+[python sdk](https://github.com/cryptomkt/cryptomkt-python)
+
+[nodejs sdk](https://github.com/cryptomkt/cryptomkt-node)
+
+[java sdk](https://github.com/cryptomkt/cryptomkt-java)
+
+[ruby sdk](https://github.com/cryptomkt/cryptomkt-ruby)

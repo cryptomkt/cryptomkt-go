@@ -1,420 +1,595 @@
-// package args holds the argument logic for the requests the client
-// will use to comunicate with Cryptomarket. Separate package between
-// args and the request is prefered as its crearer for the user to use
-// them if they are called args.AnArgument, instead of request.AnArgument.
 package args
 
 import (
-	"errors"
 	"fmt"
+	"net/url"
 	"strconv"
+	"strings"
 
-	"github.com/cryptomkt/cryptomkt-go/requests"
+	"github.com/cryptomarket/cryptomarket-go/internal"
 )
 
-type DateError struct {
-	caller     string
-	dateFormat string
+// Argument are functions that serves as arguments for the diferent
+// requests to the server, either rest request, or websocket requests.
+// Argument works by extending a given map with a particular key.
+// For example Symbol("EOSETH") returns an Argument that extends
+// a map assigning "EOSETH" to the key "symbol".
+// usually, a function returning an Argument is what's used as a
+// request parameter. just like the Symbol(val string) function
+// in the example above.
+type Argument func(map[string]interface{})
+
+func fromSnakeCaseToCamelCase(s string) string {
+	snakeParts := strings.Split(s, "_")
+	camelParts := make([]string, 0)
+	for _, snakePart := range snakeParts {
+		camelParts = append(camelParts, strings.Title(snakePart))
+	}
+	return strings.Join(camelParts, "")
 }
 
-func (de *DateError) Error() string {
-	return de.caller + "format error: must be " + de.dateFormat
-}
-
-// An Argument is a function that servers the porpouse of arguments for a
-// requests.
-// Works by modifying the given request, creating the corresponding data there.
-type Argument func(*requests.Request) error
-
-// assertDateFormatV2 assert the format yyyy-mm-dd of a date string
-// and returns an error if fails.
-func assertDateFormatV2(val, caller string) error {
-	dateFormat := "yyyy-mm-dd"
-	if len(val) != 10 {
-		return &DateError{caller, dateFormat}
+// BuildParams makes a map with the Arguments functions,
+// and check for the presence of "requireds" keys in the map,
+// raising an error if some required keys are not present.
+func BuildParams(
+	arguments []Argument,
+	requireds ...string,
+) (map[string]interface{}, error) {
+	params := make(map[string]interface{})
+	for _, argFunc := range arguments {
+		argFunc(params)
 	}
-	day, err := strconv.Atoi(val[8:10])
-	if err != nil {
-		return &DateError{caller, dateFormat}
-	}
-	if day < 1 || 31 < day {
-		return fmt.Errorf("%s format error: invalid day value", caller)
-	}
-	month, err := strconv.Atoi(val[5:7])
-	if err != nil {
-		return &DateError{caller, dateFormat}
-	}
-	if month < 1 || 12 < month {
-		return fmt.Errorf("%s format error: invalid month value", caller)
-	}
-	_, err = strconv.Atoi(val[0:4])
-	if err != nil {
-		return &DateError{caller, dateFormat}
-	}
-	return nil
-}
-
-// assertDateFormatV1 assert the format dd/mm/yyyy of a date string
-// and returns an error if fails.
-func assertDateFormatV1(val, caller string) error {
-	dateFormat := "dd/mm/yyyy"
-	if len(val) != 10 {
-		return &DateError{caller, dateFormat}
-	}
-	day, err := strconv.Atoi(val[0:2])
-	if err != nil {
-		return &DateError{caller, dateFormat}
-	}
-	if day < 1 || 31 < day {
-		return fmt.Errorf("%s format error: invalid day value", caller)
-	}
-	month, err := strconv.Atoi(val[3:5])
-	if err != nil {
-		return &DateError{caller, dateFormat}
-	}
-	if month < 1 || 12 < month {
-		return fmt.Errorf("%s format error: invalid month value", caller)
-	}
-	_, err = strconv.Atoi(val[6:10])
-	if err != nil {
-		return &DateError{caller, dateFormat}
-	}
-	return nil
-}
-
-// Amount is an argument of a request.
-// Represents numbers as strings.
-//
-// Number format: without thousand separator, and . (a dot) as decimal point.
-func Amount(val string) Argument {
-	return func(request *requests.Request) error {
-		request.AddArgument("amount", val)
-		return nil
-	}
-}
-
-// Market is an argument of a request.
-//
-// Accepts a par of currencies. e.g. "ETHCLP" or "BTCARS".
-func Market(val string) Argument {
-	return func(request *requests.Request) error {
-		request.AddArgument("market", val)
-		return nil
-	}
-}
-
-// Type is an argument of a request.
-//
-// Accepts either "buy" or "sell".
-func Type(val string) Argument {
-	return func(request *requests.Request) error {
-		if !(val == "buy" || val == "sell") {
-			return errors.New("type must be either \"buy\" or \"sell\"")
+	missing := []string{}
+	for _, required := range requireds {
+		if _, ok := params[required]; !ok {
+			missing = append(missing, required)
 		}
-		request.AddArgument("type", val)
-		return nil
 	}
-}
-
-// Page is an argument of a request.
-//
-// Accepts an integer greater or equal to 0, asumed to be 0 by the server if not given.
-func Page(val int) Argument {
-	return func(request *requests.Request) error {
-		if val < 0 {
-			return errors.New("page must be an integer greater or equal to 0")
+	if len(missing) > 0 {
+		missingAsCamelCase := make([]string, 0)
+		for _, miss := range missing {
+			missingAsCamelCase = append(
+				missingAsCamelCase,
+				fromSnakeCaseToCamelCase(miss),
+			)
 		}
-		request.AddArgument("page", strconv.Itoa(val))
-		return nil
+		return nil, fmt.Errorf(
+			"CryptomarketSDKError: missing arguments: %v", missingAsCamelCase,
+		)
 	}
+	return params, nil
 }
 
-// Limit is an argument of a request. It accepts an integer greater
-// or equal to 20 and lesser or equal to 100.
-//
-// Asumed to be 20 by the server if the argument is not given.
-func Limit(val int) Argument {
-	return func(request *requests.Request) error {
-		if val < 20 || 100 < val {
-			return errors.New("limit must be an integer greater or equal to 20 and lesser or equal to 100")
+type stringable interface {
+	TransactionTypeType |
+		TransactionSubTypeType |
+		TransactionStatusType
+}
+
+func toString[str stringable](list []str) string {
+	asStrs := make([]string, len(list))
+	for i, val := range list {
+		asStrs[i] = string(val)
+	}
+	return strings.Join(asStrs, ",")
+}
+
+func BuildQuery(params map[string]interface{}) string {
+	query := url.Values{}
+	for key, value := range params {
+		switch v := value.(type) {
+		case int:
+			query.Add(key, strconv.Itoa(v))
+		case []string:
+			strs := strings.Join(v, ",")
+			query.Add(key, strs)
+		case []TransactionTypeType:
+			query.Add(key, toString(v))
+		case []TransactionSubTypeType:
+			query.Add(key, toString(v))
+		case []TransactionStatusType:
+			query.Add(key, toString(v))
+		default:
+			query.Add(key, fmt.Sprint(v))
 		}
-		request.AddArgument("limit", strconv.Itoa(val))
-		return nil
+	}
+	return query.Encode()
+}
+
+func Currencies(val []string) Argument {
+	return func(params map[string]interface{}) {
+		params[internal.ArgNameCurrencies] = val
 	}
 }
 
-// Start is an argument of a request.
-//
-// Date format: yyyy-mm-dd.
-func Start(val string) Argument {
-	return func(request *requests.Request) error {
-		err := assertDateFormatV2(val, "Start")
-		if err != nil {
-			return err
-		}
-		request.AddArgument("start", val)
-		return nil
-	}
-}
-
-// End is an argument of a request.
-//
-// Date format: yyyy-mm-dd.
-func End(val string) Argument {
-	return func(request *requests.Request) error {
-		err := assertDateFormatV2(val, "End")
-		if err != nil {
-			return err
-		}
-		request.AddArgument("end", val)
-		return nil
-	}
-}
-
-// Timeframe is an argument of a request. Its the lapse between two candles.
-//
-// Accepts: 1, 5, 15, 60, 240, 1440 or 10080 as strings.
-func Timeframe(val string) Argument {
-	return func(request *requests.Request) error {
-		if !(val == "1" || val == "5" || val == "15" || val == "60" || val == "240" || val == "1440" || val == "10080") {
-			return errors.New("timeframe must be one of the following numbers as string: 1, 5, 15, 60, 240, 1440 or 10080")
-		}
-		request.AddArgument("timeframe", val)
-		return nil
-	}
-}
-
-// TimeFrame is an argument of a request. Its the lapse between two candles.
-// Is an Alias of Timeframe
-//
-// Accepts: 1, 5, 15, 60, 240, 1440 or 10080 as strings.
-func TimeFrame(val string) Argument {
-	return TimeFrame(val)
-}
-
-// Price is an argument of a request.
-func Price(val string) Argument {
-	return func(request *requests.Request) error {
-		request.AddArgument("price", val)
-		return nil
-	}
-}
-
-// Currency is an argument of a request. Its a currency as "EUR" or "XLM".
 func Currency(val string) Argument {
-	return func(request *requests.Request) error {
-		request.AddArgument("currency", val)
-		return nil
+	return func(params map[string]interface{}) {
+		params[internal.ArgNameCurrency] = val
 	}
 }
 
-// Id is an argument of a request.
-func Id(val string) Argument {
-	return func(request *requests.Request) error {
-		request.AddArgument("id", val)
-		return nil
+func Symbols(val []string) Argument {
+	return func(params map[string]interface{}) {
+		params[internal.ArgNameSymbols] = val
 	}
 }
 
-// Date is an argument of a request.
-//
-// Needed in deposit requests for México.
-//
-// Date format: dd/mm/yyyy.
-func Date(val string) Argument {
-	return func(request *requests.Request) error {
-		err := assertDateFormatV1(val, "Date")
-		if err != nil {
-			return err
-		}
-		request.AddArgument("date", val)
-		return nil
+func Symbol(val string) Argument {
+	return func(params map[string]interface{}) {
+		params[internal.ArgNameSymbol] = val
 	}
 }
 
-// TrackingCode is an argument of a request.
-//
-// Its needed in deposit requests for México.
-func TrackingCode(val string) Argument {
-	return func(request *requests.Request) error {
-		request.AddArgument("tracking_code", val)
-		return nil
+func Sort(val SortType) Argument {
+	return func(params map[string]interface{}) {
+		params[internal.ArgNameSort] = val
 	}
 }
 
-// Voucher is an argument of a request.
-//
-// Its needed in deposit requests for México, Brasil and European Union.
-func Voucher(val string) Argument {
-	return func(request *requests.Request) error {
-		request.AddArgument("voucher", val)
-		return nil
+func SortBy(val SortByType) Argument {
+	return func(params map[string]interface{}) {
+		params[internal.ArgNameSortBy] = val
 	}
 }
 
-// BancAccount is an argument of a request.
-func BankAccount(val string) Argument {
-	return func(request *requests.Request) error {
-		request.AddArgument("bank_account", val)
-		return nil
+func From(val string) Argument {
+	return func(params map[string]interface{}) {
+		params[internal.ArgNameFrom] = val
 	}
 }
 
-// Address is an argument of a request.
+func To(val string) Argument {
+	return func(params map[string]interface{}) {
+		params[internal.ArgNameTo] = val
+	}
+}
+
+func Till(val string) Argument {
+	return func(params map[string]interface{}) {
+		params[internal.ArgNameTill] = val
+	}
+}
+
+func Limit(val int) Argument {
+	return func(params map[string]interface{}) {
+		params[internal.ArgNameLimit] = val
+	}
+}
+
+func Offset(val int) Argument {
+	return func(params map[string]interface{}) {
+		params[internal.ArgNameOffset] = val
+	}
+}
+
+func Volume(val string) Argument {
+	return func(params map[string]interface{}) {
+		params[internal.ArgNameVolume] = val
+	}
+}
+
+func Period(val PeriodType) Argument {
+	return func(params map[string]interface{}) {
+		params[internal.ArgNamePeriod] = val
+	}
+}
+
+func ClientOrderID(val string) Argument {
+	return func(params map[string]interface{}) {
+		params[internal.ArgNameClientOrderID] = val
+	}
+}
+
+func Side(val SideType) Argument {
+	return func(params map[string]interface{}) {
+		params[internal.ArgNameSide] = val
+	}
+}
+
+func Quantity(val string) Argument {
+	return func(params map[string]interface{}) {
+		params[internal.ArgNameQuantity] = val
+	}
+}
+
+func Price(val string) Argument {
+	return func(params map[string]interface{}) {
+		params[internal.ArgNamePrice] = val
+	}
+}
+
+func StopPrice(val string) Argument {
+	return func(params map[string]interface{}) {
+		params[internal.ArgNameStopPrice] = val
+	}
+}
+
+func TimeInForce(val TimeInForceType) Argument {
+	return func(params map[string]interface{}) {
+		params[internal.ArgNameTimeInForce] = val
+	}
+}
+
+func ExpireTime(val string) Argument {
+	return func(params map[string]interface{}) {
+		params[internal.ArgNameExpireTime] = val
+	}
+}
+
+func StrictValidate(val bool) Argument {
+	return func(params map[string]interface{}) {
+		params[internal.ArgNameStrictValidate] = val
+	}
+}
+
+func PostOnly(val bool) Argument {
+	return func(params map[string]interface{}) {
+		params[internal.ArgNamePostOnly] = val
+	}
+}
+
+func OrderID(val int) Argument {
+	return func(params map[string]interface{}) {
+		params[internal.ArgNameOrderID] = val
+	}
+}
+
+func Amount(val string) Argument {
+	return func(params map[string]interface{}) {
+		params[internal.ArgNameAmount] = val
+	}
+}
+
 func Address(val string) Argument {
-	return func(request *requests.Request) error {
-		request.AddArgument("address", val)
-		return nil
+	return func(params map[string]interface{}) {
+		params[internal.ArgNameAddress] = val
 	}
 }
 
-// Memo is an argument of a request.
-func Memo(val string) Argument {
-	return func(request *requests.Request) error {
-		request.AddArgument("memo", val)
-		return nil
+func PaymentID(val string) Argument {
+	return func(params map[string]interface{}) {
+		params[internal.ArgNamePaymentID] = val
 	}
 }
 
-// CallbackUrl is an argument of a request.
-//
-// Max 256 caracteres.
-func CallbackUrl(val string) Argument {
-	return func(request *requests.Request) error {
-		if len(val) > 256 {
-			return errors.New("callback url too long, max 256 caracteres")
-		}
-		request.AddArgument("callback_url", val)
-		return nil
+func IncludeFee(val bool) Argument {
+	return func(params map[string]interface{}) {
+		params[internal.ArgNameIncludeFee] = val
 	}
 }
 
-// ErrorUrl is an argument of a request.
-//
-// Max 256 caracteres.
-func ErrorUrl(val string) Argument {
-	return func(request *requests.Request) error {
-		if len(val) > 256 {
-			return errors.New("Error url too long, max 256 caracteres")
-		}
-		request.AddArgument("error_url", val)
-		return nil
+func AutoCommit(val bool) Argument {
+	return func(params map[string]interface{}) {
+		params[internal.ArgNameAutoCommit] = val
 	}
 }
 
-// ErrorUrl is an argument of a request.
-//
-// Max 64 caracteres.
-func ExternalId(val string) Argument {
-	return func(request *requests.Request) error {
-		request.AddArgument("external_id", val)
-		if len(val) > 64 {
-			return errors.New("callback url too long, max 64 caracteres")
-		}
-		return nil
+func PublicComment(val string) Argument {
+	return func(params map[string]interface{}) {
+		params[internal.ArgNamePublicComment] = val
 	}
 }
 
-// PaymentReceiver is an argument of a request.
-func PaymentReceiver(val string) Argument {
-	return func(request *requests.Request) error {
-		request.AddArgument("payment_receiver", val)
-		return nil
+func FromCurrency(val string) Argument {
+	return func(params map[string]interface{}) {
+		params[internal.ArgNameFromCurrency] = val
 	}
 }
 
-// SuccessUrl is an argument of a request.
-//
-// Max 256 caracteres
-func SuccessUrl(val string) Argument {
-	return func(request *requests.Request) error {
-		if len(val) > 256 {
-			return errors.New("callback url too long, max 256 caracteres")
-		}
-		request.AddArgument("success_url", val)
-		return nil
+func ToCurrency(val string) Argument {
+	return func(params map[string]interface{}) {
+		params[internal.ArgNameToCurrency] = val
 	}
 }
 
-// ToReceive is an argument of a request.
-func ToReceive(val float64) Argument {
-	return func(request *requests.Request) error {
-		request.AddArgument("to_receive", strconv.FormatFloat(val, 'f', 2, 64))
-		return nil
+func TransferType(val TransferTypeType) Argument {
+	return func(params map[string]interface{}) {
+		params[internal.ArgNameTransferType] = val
 	}
 }
 
-// ToReceiveCurrency is an argument of a request.
-func ToReceiveCurrency(val string) Argument {
-	return func(request *requests.Request) error {
-		request.AddArgument("to_receive_currency", val)
-		return nil
+func Identifier(val string) Argument {
+	return func(params map[string]interface{}) {
+		params[internal.ArgNameIdentifier] = val
 	}
 }
 
-// Language is an argument of a request.
-//
-// Supported languages are "es", "en" and "pt".
-func Language(val string) Argument {
-	return func(request *requests.Request) error {
-		if !(val == "es" || val == "en" || val == "pt") {
-			return errors.New("language not supported. Supported languages are \"es\", \"en\" and \"pt\"")
-		}
-		request.AddArgument("language", val)
-		return nil
+func IdentifyBy(val IdentifyByType) Argument {
+	return func(params map[string]interface{}) {
+		params[internal.ArgNameIdentifyBy] = val
 	}
 }
 
-// Token is an argument of a request.
-func Token(val string) Argument {
-	return func(request *requests.Request) error {
-		request.AddArgument("token", val)
-		return nil
+func ShowSenders(val string) Argument {
+	return func(params map[string]interface{}) {
+		params[internal.ArgNameShowSenders] = val
 	}
 }
 
-// Wallet is an argument of a request.
-//
-// examples: "ETH", "XLM" or "BTC".
-func Wallet(val string) Argument {
-	return func(request *requests.Request) error {
-		request.AddArgument("wallet", val)
-		return nil
+func ID(val string) Argument {
+	return func(params map[string]interface{}) {
+		params[internal.ArgNameID] = val
 	}
 }
 
-// StartDate is an argument of a request.
-//
-// Date format: dd/mm/yyyy
-func StartDate(val string) Argument {
-	return func(request *requests.Request) error {
-		err := assertDateFormatV1(val, "StartDate")
-		if err != nil {
-			return err
-		}
-		request.AddArgument("start_date", val)
-		return nil
+func Source(val AccountType) Argument {
+	return func(params map[string]interface{}) {
+		params[internal.ArgNameSource] = val
 	}
 }
 
-// EndDate is an argument of a request.
-//
-// Date format: dd/mm/yyyy
-func EndDate(val string) Argument {
-	return func(request *requests.Request) error {
-		err := assertDateFormatV1(val, "EndDate")
-		if err != nil {
-			return err
-		}
-		request.AddArgument("end_date", val)
-		return nil
+func Destination(val AccountType) Argument {
+	return func(params map[string]interface{}) {
+		params[internal.ArgNameDestination] = val
 	}
 }
 
-// RefundMail is an argument of a request.
-func RefundEmail(val string) Argument {
-	return func(request *requests.Request) error {
-		request.AddArgument("refund_email", val)
-		return nil
+func Since(val string) Argument {
+	return func(params map[string]interface{}) {
+		params[internal.ArgNameSince] = val
+	}
+}
+
+func Untill(val string) Argument {
+	return func(params map[string]interface{}) {
+		params[internal.ArgNameUntil] = val
+	}
+}
+
+func Depth(val int) Argument {
+	return func(params map[string]interface{}) {
+		params[internal.ArgNameDepth] = val
+	}
+}
+
+func WSDepth(val WSDepthType) Argument {
+	return func(params map[string]interface{}) {
+		params[internal.ArgNameDepth] = val
+	}
+}
+
+func TakeRate(val string) Argument {
+	return func(params map[string]interface{}) {
+		params[internal.ArgNameTakeRate] = val
+	}
+}
+
+func MakeRate(val string) Argument {
+	return func(params map[string]interface{}) {
+		params[internal.ArgNameMakeRate] = val
+	}
+}
+
+func NewClientOrderID(val string) Argument {
+	return func(params map[string]interface{}) {
+		params[internal.ArgNameNewClientOrderID] = val
+	}
+}
+
+func UseOffchain(val UseOffchainType) Argument {
+	return func(params map[string]interface{}) {
+		params[internal.ArgNameNewClientOrderID] = val
+	}
+}
+
+func RequestClientOrderID(val string) Argument {
+	return func(params map[string]interface{}) {
+		params[internal.ArgNameRequestClientOrderID] = val
+	}
+}
+
+func OrderBookSpeed(val OrderBookSpeedType) Argument {
+	return func(params map[string]interface{}) {
+		params[internal.ArgNameSpeed] = val
+	}
+}
+
+func TickerSpeed(val TickerSpeedType) Argument {
+	return func(params map[string]interface{}) {
+		params[internal.ArgNameSpeed] = val
+	}
+}
+func PriceRateSpeed(val PriceRateSpeedType) Argument {
+	return func(params map[string]interface{}) {
+		params[internal.ArgNameSpeed] = val
+	}
+}
+
+func OrderListID(val string) Argument {
+	return func(params map[string]interface{}) {
+		params[internal.ArgNameOrderListID] = val
+	}
+}
+
+func Contingency(val ContingencyType) Argument {
+	return func(params map[string]interface{}) {
+		params[internal.ArgNameContingencyType] = val
+	}
+}
+func IDTill(val string) Argument {
+	return func(params map[string]interface{}) {
+		params[internal.ArgNameIDTill] = val
+	}
+}
+
+func IDFrom(val string) Argument {
+	return func(params map[string]interface{}) {
+		params[internal.ArgNameIDFrom] = val
+	}
+}
+
+type OrderRequest struct {
+	ClientOrderID  string          `json:"client_order_id,omitempty"`
+	Symbol         string          `json:"symbol,omitempty"`
+	Side           SideType        `json:"side,omitempty"`
+	Type           OrderType       `json:"type,omitempty"`
+	TimeInForce    TimeInForceType `json:"time_in_force,omitempty"`
+	Quantity       string          `json:"quantity,omitempty"`
+	Price          string          `json:"price,omitempty"`
+	StopPrice      string          `json:"stop_price,omitempty"`
+	ExpireTime     string          `json:"expire_time,omitempty"`
+	StrictValidate bool            `json:"strict_validate,omitempty"`
+	PostOnly       bool            `json:"post_only,omitempty"`
+	MakeRate       string          `json:"make_rate,omitempty"`
+	TakeRate       string          `json:"take_rate,omitempty"`
+}
+
+func Orders(val []OrderRequest) Argument {
+	return func(params map[string]interface{}) {
+		params[internal.ArgNameOrders] = val
+	}
+}
+
+func TransactionType(val TransactionTypeType) Argument {
+	return func(params map[string]interface{}) {
+		params[internal.ArgNameType] = val
+	}
+}
+
+func TransactionTypes(list ...TransactionTypeType) Argument {
+	return func(params map[string]interface{}) {
+		params[internal.ArgNameTypes] = list
+	}
+}
+
+func TransactionSubTypes(list ...TransactionSubTypeType) Argument {
+	return func(params map[string]interface{}) {
+		params[internal.ArgNameSubtypes] = list
+	}
+}
+
+func TransactionStatuses(list ...TransactionStatusType) Argument {
+	return func(params map[string]interface{}) {
+		params[internal.ArgNameStatuses] = list
+	}
+}
+
+func SubAccountID(val string) Argument {
+	return func(params map[string]interface{}) {
+		params[internal.ArgNameSubAccountID] = val
+	}
+}
+
+func SubAccountIDs(list ...string) Argument {
+	return func(params map[string]interface{}) {
+		params[internal.ArgNameSubAccountIDs] = list
+	}
+}
+
+func DepositAddressGenerationEnabled(val bool) Argument {
+	return func(params map[string]interface{}) {
+		params[internal.ArgNameDepositAddressGenerationEnabled] = val
+	}
+}
+
+func WithdrawEnabled(val bool) Argument {
+	return func(params map[string]interface{}) {
+		params[internal.ArgNameWithdrawEnabled] = val
+	}
+}
+
+func Description(val string) Argument {
+	return func(params map[string]interface{}) {
+		params[internal.ArgNameDescription] = val
+	}
+}
+
+func CreatedAt(val string) Argument {
+	return func(params map[string]interface{}) {
+		params[internal.ArgNameCreatedAt] = val
+	}
+}
+
+func UpdatedAt(val string) Argument {
+	return func(params map[string]interface{}) {
+		params[internal.ArgNameUpdatedAt] = val
+	}
+}
+
+func NetworkCode(val string) Argument {
+	return func(params map[string]interface{}) {
+		params[internal.ArgNameNetworkCode] = val
+	}
+}
+
+type SubscriptionType string
+
+func SubscriptionTypeTrades() SubscriptionType {
+	return SubscriptionType(internal.ChannelTrades)
+}
+
+func SubscriptionsTypeCandles(period PeriodType) SubscriptionType {
+	return SubscriptionType(fmt.Sprintf(internal.ChannelCandles, period))
+}
+
+func SubscriptionTypeMiniTicker(speed OrderBookSpeedType) SubscriptionType {
+	return SubscriptionType(fmt.Sprintf(internal.ChannelMiniTicker, speed))
+}
+
+func SubscriptionTypeMiniTickerInBatch(speed OrderBookSpeedType) SubscriptionType {
+	return SubscriptionType(fmt.Sprintf(internal.ChannelMiniTickerInBatch, speed))
+}
+
+func SubscriptionTypeTicker(speed OrderBookSpeedType) SubscriptionType {
+	return SubscriptionType(fmt.Sprintf(internal.ChannelTicker, speed))
+}
+
+func SubscriptionTypeTickerInBatch(speed OrderBookSpeedType) SubscriptionType {
+	return SubscriptionType(fmt.Sprintf(internal.ChannelTickerInBatch, speed))
+}
+
+func SubscriptionTypeFullOrderbook(speed OrderBookSpeedType) SubscriptionType {
+	return SubscriptionType(internal.ChannelOrderBookFull)
+}
+
+func SubscriptionTypePartialOrderbook(depth WSDepthType, speed OrderBookSpeedType) SubscriptionType {
+	return SubscriptionType(fmt.Sprintf(internal.ChannelOrderbookPartial, depth, speed))
+}
+
+func SubscriptionTypePartialOrderbookInBatch(depth WSDepthType, speed OrderBookSpeedType) SubscriptionType {
+	return SubscriptionType(fmt.Sprintf(internal.ChannelOrderbookPartialInBatch, depth, speed))
+}
+
+func SubscriptionTypeOrderbookTop(speed OrderBookSpeedType) SubscriptionType {
+	return SubscriptionType(fmt.Sprintf(internal.ChannelOrderbookTop, speed))
+}
+
+func SubscriptionTypeOrderbookTopInBatch(speed OrderBookSpeedType) SubscriptionType {
+	return SubscriptionType(fmt.Sprintf(internal.ChannelOrderbookTopInBatch, speed))
+}
+
+func Subscription(val SubscriptionType) Argument {
+	return func(params map[string]interface{}) {
+		params[internal.ArgNameSubscription] = val
+	}
+}
+
+func Mode(val SubscriptionModeType) Argument {
+	return func(params map[string]interface{}) {
+		params[internal.ArgNameMode] = val
+	}
+}
+
+func TargetCurrency(val string) Argument {
+	return func(params map[string]interface{}) {
+		params[internal.ArgNameTargetCurrency] = val
+	}
+}
+
+func PreferredNetwork(val string) Argument {
+	return func(params map[string]interface{}) {
+		params[internal.ArgNamePrefferedNetwork] = val
+	}
+}
+
+type FeeRequest struct {
+	Currency    string `json:"currency"`
+	Amount      string `json:"amount"`
+	NetworkCode string `json:"network_code,omitempty"`
+}
+
+func FeeRequests(val []FeeRequest) Argument {
+	return func(params map[string]interface{}) {
+		params[internal.SDKArgNameFeeRequest] = val
 	}
 }
