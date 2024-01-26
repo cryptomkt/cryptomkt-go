@@ -7,8 +7,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/cryptomkt/cryptomkt-go/args"
-	"github.com/cryptomkt/cryptomkt-go/models"
+	"github.com/cryptomkt/cryptomkt-go/v3/args"
+	"github.com/cryptomkt/cryptomkt-go/v3/models"
 )
 
 func beforeEachMarketDataTest() (client *MarketDataClient, saver *saver) {

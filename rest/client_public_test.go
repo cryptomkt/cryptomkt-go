@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/cryptomkt/cryptomkt-go/args"
+	"github.com/cryptomkt/cryptomkt-go/v3/args"
 )
 
 func TestGetCurrencies(t *testing.T) {
