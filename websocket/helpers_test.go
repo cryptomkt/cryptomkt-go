@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/cryptomkt/cryptomkt-go/models"
+	"github.com/cryptomkt/cryptomkt-go/v3/models"
 )
 
 type APIKeys struct {

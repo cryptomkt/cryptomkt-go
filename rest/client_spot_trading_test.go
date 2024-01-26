@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/cryptomkt/cryptomkt-go/args"
+	"github.com/cryptomkt/cryptomkt-go/v3/args"
 )
 
 func TestGetSpotTradingBalance(t *testing.T) {

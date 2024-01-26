@@ -6,10 +6,10 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/cryptomkt/cryptomkt-go/args"
-	"github.com/cryptomkt/cryptomkt-go/internal"
+	"github.com/cryptomkt/cryptomkt-go/v3/args"
+	"github.com/cryptomkt/cryptomkt-go/v3/internal"
 
-	"github.com/cryptomkt/cryptomkt-go/models"
+	"github.com/cryptomkt/cryptomkt-go/v3/models"
 )
 
 // http methods

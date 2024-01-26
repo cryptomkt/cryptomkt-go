@@ -5,9 +5,9 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/cryptomkt/cryptomkt-go/args"
-	"github.com/cryptomkt/cryptomkt-go/internal"
-	"github.com/cryptomkt/cryptomkt-go/models"
+	"github.com/cryptomkt/cryptomkt-go/v3/args"
+	"github.com/cryptomkt/cryptomkt-go/v3/internal"
+	"github.com/cryptomkt/cryptomkt-go/v3/models"
 )
 
 // WalletManagementClient connects via websocket to cryptomarket to get wallet information of the user. uses SHA256 as auth method and authenticates automatically.

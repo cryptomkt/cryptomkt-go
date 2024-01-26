@@ -9,7 +9,7 @@
 To install the Cryptomarket client
 
 ```
- go get github.com/cryptomkt/cryptomkt-go
+ go get github.com/cryptomkt/cryptomkt-go/v3
 ```
 
 # Documentation
@@ -24,8 +24,8 @@ This sdk makes use of the [api version 3](https://api.exchange.cryptomkt.com/#ab
 import (
 	"context"
 
-  "github.com/cryptomkt/cryptomkt-go/args"
-  "github.com/cryptomkt/cryptomkt-go/rest"
+  "github.com/cryptomkt/cryptomkt-go/v3/args"
+  "github.com/cryptomkt/cryptomkt-go/v3/rest"
 )
 
 // instance a client
