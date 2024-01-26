@@ -1,6 +1,6 @@
 package models
 
-import "github.com/cryptomkt/cryptomkt-go/args"
+import "github.com/cryptomkt/cryptomkt-go/v3/args"
 
 type WSTradeFeed map[string][]WSTrade
 type WSTrade struct {
