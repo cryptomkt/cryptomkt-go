@@ -177,7 +177,7 @@ func (client *WalletManagementClient) UnsubscribeToTransactions() error {
 // the subscriptions sends a snapshot for with all balances and one update with one balance at a time
 //
 // https://api.exchange.cryptomkt.com/#subscribe-to-wallet-balance
-func (client *WalletManagementClient) SubscribeToWalletBalance() (notificationCh chan models.Notification[[]models.Balance], err error) {
+func (client *WalletManagementClient) SubscribeToWalletBalances() (notificationCh chan models.Notification[[]models.Balance], err error) {
 	dataCh, err := client.doSubscription(methodSubscribeWalletBalances, nil, nil)
 	if err != nil {
 		return nil, err
@@ -221,6 +221,6 @@ func (client *WalletManagementClient) SubscribeToWalletBalance() (notificationCh
 // UnsubscribeToWalletBalances stop recieving the feed of balances changes
 //
 // https://api.exchange.cryptomkt.com/#subscribe-to-wallet-balance
-func (client *WalletManagementClient) UnsubscribeToWalletBalance() error {
+func (client *WalletManagementClient) UnsubscribeToWalletBalances() error {
 	return client.doUnsubscription(methodUnsubscribeWalletBalances, nil, nil)
 }

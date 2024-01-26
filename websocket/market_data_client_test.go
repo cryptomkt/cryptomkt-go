@@ -403,3 +403,23 @@ func TestGetActiveSubscriptions(t *testing.T) {
 		t.Fatal("wrong number of subscriptions")
 	}
 }
+
+func TestPriceRateSubscription(t *testing.T) {
+	client, saver := beforeEachMarketDataTest()
+	subscription, err := client.SubscribeToPriceRates(
+		args.PriceRateSpeed(args.PriceRateSpeed1s),
+		args.Currencies([]string{"EOS", "ETH"}),
+		args.TargetCurrency("BTC"),
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+	saver.strSaveCh() <- fmt.Sprint(subscription.Symbols)
+	go func() {
+		defer saver.close()
+		for notification := range subscription.NotificationCh {
+			saver.strSaveCh() <- fmt.Sprint(notification.Data)
+		}
+	}()
+	afterEach(t, client, saver, subscription.NotificationChannel)
+}

@@ -7,12 +7,18 @@ import (
 )
 
 type Currency struct {
-	FullName          string    `json:"full_name"`
-	PayinEnabled      bool      `json:"payin_enabled"`
-	PayoutEnabled     bool      `json:"payout_enabled"`
-	TransferEnabled   bool      `json:"transfer_enabled"`
-	PrecisionTransfer string    `json:"precision_transfer"`
-	Networks          []Network `json:"networks"`
+	FullName            string    `json:"full_name"`
+	Crypto              bool      `json:"crypto"`
+	PayinEnabled        bool      `json:"payin_enabled"`
+	PayoutEnabled       bool      `json:"payout_enabled"`
+	TransferEnabled     bool      `json:"transfer_enabled"`
+	PrecisionTransfer   string    `json:"precision_transfer"`
+	Sign                string    `json:"sign"`
+	QRPrefix            string    `json:"qr_prefix"`
+	CryptoPaymentIDName string    `json:"crypto_payment_id_name"`
+	CryptoExplorer      string    `json:"crypto_explorer"`
+	Delisted            bool      `json:"delisted"`
+	Networks            []Network `json:"networks"`
 }
 
 type Network struct {
@@ -35,10 +41,10 @@ type Network struct {
 
 // Balance is the amount of currency a user have
 type Balance struct {
-	Currency       string `json:"currency"`
-	Available      string `json:"available"`
-	Reserved       string `json:"reserved"`
-	ReservedMargin string `json:"reserved_margin"`
+	Currency  string `json:"currency"`
+	Available string `json:"available"`
+	Reserved  string `json:"reserved"`
+	// ReservedMargin string `json:"reserved_margin"`
 }
 
 type SubAccountBalances struct {
@@ -166,7 +172,7 @@ type Trade struct {
 // Transaction is a movement of currency,
 // not in the market, but related on the exchange
 type Transaction struct {
-	ID        int64                       `json:"id,result"`
+	ID        int64                       `json:"id"`
 	Status    args.TransactionStatusType  `json:"status"`
 	Type      args.TransactionTypeType    `json:"type"`
 	SubType   args.TransactionSubTypeType `json:"subtype"`
@@ -241,13 +247,25 @@ type Candle struct {
 type Ticker struct {
 	Timestamp   string `json:"timestamp"`
 	Open        string `json:"open"`
-	Close       string `json:"last,close"`
+	Close       string `json:"close"`
+	Last        string `json:"last"`
 	High        string `json:"high"`
 	Low         string `json:"low"`
 	Volume      string `json:"volume"`
 	VolumeQuote string `json:"volume_quote"`
 	Ask         string `json:"ask"`
 	Bid         string `json:"bid"`
+}
+
+func (ticker *Ticker) GetLast() string {
+	if ticker.Last != "" {
+		return ticker.Last
+	}
+	return ticker.Close
+}
+
+func (ticker *Ticker) GetClose() string {
+	return ticker.GetLast()
 }
 
 // Error is an error from the exchange
@@ -311,7 +329,15 @@ type AmountLock struct {
 }
 
 type IDResponse struct {
-	ID string `json:"id"`
+	ID     string `json:"id"`
+	Result string `json:"result"`
+}
+
+func (idResponse *IDResponse) GetID() string {
+	if idResponse.ID != "" {
+		return idResponse.ID
+	}
+	return idResponse.Result
 }
 
 type ResultResponse struct {
@@ -344,4 +370,11 @@ type ACLSettings struct {
 	Description                     string `json:"description"`
 	CreatedAt                       string `json:"created_at"`
 	UpdatedAt                       string `json:"updated_at"`
+}
+
+type Fee struct {
+	Fee        string `json:"fee"`
+	NetworkFee string `json:"networkFee"`
+	Amount     string `json:"amount"`
+	Currency   string `json:"currency"`
 }

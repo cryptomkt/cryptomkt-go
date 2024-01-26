@@ -203,28 +203,77 @@ func TestGetActiveSpotOrdersAndCancelAllSpotOrders(t *testing.T) {
 }
 
 func TestCreateSpotOrderList(t *testing.T) {
-	// TODO
+	orderlistId := fmt.Sprint(time.Now().Unix())
+	secondOrderId := orderlistId + "2"
+	side := args.SideSell
+	quantity := "0.01"
+	price := "10000"
+	timeInForce := args.TimeInForceFOK
+	client, saver, bg, err := beforeEachTradingClientTest()
+	saver.close()
+	if err != nil {
+		t.Fatal(err)
+	}
+	orders, err := client.CreateSpotOrderList(bg, args.OrderListID(orderlistId), args.Contingency(args.ContingencyAllOrNone), args.Orders([]args.OrderRequest{
+		{ClientOrderID: orderlistId, Symbol: "EOSETH", Side: side, TimeInForce: timeInForce, Quantity: quantity, Price: price},
+		{ClientOrderID: secondOrderId, Symbol: "EOSBTC", Side: side, TimeInForce: timeInForce, Quantity: quantity, Price: price},
+	}))
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, order := range orders {
+		err = checkReport(&order)
+		if err != nil {
+			saver.errSaveCh() <- err
+		}
+	}
 }
 
-func TestGetSpotTradingBalances(t *testing.T) {
+func TestSubscribeToSpotBalance(t *testing.T) {
 	client, saver, bg, err := beforeEachTradingClientTest()
 	if err != nil {
 		t.Fatal(err)
 	}
-	balances, err := client.GetSpotTradingBalances(bg)
+	notificationCh, err := client.SubscribeToSpotBalance(args.Mode(args.SubscriptionModeUpdates))
 	if err != nil {
 		t.Fatal(err)
 	}
-	for _, balance := range balances {
-		if err = checkBalance(&balance); err != nil {
-			saver.errSaveCh() <- err
+	go func() {
+		defer saver.close()
+		for notification := range notificationCh {
+			saver.strSaveCh() <- "notification recieved"
+			saver.strSaveCh() <- fmt.Sprint(notification)
+			for _, balance := range notification.Data {
+				if err := checkBalance(&balance); err != nil {
+					saver.errSaveCh() <- err
+				}
+			}
 		}
-	}
-	saver.close()
+	}()
+	<-time.After(5 * time.Second)
+	clientOrderID := fmt.Sprint(time.Now().Unix())
+	client.CreateSpotOrder(
+		bg,
+		args.Symbol("EOSETH"),
+		args.Side(args.SideSell),
+		args.Price("1000"),
+		args.Quantity("0.01"),
+		args.ClientOrderID(clientOrderID),
+	)
+	<-time.After(5 * time.Second)
+	client.CancelSpotOrder(
+		bg,
+		args.ClientOrderID(clientOrderID),
+	)
+	client.UnsubscribeToSpotBalance()
+	<-time.After(5 * time.Second)
+
+	saver.printSavedStrings()
 	saver.printSavedErrors()
 	if saver.errorsPrinted {
 		t.Fail()
 	}
+
 }
 
 func TestGetSpotTradingBalance(t *testing.T) {

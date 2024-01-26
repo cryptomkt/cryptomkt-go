@@ -389,6 +389,11 @@ func TickerSpeed(val TickerSpeedType) Argument {
 		params[internal.ArgNameSpeed] = val
 	}
 }
+func PriceRateSpeed(val PriceRateSpeedType) Argument {
+	return func(params map[string]interface{}) {
+		params[internal.ArgNameSpeed] = val
+	}
+}
 
 func OrderListID(val string) Argument {
 	return func(params map[string]interface{}) {
@@ -562,5 +567,29 @@ func Subscription(val SubscriptionType) Argument {
 func Mode(val SubscriptionModeType) Argument {
 	return func(params map[string]interface{}) {
 		params[internal.ArgNameMode] = val
+	}
+}
+
+func TargetCurrency(val string) Argument {
+	return func(params map[string]interface{}) {
+		params[internal.ArgNameTargetCurrency] = val
+	}
+}
+
+func PreferredNetwork(val string) Argument {
+	return func(params map[string]interface{}) {
+		params[internal.ArgNamePrefferedNetwork] = val
+	}
+}
+
+type FeeRequest struct {
+	Currency    string `json:"currency"`
+	Amount      string `json:"amount"`
+	NetworkCode string `json:"network_code,omitempty"`
+}
+
+func FeeRequests(val []FeeRequest) Argument {
+	return func(params map[string]interface{}) {
+		params[internal.SDKArgNameFeeRequest] = val
 	}
 }

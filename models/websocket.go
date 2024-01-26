@@ -68,6 +68,12 @@ type OrderbookTop struct {
 	BestBidQuantity string `json:"B"`
 }
 
+type WSPrice struct {
+	Timestamp int64  `json:"t"`
+	Rate      string `json:"r"`
+}
+type PriceFeed map[string]WSPrice
+
 type FeedType interface {
 	WSTradeFeed |
 		WSCandleFeed |
@@ -77,7 +83,8 @@ type FeedType interface {
 		WSTickerFeed |
 		[]Report |
 		Transaction |
-		[]Balance
+		[]Balance |
+		PriceFeed
 }
 
 type Notification[ft FeedType] struct {

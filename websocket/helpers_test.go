@@ -14,7 +14,7 @@ type APIKeys struct {
 }
 
 func LoadKeys() (apiKeys APIKeys) {
-	data, err := os.ReadFile("/home/ismael/cryptomarket/keys-v3.json")
+	data, err := os.ReadFile("/home/ismael/cryptomarket/keys.json")
 	if err != nil {
 		fmt.Print(err)
 	}

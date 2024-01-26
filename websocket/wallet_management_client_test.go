@@ -127,7 +127,7 @@ func TestBalanceSubscription(t *testing.T) {
 	apiKeys := LoadKeys()
 	client, _ := NewWalletManagementClient(apiKeys.APIKey, apiKeys.APISecret, 0)
 	restClient := rest.NewClient(apiKeys.APIKey, apiKeys.APISecret, 0)
-	notificationCh, err := client.SubscribeToWalletBalance()
+	notificationCh, err := client.SubscribeToWalletBalances()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -153,7 +153,7 @@ func TestBalanceSubscription(t *testing.T) {
 		args.Destination(args.AccountSpot),
 	)
 	if err != nil {
-		fmt.Println(err)
+		t.Fatal(err)
 	}
 	<-time.After(5 * time.Second)
 	_, err = restClient.TransferBetweenWalletAndExchange(
@@ -164,10 +164,10 @@ func TestBalanceSubscription(t *testing.T) {
 		args.Destination(args.AccountSpot),
 	)
 	if err != nil {
-		fmt.Println(err)
+		t.Fatal(err)
 	}
 	<-time.After(5 * time.Second)
-	err = client.UnsubscribeToWalletBalance()
+	err = client.UnsubscribeToWalletBalances()
 	if err != nil {
 		t.Fatal(err)
 	}

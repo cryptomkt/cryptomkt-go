@@ -192,21 +192,26 @@ func (client *SpotTradingClient) CreateSpotOrder(
 func (client *SpotTradingClient) CreateSpotOrderList(
 	ctx context.Context,
 	arguments ...args.Argument,
-) ([]models.Order, error) {
-	var resp struct {
-		Result []models.Order
-	}
-	err := client.doRequest(
+) ([]models.Report, error) {
+	reports := make([]models.Report, 0)
+	err := client.doRequestOfNNotifications(
 		ctx,
 		methodCreateSpotOrderList,
 		arguments,
 		[]string{internal.ArgNameOrderListID, internal.ArgNameContingencyType, internal.ArgNameOrders},
-		&resp,
+		func(data []byte) {
+			var response struct {
+				Result models.Report
+			}
+			json.Unmarshal(data, &response)
+			reports = append(reports, response.Result)
+		},
+		internal.ArgNameOrders,
 	)
 	if err != nil {
 		return nil, err
 	}
-	return resp.Result, nil
+	return reports, nil
 }
 
 // CancelSpotOrders cancels a spot order
@@ -389,8 +394,17 @@ func (client *SpotTradingClient) UnsubscribeToReports() (err error) {
 	return client.doUnsubscription(methodSpotUnsubscribe, nil, nil)
 }
 
-func (client *SpotTradingClient) SubscribeToSpotBalances(arguments ...args.Argument) (notificationCh chan models.Notification[[]models.Balance], err error) {
-	dataCh, err := client.doSubscription(methodSubscribeSpotBalance, arguments, nil)
+// Subscribes to the user's balances.
+//
+// Requires the "Orderbook, History, Trading balance" API key Access Right.
+//
+// https://api.exchange.cryptomkt.com/#subscribe-to-spot-balances
+//
+// Arguments:
+//
+//	Mode(string)  // The symbol of the commission rate
+func (client *SpotTradingClient) SubscribeToSpotBalance(arguments ...args.Argument) (notificationCh chan models.Notification[[]models.Balance], err error) {
+	dataCh, err := client.doSubscription(methodSubscribeSpotBalance, arguments, []string{internal.ArgNameMode})
 	if err != nil {
 		return nil, err
 	}
@@ -411,6 +425,11 @@ func (client *SpotTradingClient) SubscribeToSpotBalances(arguments ...args.Argum
 	return notificationCh, nil
 }
 
-func (client *SpotTradingClient) UnsubscribeToSpotBalances() (err error) {
+// Unubscribes to the user's balances.
+//
+// Requires the "Orderbook, History, Trading balance" API key Access Right.
+//
+// https://api.exchange.cryptomkt.com/#subscribe-to-spot-balances
+func (client *SpotTradingClient) UnsubscribeToSpotBalance() (err error) {
 	return client.doUnsubscription(methodUnsubstribeSpotBalance, nil, nil)
 }

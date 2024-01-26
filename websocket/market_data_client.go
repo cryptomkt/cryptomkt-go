@@ -53,7 +53,7 @@ type channelSubscriptionResponse struct {
 
 func (client *MarketDataClient) doChannelSubscription(
 	method string,
-	channel string,
+	subscriptionCh string,
 	params map[string]interface{},
 ) (*struct {
 	ch      chan []byte
@@ -63,28 +63,26 @@ func (client *MarketDataClient) doChannelSubscription(
 		return nil, fmt.Errorf("CryptomarketSDKError: websocket connection closed")
 	}
 	ch := make(chan []byte, 1)
-	id := client.chanCache.store(ch)
+	id := client.chanCache.saveCh(ch, 1)
 	notification := wsSubscription{
 		ID:      id,
 		Method:  method,
-		Channel: channel,
+		Channel: subscriptionCh,
 		Params:  params,
 	}
 	data, err := json.Marshal(notification)
 	if err != nil {
-		if ch, ok := client.chanCache.pop(id); ok {
-			close(ch)
-		}
+		client.chanCache.closeAndRemoveCh(id)
 		return nil, fmt.Errorf("CryptomarketSDKError: invalid notification: %v", err)
 	}
-	key := channel
+	key := subscriptionCh
 	var dataOut chan []byte
-	if ch, ok := client.chanCache.getCh(key); ok {
+	if ch, ok := client.chanCache.getSubscriptionChan(key); ok {
 		dataOut = ch
 	} else {
 		dataOut = make(chan []byte, 1)
 	}
-	client.chanCache.storeSubscriptionCh(key, dataOut)
+	client.chanCache.saveSubscriptionCh(key, dataOut)
 	client.wsManager.snd <- data
 	data = <-ch
 	var resp channelSubscriptionResponse
@@ -100,7 +98,7 @@ func (client *MarketDataClient) doChannelSubscription(
 }
 
 // UnsubscribeTo closes the receiving channel of a subscription, given his NorificationChannel name.
-// further messages recieved from the server on the corresponding channel will be droped.
+// Further messages recieved from the server on the corresponding channel will be droped.
 func (client *MarketDataClient) UnsubscribeTo(notificationChannel string) {
 	client.chanCache.deleteSubscriptionCh(notificationChannel)
 }
@@ -148,7 +146,7 @@ func (client *MarketDataClient) GetActiveSubscriptions(
 		return nil, fmt.Errorf("CryptomarketSDKError: websocket connection closed")
 	}
 	ch := make(chan []byte, 1)
-	id := client.chanCache.store(ch)
+	id := client.chanCache.saveCh(ch, 1)
 	var notificationWithChannel struct {
 		ID      int64  `json:"id"`
 		Method  string `json:"method"`
@@ -161,17 +159,13 @@ func (client *MarketDataClient) GetActiveSubscriptions(
 	)
 	data, err := json.Marshal(notificationWithChannel)
 	if err != nil {
-		if ch, ok := client.chanCache.pop(id); ok {
-			close(ch)
-		}
+		client.chanCache.closeAndRemoveCh(id)
 		return nil, fmt.Errorf("CryptomarketSDKError: invalid notification: %v", err)
 	}
 	client.wsManager.snd <- data
 	select {
 	case <-ctx.Done():
-		if ch, ok := client.chanCache.pop(id); ok {
-			close(ch)
-		}
+		client.chanCache.closeAndRemoveCh(id)
 		return nil, ctx.Err()
 	case data := <-ch:
 		var resp struct {
@@ -192,8 +186,16 @@ func (client *MarketDataClient) GetActiveSubscriptions(
 }
 
 func addAsteriscIfNoSymbols(params *map[string]interface{}) {
-	if _, ok := (*params)[internal.ArgNameSymbols]; !ok {
-		(*params)[internal.ArgNameSymbols] = []string{"*"}
+	addAsteriscIfMissingArg(params, internal.ArgNameSymbols)
+}
+
+func addAsteriscIfNoCurrencies(params *map[string]interface{}) {
+	addAsteriscIfMissingArg(params, internal.ArgNameCurrencies)
+}
+
+func addAsteriscIfMissingArg(params *map[string]interface{}, argName string) {
+	if _, ok := (*params)[argName]; !ok {
+		(*params)[argName] = []string{"*"}
 	}
 }
 
@@ -609,5 +611,36 @@ func (client *MarketDataClient) SubscribeToOrderbookTopInBatchers(
 		NotificationCh:      convertChan[models.OrderbookTopFeed](response.ch),
 		Symbols:             response.symbols,
 		NotificationChannel: channel,
+	}, nil
+}
+
+// SubscribeToPriceRates subscribe to a feed of price rates.
+//
+// subscription is for all currencies or specified currencies (bases), against a target currency (quote). indexed by currency id (bases)
+//
+// https://api.exchange.cryptomkt.com/#subscribe-to-price-rates
+//
+// Arguments:
+//
+//	PriceRateSpeed(TickerSpeedType)  // The speed of the feed. PriceRateSpeed1s or PriceRateSpeed3s
+//	Currencies([]CurrenciesType)  // Optional. A list of currencies ids for the base currencies for the price rates
+//	TargetCurrency(String) quote currency for the price rates
+func (client *MarketDataClient) SubscribeToPriceRates(
+	arguments ...args.Argument,
+) (subscription *models.Subscription[models.PriceFeed], err error) {
+	params, err := args.BuildParams(arguments, internal.ArgNameSpeed, internal.ArgNameTargetCurrency)
+	if err != nil {
+		return nil, err
+	}
+	addAsteriscIfNoCurrencies(&params)
+	subscriptionCh := fmt.Sprintf(internal.ChannelPriceRate, params[internal.ArgNameSpeed])
+	response, err := client.doChannelSubscription(methodSubscribe, subscriptionCh, params)
+	if err != nil {
+		return nil, err
+	}
+	return &models.Subscription[models.PriceFeed]{
+		NotificationCh:      convertChan[models.PriceFeed](response.ch),
+		Symbols:             response.symbols,
+		NotificationChannel: subscriptionCh,
 	}, nil
 }

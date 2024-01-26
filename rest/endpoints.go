@@ -32,6 +32,7 @@ const (
 	endpointTransactions               = "wallet/transactions"
 	endpointCryptoCheckOffchain        = "wallet/crypto/check-offchain-available"
 	endpointEstimateWithdrawFee        = "wallet/crypto/fee/estimate"
+	endpointEstimateWithdrawFees       = "wallet/crypto/fees/estimate"
 	endpointAmountLocks                = "wallet/amount-locks"
 	// sub accounts
 	endpointSubAccountList          = "sub-account"

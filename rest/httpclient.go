@@ -1,15 +1,11 @@
 package rest
 
 import (
-	"bytes"
 	"context"
-	"encoding/json"
 	"errors"
 	"io"
 	"net/http"
 	"strings"
-
-	"github.com/cryptomarket/cryptomarket-go/args"
 )
 
 const (
@@ -43,14 +39,15 @@ func newHTTPClient(apiKey, apiSecret string, window int) httpclient {
 }
 
 type RequestData struct {
-	cxt      context.Context
-	method   string
-	endpoint string
-	params   map[string]interface{}
-	public   bool
+	cxt                context.Context
+	method             string
+	endpoint           string
+	urlEncodedPayload  string
+	jsonEncodedPayload string
+	public             bool
 }
 
-func (hclient httpclient) makeRequest(requestData RequestData) (result []byte, err error) {
+func (hclient httpclient) makeRequest(requestData *RequestData) (result []byte, err error) {
 	request, err := hclient.buildRequest(requestData)
 	if err != nil {
 		return nil, err
@@ -63,18 +60,17 @@ func (hclient httpclient) makeRequest(requestData RequestData) (result []byte, e
 	return readResponse(response)
 }
 
-func (hclient httpclient) buildRequest(requestData RequestData) (*http.Request, error) {
+func (hclient httpclient) buildRequest(requestData *RequestData) (*http.Request, error) {
 	if requestData.method == methodPost {
 		return hclient.buildPostRequest(requestData)
 	}
-	rawQuery := args.BuildQuery(requestData.params)
 	if requestData.method == methodGet {
-		return hclient.buildGetRequest(requestData, rawQuery)
+		return hclient.buildGetRequest(requestData, requestData.urlEncodedPayload)
 	}
-	return hclient.buildOtherRequest(requestData, rawQuery)
+	return hclient.buildOtherRequest(requestData, requestData.urlEncodedPayload)
 }
 
-func (hclient httpclient) buildGetRequest(requestData RequestData, rawQuery string) (*http.Request, error) {
+func (hclient httpclient) buildGetRequest(requestData *RequestData, rawQuery string) (*http.Request, error) {
 	request, err := hclient.buildRequestHelper(requestData, nil, rawQuery)
 	if err != nil {
 		return nil, err
@@ -83,12 +79,8 @@ func (hclient httpclient) buildGetRequest(requestData RequestData, rawQuery stri
 	return request, nil
 }
 
-func (hclient httpclient) buildPostRequest(requestData RequestData) (*http.Request, error) {
-	requestBody, err := json.Marshal(requestData.params)
-	if err != nil {
-		return nil, errors.New("CryptxomarketSDKError: Can't build the request: " + err.Error())
-	}
-	request, err := hclient.buildRequestHelper(requestData, bytes.NewReader(requestBody), string(requestBody))
+func (hclient httpclient) buildPostRequest(requestData *RequestData) (*http.Request, error) {
+	request, err := hclient.buildRequestHelper(requestData, strings.NewReader(requestData.jsonEncodedPayload), requestData.jsonEncodedPayload)
 	if err != nil {
 		return nil, err
 	}
@@ -96,7 +88,7 @@ func (hclient httpclient) buildPostRequest(requestData RequestData) (*http.Reque
 	return request, err
 }
 
-func (hclient httpclient) buildOtherRequest(requestData RequestData, urlEncodedQuery string) (*http.Request, error) {
+func (hclient httpclient) buildOtherRequest(requestData *RequestData, urlEncodedQuery string) (*http.Request, error) {
 	request, err := hclient.buildRequestHelper(requestData, strings.NewReader(urlEncodedQuery), urlEncodedQuery)
 	if err != nil {
 		return nil, err
@@ -105,7 +97,7 @@ func (hclient httpclient) buildOtherRequest(requestData RequestData, urlEncodedQ
 	return request, err
 }
 
-func (hclient httpclient) buildRequestHelper(requestData RequestData, body io.Reader, query string) (*http.Request, error) {
+func (hclient httpclient) buildRequestHelper(requestData *RequestData, body io.Reader, query string) (*http.Request, error) {
 	request, err := http.NewRequestWithContext(requestData.cxt, requestData.method, apiURL+apiVersion+requestData.endpoint, body)
 	if err != nil {
 		return nil, errors.New("CryptomarketSDKError: Can't build the request: " + err.Error())

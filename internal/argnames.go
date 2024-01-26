@@ -73,6 +73,10 @@ const (
 	ArgNameUpdatedAt            string = "updated_at"
 	ArgNameNetworkCode          string = "network_code"
 	ArgNameMode                 string = "mode"
+	ArgNameTargetCurrency       string = "target_currency"
+	ArgNamePrefferedNetwork     string = "preferred_network"
 
 	ArgNameDepositAddressGenerationEnabled string = "deposit_address_generation_enabled"
+
+	SDKArgNameFeeRequest string = "sdk_fee_requests"
 )

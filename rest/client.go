@@ -62,7 +62,11 @@ func (client *Client) publicGet(
 	params map[string]interface{},
 	model interface{},
 ) error {
-	return client.doRequest(RequestData{ctx, methodGet, endpoint, params, publicCall}, model)
+	requestData, err := makeRequestData(ctx, methodGet, endpoint, params, publicCall)
+	if err != nil {
+		return err
+	}
+	return client.doRequest(requestData, model)
 }
 
 func (client *Client) privateGet(
@@ -71,7 +75,11 @@ func (client *Client) privateGet(
 	params map[string]interface{},
 	model interface{},
 ) error {
-	return client.doRequest(RequestData{ctx, methodGet, endpoint, params, privateCall}, model)
+	requestData, err := makeRequestData(ctx, methodGet, endpoint, params, privateCall)
+	if err != nil {
+		return err
+	}
+	return client.doRequest(requestData, model)
 }
 
 func (client *Client) post(
@@ -80,7 +88,11 @@ func (client *Client) post(
 	params map[string]interface{},
 	model interface{},
 ) error {
-	return client.doRequest(RequestData{ctx, methodPost, endpoint, params, privateCall}, model)
+	requestData, err := makeRequestData(ctx, methodPost, endpoint, params, privateCall)
+	if err != nil {
+		return err
+	}
+	return client.doRequest(requestData, model)
 }
 
 func (client *Client) put(
@@ -89,7 +101,11 @@ func (client *Client) put(
 	params map[string]interface{},
 	model interface{},
 ) error {
-	return client.doRequest(RequestData{ctx, methodPut, endpoint, params, privateCall}, model)
+	requestData, err := makeRequestData(ctx, methodPut, endpoint, params, privateCall)
+	if err != nil {
+		return err
+	}
+	return client.doRequest(requestData, model)
 }
 
 func (client *Client) patch(
@@ -98,7 +114,11 @@ func (client *Client) patch(
 	params map[string]interface{},
 	model interface{},
 ) error {
-	return client.doRequest(RequestData{ctx, methodPatch, endpoint, params, privateCall}, model)
+	requestData, err := makeRequestData(ctx, methodPatch, endpoint, params, privateCall)
+	if err != nil {
+		return err
+	}
+	return client.doRequest(requestData, model)
 }
 
 func (client *Client) delete(
@@ -107,11 +127,36 @@ func (client *Client) delete(
 	params map[string]interface{},
 	model interface{},
 ) error {
-	return client.doRequest(RequestData{ctx, methodDelete, endpoint, params, privateCall}, model)
+	requestData, err := makeRequestData(ctx, methodDelete, endpoint, params, privateCall)
+	if err != nil {
+		return err
+	}
+	return client.doRequest(requestData, model)
 }
 
+func makeRequestData(
+	ctx context.Context,
+	method string,
+	endpoint string,
+	params map[string]interface{},
+	public bool,
+) (*RequestData, error) {
+	urlEncodedParams := args.BuildQuery(params)
+	jsonEncodedParams, err := json.Marshal(params)
+	if err != nil {
+		return nil, fmt.Errorf("CryptomarketSDKError: unable to encode params: %v", err)
+	}
+	return &RequestData{
+		cxt:                ctx,
+		method:             method,
+		endpoint:           endpoint,
+		urlEncodedPayload:  urlEncodedParams,
+		jsonEncodedPayload: string(jsonEncodedParams),
+		public:             public,
+	}, nil
+}
 func (client *Client) doRequest(
-	requestData RequestData,
+	requestData *RequestData,
 	model interface{},
 ) error {
 	data, err := client.hclient.makeRequest(requestData)
@@ -154,6 +199,7 @@ func (client *Client) handleResponseData(
 // Arguments:
 //
 //	Currencies([]CurrenciesType)  // Optional. A list of currencies ids
+//	PreferredNetwork(String) // Optional. Code of the default network of the currency
 func (client *Client) GetCurrencies(
 	ctx context.Context,
 	arguments ...args.Argument,
@@ -1192,7 +1238,7 @@ func (client *Client) withdrawCrypto(
 	}
 	response := models.IDResponse{}
 	err = client.post(ctx, endpointCryptoWithdraw, params, &response)
-	result = response.ID
+	result = response.GetID()
 	return
 }
 
@@ -1256,28 +1302,39 @@ func (client *Client) WithdrawCryptoRollback(
 //
 // Requires the "Payment information" API key Access Right
 //
-// https://api.exchange.cryptomkt.com/#estimate-withdraw-fee
+// https://api.exchange.cryptomkt.com/#estimate-withdrawal-fees
 //
 // Arguments:
 //
-//	Currency(string)  // the currency code for withdrawal
-//	Amount(string)  // the expected withdraw amount
-//	NetworkCode(String) // Optional. network code
+//	FeeRequests([]FeeRequest) // the fees to request
 func (client *Client) GetEstimateWithdrawFees(
 	ctx context.Context,
 	arguments ...args.Argument,
-) (result []models.FeeResponse, err error) {
+) (result []models.Fee, err error) {
 	params, err := args.BuildParams(
 		arguments,
-		internal.ArgNameCurrency,
-		internal.ArgNameAmount,
+		internal.SDKArgNameFeeRequest,
 	)
 	if err != nil {
 		return
 	}
-	response := []models.FeeResponse{}
-	err = client.privateGet(ctx, endpointEstimateWithdrawFee, params, &response)
-	return response, err
+	jsonData, err := json.Marshal(params[internal.SDKArgNameFeeRequest])
+	if err != nil {
+		return nil, fmt.Errorf("CryptomarketSDKError: %v", err)
+	}
+	requestData := &RequestData{
+		cxt:                ctx,
+		method:             methodPost,
+		endpoint:           endpointEstimateWithdrawFees,
+		urlEncodedPayload:  "",
+		jsonEncodedPayload: string(jsonData),
+		public:             privateCall,
+	}
+	err = client.doRequest(requestData, &result)
+	if err != nil {
+		return nil, err
+	}
+	return result, err
 }
 
 // GetEstimateWithdrawalFee gets an estimate of the withdrawal fee

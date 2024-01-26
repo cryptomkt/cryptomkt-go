@@ -130,6 +130,9 @@ func TestWithdrawCryptoCommit(t *testing.T) {
 		args.Address(adaAddress.Address),
 		args.AutoCommit(false),
 	)
+	if err != nil {
+		t.Fatal(err)
+	}
 	if transactionID == "" {
 		t.Fatal("no transaction id")
 	}
@@ -179,8 +182,14 @@ func TestGetEstimateWithdrawFee(t *testing.T) {
 
 func TestGetEstimateWithdrawFees(t *testing.T) {
 	client, bg := beforeEach()
-	_, err := client.GetEstimateWithdrawFees(bg, args.Currency("USDT"), args.Amount("1"), args.NetworkCode("TRX"))
+	result, err := client.GetEstimateWithdrawFees(bg, args.FeeRequests([]args.FeeRequest{
+		{Currency: "EOS", Amount: "100"},
+		{Currency: "ETH", Amount: "200"},
+	}))
 	if err != nil {
+		t.Fatal(err)
+	}
+	if err = checkList(checkFee, result); err != nil {
 		t.Fatal(err)
 	}
 }

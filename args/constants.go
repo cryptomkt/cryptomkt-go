@@ -130,6 +130,13 @@ const (
 	TickerSpeed3s TickerSpeedType = "3s"
 )
 
+type PriceRateSpeedType string
+
+const (
+	PriceRateSpeed1s PriceRateSpeedType = "1s"
+	PriceRateSpeed3s PriceRateSpeedType = "3s"
+)
+
 type OrderBookSpeedType string
 
 const (

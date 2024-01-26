@@ -286,6 +286,17 @@ func checkCryptoAddress(model *models.CryptoAddress) (err error) {
 	return
 }
 
+func checkFee(model *models.Fee) (err error) {
+	fields := map[string]interface{}{
+		"currency":    model.Currency,
+		"amount":      model.Amount,
+		"fee":         model.Fee,
+		"network fee": model.NetworkFee,
+	}
+	err = checkFields(fields)
+	return
+}
+
 func checkTradingCommission(model *models.TradingCommission) (err error) {
 	fields := map[string]interface{}{
 		"symbol":    model.Symbol,
@@ -305,7 +316,8 @@ type checkable interface {
 		models.Trade |
 		models.CryptoAddress |
 		models.Transaction |
-		models.TradingCommission
+		models.TradingCommission |
+		models.Fee
 }
 
 func checkList[C checkable](checkerFn func(*C) error, list []C) error {
