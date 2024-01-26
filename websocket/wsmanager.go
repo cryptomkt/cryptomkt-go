@@ -3,14 +3,12 @@ package websocket
 import (
 	"flag"
 	"fmt"
-	"log"
 	"net/url"
 
 	"github.com/gorilla/websocket"
 )
 
 const addr string = "api.exchange.cryptomkt.com"
-
 
 // wsManager deals with the server communication, it sends and recieves data
 // the way to use it is to snd via its send channel and to recieve in a loop
@@ -34,10 +32,8 @@ func newWSManager(path string) *wsManager {
 
 func (ws *wsManager) connect() error {
 	flag.Parse()
-	log.SetFlags(0)
 
 	u := url.URL{Scheme: "wss", Host: addr, Path: ws.streamPath}
-	log.Printf("connecting to %s", u.String())
 
 	c, _, err := websocket.DefaultDialer.Dial(u.String(), nil)
 	if err != nil {
@@ -61,25 +57,21 @@ func (ws *wsManager) sndLoop() {
 	for msg := range ws.snd {
 		err := ws.conn.WriteMessage(websocket.TextMessage, msg)
 		if err != nil {
-			fmt.Println("write:", err)
 			return
 		}
 	}
 	// send close msg to server
 	err := ws.conn.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""))
 	if err != nil {
-		fmt.Println("write close:", err)
 		return
 	}
 }
 
-// TODO: A close after a timeout since the send of the close message. => close even if the close response is not recieved
 func (ws *wsManager) rcvLoop() {
 	defer close(ws.rcv)
 	for {
 		_, message, err := ws.conn.ReadMessage()
 		if err != nil {
-			fmt.Println("read:", err)
 			ws.conn.Close()
 			return
 		}

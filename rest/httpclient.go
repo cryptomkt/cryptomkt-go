@@ -2,24 +2,20 @@ package rest
 
 import (
 	"context"
-	"crypto/hmac"
-	"crypto/sha256"
-	"encoding/base64"
-	"encoding/hex"
 	"errors"
-	"io/ioutil"
+	"io"
 	"net/http"
-	"net/url"
-	"strconv"
 	"strings"
-	"time"
-
-	"github.com/cryptomarket/cryptomarket-go/args"
 )
 
-var (
-	apiURL     = "https://api.exchange.cryptomkt.com"
-	apiVersion = "/api/2/"
+const (
+	apiURL                  = "https://api.exchange.cryptomkt.com"
+	apiVersion              = "/api/3/"
+	headerContentType       = "Content-type"
+	headerUserAgent         = "User-Agent"
+	userAgentCryptomarketGo = "cryptomarket/go"
+	applicationJson         = "application/json"
+	applicationUrlEncoded   = "application/x-www-form-urlencoded"
 )
 
 // httpclient handles all the http logic, leaving public only whats needed.
@@ -29,95 +25,94 @@ type httpclient struct {
 	client    *http.Client
 	apiKey    string
 	apiSecret string
+	window    int
 }
 
 // New creates a new httpclient
-func newHTTPClient(apiKey, apiSecret string) httpclient {
+func newHTTPClient(apiKey, apiSecret string, window int) httpclient {
 	return httpclient{
 		client:    &http.Client{},
 		apiKey:    apiKey,
 		apiSecret: apiSecret,
+		window:    window,
 	}
 }
 
-func (hclient httpclient) doRequest(cxt context.Context, method, endpoint string, params map[string]interface{}, public bool) (result []byte, err error) {
-	// build query
-	rawQuery := buildQuery(params)
-	// build request
-	var req *http.Request
-	if method == methodGet {
-		req, err = http.NewRequestWithContext(cxt, method, apiURL+apiVersion+endpoint, nil)
-		req.URL.RawQuery = rawQuery
-	} else {
-		req, err = http.NewRequestWithContext(cxt, method, apiURL+apiVersion+endpoint, strings.NewReader(rawQuery))
-	}
+type RequestData struct {
+	cxt                context.Context
+	method             string
+	endpoint           string
+	urlEncodedPayload  string
+	jsonEncodedPayload string
+	public             bool
+}
+
+func (hclient httpclient) makeRequest(requestData *RequestData) (result []byte, err error) {
+	request, err := hclient.buildRequest(requestData)
 	if err != nil {
-		return nil, errors.New("CryptomarketSDKError: Can't build the request: " + err.Error())
+		return nil, err
 	}
-
-	req.Header.Add("User-Agent", "cryptomarket/go")
-	req.Header.Add("Content-type", "application/x-www-form-urlencoded")
-	// add auth header if is not a public call
-	if !public {
-		req.Header.Add("Authorization", hclient.buildCredential(method, endpoint, rawQuery))
-	}
-
-	// make request
-	resp, err := hclient.client.Do(req)
+	response, err := hclient.client.Do(request)
 	if err != nil {
 		return nil, errors.New("CryptomarketSDKError: Can't make the request: " + err.Error())
 	}
-	defer resp.Body.Close()
-	body, err := ioutil.ReadAll(resp.Body)
+	defer response.Body.Close()
+	return readResponse(response)
+}
+
+func (hclient httpclient) buildRequest(requestData *RequestData) (*http.Request, error) {
+	if requestData.method == methodPost {
+		return hclient.buildPostRequest(requestData)
+	}
+	if requestData.method == methodGet {
+		return hclient.buildGetRequest(requestData, requestData.urlEncodedPayload)
+	}
+	return hclient.buildOtherRequest(requestData, requestData.urlEncodedPayload)
+}
+
+func (hclient httpclient) buildGetRequest(requestData *RequestData, rawQuery string) (*http.Request, error) {
+	request, err := hclient.buildRequestHelper(requestData, nil, rawQuery)
+	if err != nil {
+		return nil, err
+	}
+	request.URL.RawQuery = rawQuery
+	return request, nil
+}
+
+func (hclient httpclient) buildPostRequest(requestData *RequestData) (*http.Request, error) {
+	request, err := hclient.buildRequestHelper(requestData, strings.NewReader(requestData.jsonEncodedPayload), requestData.jsonEncodedPayload)
+	if err != nil {
+		return nil, err
+	}
+	request.Header.Add(headerContentType, applicationJson)
+	return request, err
+}
+
+func (hclient httpclient) buildOtherRequest(requestData *RequestData, urlEncodedQuery string) (*http.Request, error) {
+	request, err := hclient.buildRequestHelper(requestData, strings.NewReader(urlEncodedQuery), urlEncodedQuery)
+	if err != nil {
+		return nil, err
+	}
+	request.Header.Add(headerContentType, applicationUrlEncoded)
+	return request, err
+}
+
+func (hclient httpclient) buildRequestHelper(requestData *RequestData, body io.Reader, query string) (*http.Request, error) {
+	request, err := http.NewRequestWithContext(requestData.cxt, requestData.method, apiURL+apiVersion+requestData.endpoint, body)
+	if err != nil {
+		return nil, errors.New("CryptomarketSDKError: Can't build the request: " + err.Error())
+	}
+	request.Header.Add(headerUserAgent, userAgentCryptomarketGo)
+	if !requestData.public {
+		request.Header.Add("Authorization", hclient.getCredentialForRequest(request, query))
+	}
+	return request, nil
+}
+
+func readResponse(resp *http.Response) ([]byte, error) {
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, errors.New("CryptomarketSDKError: Can't read the response body: " + err.Error())
 	}
 	return body, nil
-}
-
-func (hclient httpclient) buildCredential(httpMethod, method, query string) string {
-	timestamp := strconv.FormatInt(time.Now().Unix(), 10)
-	msg := httpMethod + timestamp + apiVersion + method
-	if len(query) != 0 {
-		if httpMethod == methodGet {
-			msg += "?"
-		}
-		msg += query
-	}
-	h := hmac.New(sha256.New, []byte(hclient.apiSecret))
-	h.Write([]byte(msg))
-	signature := hex.EncodeToString(h.Sum(nil))
-	return "HS256 " + base64.StdEncoding.EncodeToString([]byte(hclient.apiKey+":"+timestamp+":"+signature))
-}
-
-func buildQuery(params map[string]interface{}) string {
-	query := url.Values{}
-	for key, value := range params {
-		switch v := value.(type) {
-		case []string:
-			strs := strings.Join(v, ",")
-			query.Add(key, strs)
-		case string:
-			query.Add(key, v)
-		case int:
-			query.Add(key, strconv.Itoa(v))
-		case args.IdentifyByType:
-			query.Add(key, string(v))
-		case args.MarginType:
-			query.Add(key, string(v))
-		case args.OrderType:
-			query.Add(key, string(v))
-		case args.PeriodType:
-			query.Add(key, string(v))
-		case args.SideType:
-			query.Add(key, string(v))
-		case args.SortByType:
-			query.Add(key, string(v))
-		case args.SortType:
-			query.Add(key, string(v))
-		case args.TimeInForceType:
-			query.Add(key, string(v))
-		}
-	}
-	return query.Encode()
 }

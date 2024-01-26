@@ -1,6 +1,13 @@
 package args
 
-import "fmt"
+import (
+	"fmt"
+	"net/url"
+	"strconv"
+	"strings"
+
+	"github.com/cryptomarket/cryptomarket-go/internal"
+)
 
 // Argument are functions that serves as arguments for the diferent
 // requests to the server, either rest request, or websocket requests.
@@ -12,106 +19,22 @@ import "fmt"
 // in the example above.
 type Argument func(map[string]interface{})
 
-// SideType is an order side or a trade side of an order
-type SideType string
-
-const (
-	// SideTypeSell is the sell side for an order or a trade
-	SideTypeSell SideType = "sell"
-	// SideTypeBuy is the buy side for an order or a trade
-	SideTypeBuy SideType = "buy"
-)
-
-// OrderType is a type of order
-type OrderType string
-
-// OrderTypes
-const (
-	OrderTypeLimit      OrderType = "limit"
-	OrderTypeMarket     OrderType = "market"
-	OrderTypeStopLimit  OrderType = "stopLimit"
-	OrderTypeStopMarket OrderType = "stopMarket"
-)
-
-// TimeInForceType is the time in force of an order
-type TimeInForceType string
-
-// types of time in force
-const (
-	TimeInForceTypeGTC TimeInForceType = "GTC" // Good Till Cancel
-	TimeInForceTypeIOC TimeInForceType = "IOC" // Immediate or Cancel
-	TimeInForceTypeFOK TimeInForceType = "FOK" // Fill or Kill
-	TimeInForceTypeDAY TimeInForceType = "Day" // valid during Day
-	TimeInForceTypeGTD TimeInForceType = "GTD" // Good Till Date
-)
-
-// SortType is the sorting direction of a query
-type SortType string
-
-const (
-	// SortTypeASC is the ascending sorting direction of a query
-	SortTypeASC SortType = "ASC"
-	// SortTypeDESC is the descending sorting direction of a query
-	SortTypeDESC SortType = "DESC"
-)
-
-// SortByType is the parameter for sorting
-type SortByType string
-
-const (
-	// SortByTypeTimestamp is the sorting field for pagination, sorting by timestamp
-	SortByTypeTimestamp SortByType = "timestamp"
-	// SortByTypeID is the sorting field for pagination, sorting by id
-	SortByTypeID SortByType = "id"
-)
-
-const (
-	// TransferByEmail signals the identifier type to transfer by.
-	TransferByEmail = "email"
-	// TransferByUsername signals the identifier type to transfer by.
-	TransferByUsername = "username"
-)
-
-// PeriodType is the period of a candle
-type PeriodType string
-
-// candle periods
-const (
-	PeriodType1Minutes  PeriodType = "M1"
-	PeriodType3Minutes  PeriodType = "M3"
-	PeriodType5Minutes  PeriodType = "M5"
-	PeriodType15Minutes PeriodType = "M15"
-	PeriodType30Minutes PeriodType = "M30"
-	PeriodType1Hours    PeriodType = "H1"
-	PeriodType4Hours    PeriodType = "H4"
-	PeriodType1Day      PeriodType = "D1"
-	PeriodType7Days     PeriodType = "D7"
-	PeriodType1Month    PeriodType = "1M"
-)
-
-// MarginType is the type of margin of a trade
-type MarginType string
-
-// types of margin
-const (
-	MarginTypeInclude MarginType = "include"
-	MarginTypeOnly    MarginType = "only"
-	MarginTypeIgnore  MarginType = "ignore"
-)
-
-// IdentifyByType for transfers
-type IdentifyByType string
-
-// identify by types
-const (
-	IdentifyByTypeEmail    IdentifyByType = "email"
-	IdentifyByTypeUsername IdentifyByType = "username"
-)
+func fromSnakeCaseToCamelCase(s string) string {
+	snakeParts := strings.Split(s, "_")
+	camelParts := make([]string, 0)
+	for _, snakePart := range snakeParts {
+		camelParts = append(camelParts, strings.Title(snakePart))
+	}
+	return strings.Join(camelParts, "")
+}
 
 // BuildParams makes a map with the Arguments functions,
 // and check for the presence of "requireds" keys in the map,
 // raising an error if some required keys are not present.
-func BuildParams(arguments []Argument, requireds ...string) (map[string]interface{}, error) {
+func BuildParams(
+	arguments []Argument,
+	requireds ...string,
+) (map[string]interface{}, error) {
 	params := make(map[string]interface{})
 	for _, argFunc := range arguments {
 		argFunc(params)
@@ -123,280 +46,550 @@ func BuildParams(arguments []Argument, requireds ...string) (map[string]interfac
 		}
 	}
 	if len(missing) > 0 {
-		return nil, fmt.Errorf("CryptomarketSDKError: missing arguments: %v", missing)
+		missingAsCamelCase := make([]string, 0)
+		for _, miss := range missing {
+			missingAsCamelCase = append(
+				missingAsCamelCase,
+				fromSnakeCaseToCamelCase(miss),
+			)
+		}
+		return nil, fmt.Errorf(
+			"CryptomarketSDKError: missing arguments: %v", missingAsCamelCase,
+		)
 	}
 	return params, nil
 }
 
-// Currencies returns a "currencies" Argument
+type stringable interface {
+	TransactionTypeType |
+		TransactionSubTypeType |
+		TransactionStatusType
+}
+
+func toString[str stringable](list []str) string {
+	asStrs := make([]string, len(list))
+	for i, val := range list {
+		asStrs[i] = string(val)
+	}
+	return strings.Join(asStrs, ",")
+}
+
+func BuildQuery(params map[string]interface{}) string {
+	query := url.Values{}
+	for key, value := range params {
+		switch v := value.(type) {
+		case int:
+			query.Add(key, strconv.Itoa(v))
+		case []string:
+			strs := strings.Join(v, ",")
+			query.Add(key, strs)
+		case []TransactionTypeType:
+			query.Add(key, toString(v))
+		case []TransactionSubTypeType:
+			query.Add(key, toString(v))
+		case []TransactionStatusType:
+			query.Add(key, toString(v))
+		default:
+			query.Add(key, fmt.Sprint(v))
+		}
+	}
+	return query.Encode()
+}
+
 func Currencies(val []string) Argument {
 	return func(params map[string]interface{}) {
-		params["currencies"] = val
+		params[internal.ArgNameCurrencies] = val
 	}
 }
 
-// Currency returns a "currency" Argument
 func Currency(val string) Argument {
 	return func(params map[string]interface{}) {
-		params["currency"] = val
+		params[internal.ArgNameCurrency] = val
 	}
 }
 
-// Symbols returns a "symbols" Argument
 func Symbols(val []string) Argument {
 	return func(params map[string]interface{}) {
-		params["symbols"] = val
+		params[internal.ArgNameSymbols] = val
 	}
 }
 
-// Symbol returns a "symbol" Argument
 func Symbol(val string) Argument {
 	return func(params map[string]interface{}) {
-		params["symbol"] = val
+		params[internal.ArgNameSymbol] = val
 	}
 }
 
-// Sort returns a "sort" Argument
 func Sort(val SortType) Argument {
 	return func(params map[string]interface{}) {
-		params["sort"] = val
+		params[internal.ArgNameSort] = val
 	}
 }
 
-// SortBy returns a "by" Argument
 func SortBy(val SortByType) Argument {
 	return func(params map[string]interface{}) {
-		params["by"] = val
+		params[internal.ArgNameSortBy] = val
 	}
 }
 
-// From returns a "from" Argument
 func From(val string) Argument {
 	return func(params map[string]interface{}) {
-		params["from"] = val
+		params[internal.ArgNameFrom] = val
 	}
 }
 
-// Till returns a "till" Argument
+func To(val string) Argument {
+	return func(params map[string]interface{}) {
+		params[internal.ArgNameTo] = val
+	}
+}
+
 func Till(val string) Argument {
 	return func(params map[string]interface{}) {
-		params["till"] = val
+		params[internal.ArgNameTill] = val
 	}
 }
 
-// Limit returns a "limit" Argument
 func Limit(val int) Argument {
 	return func(params map[string]interface{}) {
-		params["limit"] = val
+		params[internal.ArgNameLimit] = val
 	}
 }
 
-// Offset returns a "offset" Argument
 func Offset(val int) Argument {
 	return func(params map[string]interface{}) {
-		params["offset"] = val
+		params[internal.ArgNameOffset] = val
 	}
 }
 
-// Volume returns a "volume" Argument
 func Volume(val string) Argument {
 	return func(params map[string]interface{}) {
-		params["volume"] = val
+		params[internal.ArgNameVolume] = val
 	}
 }
 
-// Period returns a "period" Argument
 func Period(val PeriodType) Argument {
 	return func(params map[string]interface{}) {
-		params["period"] = val
+		params[internal.ArgNamePeriod] = val
 	}
 }
 
-// ClientOrderID returns a "clientOrderId" Argument
 func ClientOrderID(val string) Argument {
 	return func(params map[string]interface{}) {
-		params["clientOrderId"] = val
+		params[internal.ArgNameClientOrderID] = val
 	}
 }
 
-// Wait returns a "wait" Argument
-func Wait(val int) Argument {
-	return func(params map[string]interface{}) {
-		params["wait"] = val
-	}
-}
-
-// Side returns a "side" Argument
 func Side(val SideType) Argument {
 	return func(params map[string]interface{}) {
-		params["side"] = val
+		params[internal.ArgNameSide] = val
 	}
 }
 
-// Quantity returns a "quantity" Argument
 func Quantity(val string) Argument {
 	return func(params map[string]interface{}) {
-		params["quantity"] = val
+		params[internal.ArgNameQuantity] = val
 	}
 }
 
-// Price returns a "price" Argument
 func Price(val string) Argument {
 	return func(params map[string]interface{}) {
-		params["price"] = val
+		params[internal.ArgNamePrice] = val
 	}
 }
 
-// StopPrice returns a "stopPrice" Argument
 func StopPrice(val string) Argument {
 	return func(params map[string]interface{}) {
-		params["stopPrice"] = val
+		params[internal.ArgNameStopPrice] = val
 	}
 }
 
-// TimeInForce returns a "timeInForce" Argument
 func TimeInForce(val TimeInForceType) Argument {
 	return func(params map[string]interface{}) {
-		params["timeInForce"] = val
+		params[internal.ArgNameTimeInForce] = val
 	}
 }
 
-// ExpireTime returns a "expireTime" Argument
 func ExpireTime(val string) Argument {
 	return func(params map[string]interface{}) {
-		params["expireTime"] = val
+		params[internal.ArgNameExpireTime] = val
 	}
 }
 
-// StrictValidate returns a "strictValidate" Argument
 func StrictValidate(val bool) Argument {
 	return func(params map[string]interface{}) {
-		params["strictValidate"] = val
+		params[internal.ArgNameStrictValidate] = val
 	}
 }
 
-// PostOnly returns a "postOnly" Argument
 func PostOnly(val bool) Argument {
 	return func(params map[string]interface{}) {
-		params["postOnly"] = val
+		params[internal.ArgNamePostOnly] = val
 	}
 }
 
-// Margin returns a "margin" Argument
-func Margin(val MarginType) Argument {
+func OrderID(val int) Argument {
 	return func(params map[string]interface{}) {
-		params["margin"] = val
+		params[internal.ArgNameOrderID] = val
 	}
 }
 
-// OrderID returns a "orderId" Argument
-func OrderID(val int64) Argument {
-	return func(params map[string]interface{}) {
-		params["orderId"] = val
-	}
-}
-
-// Amount returns a "amount" Argument
 func Amount(val string) Argument {
 	return func(params map[string]interface{}) {
-		params["amount"] = val
+		params[internal.ArgNameAmount] = val
 	}
 }
 
-// Address returns a "address" Argument
 func Address(val string) Argument {
 	return func(params map[string]interface{}) {
-		params["address"] = val
+		params[internal.ArgNameAddress] = val
 	}
 }
 
-// PaymentID returns a "paymentId" Argument
 func PaymentID(val string) Argument {
 	return func(params map[string]interface{}) {
-		params["paymentId"] = val
+		params[internal.ArgNamePaymentID] = val
 	}
 }
 
-// IncludeFee returns a "includeFee" Argument
 func IncludeFee(val bool) Argument {
 	return func(params map[string]interface{}) {
-		params["includeFee"] = val
+		params[internal.ArgNameIncludeFee] = val
 	}
 }
 
-// AutoCommit returns a "autoCommit" Argument
 func AutoCommit(val bool) Argument {
 	return func(params map[string]interface{}) {
-		params["autoCommit"] = val
+		params[internal.ArgNameAutoCommit] = val
 	}
 }
 
-// PublicComment returns a "publicComment" Argument
 func PublicComment(val string) Argument {
 	return func(params map[string]interface{}) {
-		params["publicComment"] = val
+		params[internal.ArgNamePublicComment] = val
 	}
 }
 
-// FromCurrency returns a "fromCurrency" Argument
 func FromCurrency(val string) Argument {
 	return func(params map[string]interface{}) {
-		params["fromCurrency"] = val
+		params[internal.ArgNameFromCurrency] = val
 	}
 }
 
-// ToCurrency returns a "toCurrency" Argument
 func ToCurrency(val string) Argument {
 	return func(params map[string]interface{}) {
-		params["toCurrency"] = val
+		params[internal.ArgNameToCurrency] = val
 	}
 }
 
-// TransferType returns a "type" Argument
-func TransferType(val string) Argument {
+func TransferType(val TransferTypeType) Argument {
 	return func(params map[string]interface{}) {
-		params["type"] = val
+		params[internal.ArgNameTransferType] = val
 	}
 }
 
-// Type returns a "type" Argument
-func Type(val OrderType) Argument {
-	return func(params map[string]interface{}) {
-		params["type"] = val
-	}
-}
-
-// Identifier returns a "identifier" Argument
 func Identifier(val string) Argument {
 	return func(params map[string]interface{}) {
-		params["identifier"] = val
+		params[internal.ArgNameIdentifier] = val
 	}
 }
 
-// IdentifyBy returns a "by" Argument
 func IdentifyBy(val IdentifyByType) Argument {
 	return func(params map[string]interface{}) {
-		params["by"] = val
+		params[internal.ArgNameIdentifyBy] = val
 	}
 }
 
-// ShowSenders returns a "showSenders" Argument
 func ShowSenders(val string) Argument {
 	return func(params map[string]interface{}) {
-		params["showSenders"] = val
+		params[internal.ArgNameShowSenders] = val
 	}
 }
 
-// RequestClientID returns a "requestClientId" Argument
-func RequestClientID(val string) Argument {
-	return func(params map[string]interface{}) {
-		params["requestClientId"] = val
-	}
-}
-
-// ID returns a "id" Argument
 func ID(val string) Argument {
 	return func(params map[string]interface{}) {
-		params["id"] = val
+		params[internal.ArgNameID] = val
+	}
+}
+
+func Source(val AccountType) Argument {
+	return func(params map[string]interface{}) {
+		params[internal.ArgNameSource] = val
+	}
+}
+
+func Destination(val AccountType) Argument {
+	return func(params map[string]interface{}) {
+		params[internal.ArgNameDestination] = val
+	}
+}
+
+func Since(val string) Argument {
+	return func(params map[string]interface{}) {
+		params[internal.ArgNameSince] = val
+	}
+}
+
+func Untill(val string) Argument {
+	return func(params map[string]interface{}) {
+		params[internal.ArgNameUntil] = val
+	}
+}
+
+func Depth(val int) Argument {
+	return func(params map[string]interface{}) {
+		params[internal.ArgNameDepth] = val
+	}
+}
+
+func WSDepth(val WSDepthType) Argument {
+	return func(params map[string]interface{}) {
+		params[internal.ArgNameDepth] = val
+	}
+}
+
+func TakeRate(val string) Argument {
+	return func(params map[string]interface{}) {
+		params[internal.ArgNameTakeRate] = val
+	}
+}
+
+func MakeRate(val string) Argument {
+	return func(params map[string]interface{}) {
+		params[internal.ArgNameMakeRate] = val
+	}
+}
+
+func NewClientOrderID(val string) Argument {
+	return func(params map[string]interface{}) {
+		params[internal.ArgNameNewClientOrderID] = val
+	}
+}
+
+func UseOffchain(val UseOffchainType) Argument {
+	return func(params map[string]interface{}) {
+		params[internal.ArgNameNewClientOrderID] = val
+	}
+}
+
+func RequestClientOrderID(val string) Argument {
+	return func(params map[string]interface{}) {
+		params[internal.ArgNameRequestClientOrderID] = val
+	}
+}
+
+func OrderBookSpeed(val OrderBookSpeedType) Argument {
+	return func(params map[string]interface{}) {
+		params[internal.ArgNameSpeed] = val
+	}
+}
+
+func TickerSpeed(val TickerSpeedType) Argument {
+	return func(params map[string]interface{}) {
+		params[internal.ArgNameSpeed] = val
+	}
+}
+func PriceRateSpeed(val PriceRateSpeedType) Argument {
+	return func(params map[string]interface{}) {
+		params[internal.ArgNameSpeed] = val
+	}
+}
+
+func OrderListID(val string) Argument {
+	return func(params map[string]interface{}) {
+		params[internal.ArgNameOrderListID] = val
+	}
+}
+
+func Contingency(val ContingencyType) Argument {
+	return func(params map[string]interface{}) {
+		params[internal.ArgNameContingencyType] = val
+	}
+}
+func IDTill(val string) Argument {
+	return func(params map[string]interface{}) {
+		params[internal.ArgNameIDTill] = val
+	}
+}
+
+func IDFrom(val string) Argument {
+	return func(params map[string]interface{}) {
+		params[internal.ArgNameIDFrom] = val
+	}
+}
+
+type OrderRequest struct {
+	ClientOrderID  string          `json:"client_order_id,omitempty"`
+	Symbol         string          `json:"symbol,omitempty"`
+	Side           SideType        `json:"side,omitempty"`
+	Type           OrderType       `json:"type,omitempty"`
+	TimeInForce    TimeInForceType `json:"time_in_force,omitempty"`
+	Quantity       string          `json:"quantity,omitempty"`
+	Price          string          `json:"price,omitempty"`
+	StopPrice      string          `json:"stop_price,omitempty"`
+	ExpireTime     string          `json:"expire_time,omitempty"`
+	StrictValidate bool            `json:"strict_validate,omitempty"`
+	PostOnly       bool            `json:"post_only,omitempty"`
+	MakeRate       string          `json:"make_rate,omitempty"`
+	TakeRate       string          `json:"take_rate,omitempty"`
+}
+
+func Orders(val []OrderRequest) Argument {
+	return func(params map[string]interface{}) {
+		params[internal.ArgNameOrders] = val
+	}
+}
+
+func TransactionType(val TransactionTypeType) Argument {
+	return func(params map[string]interface{}) {
+		params[internal.ArgNameType] = val
+	}
+}
+
+func TransactionTypes(list ...TransactionTypeType) Argument {
+	return func(params map[string]interface{}) {
+		params[internal.ArgNameTypes] = list
+	}
+}
+
+func TransactionSubTypes(list ...TransactionSubTypeType) Argument {
+	return func(params map[string]interface{}) {
+		params[internal.ArgNameSubtypes] = list
+	}
+}
+
+func TransactionStatuses(list ...TransactionStatusType) Argument {
+	return func(params map[string]interface{}) {
+		params[internal.ArgNameStatuses] = list
+	}
+}
+
+func SubAccountID(val string) Argument {
+	return func(params map[string]interface{}) {
+		params[internal.ArgNameSubAccountID] = val
+	}
+}
+
+func SubAccountIDs(list ...string) Argument {
+	return func(params map[string]interface{}) {
+		params[internal.ArgNameSubAccountIDs] = list
+	}
+}
+
+func DepositAddressGenerationEnabled(val bool) Argument {
+	return func(params map[string]interface{}) {
+		params[internal.ArgNameDepositAddressGenerationEnabled] = val
+	}
+}
+
+func WithdrawEnabled(val bool) Argument {
+	return func(params map[string]interface{}) {
+		params[internal.ArgNameWithdrawEnabled] = val
+	}
+}
+
+func Description(val string) Argument {
+	return func(params map[string]interface{}) {
+		params[internal.ArgNameDescription] = val
+	}
+}
+
+func CreatedAt(val string) Argument {
+	return func(params map[string]interface{}) {
+		params[internal.ArgNameCreatedAt] = val
+	}
+}
+
+func UpdatedAt(val string) Argument {
+	return func(params map[string]interface{}) {
+		params[internal.ArgNameUpdatedAt] = val
+	}
+}
+
+func NetworkCode(val string) Argument {
+	return func(params map[string]interface{}) {
+		params[internal.ArgNameNetworkCode] = val
+	}
+}
+
+type SubscriptionType string
+
+func SubscriptionTypeTrades() SubscriptionType {
+	return SubscriptionType(internal.ChannelTrades)
+}
+
+func SubscriptionsTypeCandles(period PeriodType) SubscriptionType {
+	return SubscriptionType(fmt.Sprintf(internal.ChannelCandles, period))
+}
+
+func SubscriptionTypeMiniTicker(speed OrderBookSpeedType) SubscriptionType {
+	return SubscriptionType(fmt.Sprintf(internal.ChannelMiniTicker, speed))
+}
+
+func SubscriptionTypeMiniTickerInBatch(speed OrderBookSpeedType) SubscriptionType {
+	return SubscriptionType(fmt.Sprintf(internal.ChannelMiniTickerInBatch, speed))
+}
+
+func SubscriptionTypeTicker(speed OrderBookSpeedType) SubscriptionType {
+	return SubscriptionType(fmt.Sprintf(internal.ChannelTicker, speed))
+}
+
+func SubscriptionTypeTickerInBatch(speed OrderBookSpeedType) SubscriptionType {
+	return SubscriptionType(fmt.Sprintf(internal.ChannelTickerInBatch, speed))
+}
+
+func SubscriptionTypeFullOrderbook(speed OrderBookSpeedType) SubscriptionType {
+	return SubscriptionType(internal.ChannelOrderBookFull)
+}
+
+func SubscriptionTypePartialOrderbook(depth WSDepthType, speed OrderBookSpeedType) SubscriptionType {
+	return SubscriptionType(fmt.Sprintf(internal.ChannelOrderbookPartial, depth, speed))
+}
+
+func SubscriptionTypePartialOrderbookInBatch(depth WSDepthType, speed OrderBookSpeedType) SubscriptionType {
+	return SubscriptionType(fmt.Sprintf(internal.ChannelOrderbookPartialInBatch, depth, speed))
+}
+
+func SubscriptionTypeOrderbookTop(speed OrderBookSpeedType) SubscriptionType {
+	return SubscriptionType(fmt.Sprintf(internal.ChannelOrderbookTop, speed))
+}
+
+func SubscriptionTypeOrderbookTopInBatch(speed OrderBookSpeedType) SubscriptionType {
+	return SubscriptionType(fmt.Sprintf(internal.ChannelOrderbookTopInBatch, speed))
+}
+
+func Subscription(val SubscriptionType) Argument {
+	return func(params map[string]interface{}) {
+		params[internal.ArgNameSubscription] = val
+	}
+}
+
+func Mode(val SubscriptionModeType) Argument {
+	return func(params map[string]interface{}) {
+		params[internal.ArgNameMode] = val
+	}
+}
+
+func TargetCurrency(val string) Argument {
+	return func(params map[string]interface{}) {
+		params[internal.ArgNameTargetCurrency] = val
+	}
+}
+
+func PreferredNetwork(val string) Argument {
+	return func(params map[string]interface{}) {
+		params[internal.ArgNamePrefferedNetwork] = val
+	}
+}
+
+type FeeRequest struct {
+	Currency    string `json:"currency"`
+	Amount      string `json:"amount"`
+	NetworkCode string `json:"network_code,omitempty"`
+}
+
+func FeeRequests(val []FeeRequest) Argument {
+	return func(params map[string]interface{}) {
+		params[internal.SDKArgNameFeeRequest] = val
 	}
 }
