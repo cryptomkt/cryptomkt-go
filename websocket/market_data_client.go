@@ -5,9 +5,9 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/cryptomarket/cryptomarket-go/args"
-	"github.com/cryptomarket/cryptomarket-go/internal"
-	"github.com/cryptomarket/cryptomarket-go/models"
+	"github.com/cryptomkt/cryptomkt-go/args"
+	"github.com/cryptomkt/cryptomkt-go/internal"
+	"github.com/cryptomkt/cryptomkt-go/models"
 )
 
 // PublicClient connects via websocket to cryptomarket to get market information of the exchange.

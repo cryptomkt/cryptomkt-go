@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"reflect"
 
-	"github.com/cryptomarket/cryptomarket-go/args"
-	"github.com/cryptomarket/cryptomarket-go/models"
+	"github.com/cryptomkt/cryptomkt-go/args"
+	"github.com/cryptomkt/cryptomkt-go/models"
 )
 
 type parseNotificationFnType func([]byte)

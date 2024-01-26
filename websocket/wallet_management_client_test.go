@@ -6,9 +6,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/cryptomarket/cryptomarket-go/args"
+	"github.com/cryptomkt/cryptomkt-go/args"
 
-	"github.com/cryptomarket/cryptomarket-go/rest"
+	"github.com/cryptomkt/cryptomkt-go/rest"
 )
 
 func loadWalletClient() (*WalletManagementClient, error) {

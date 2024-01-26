@@ -5,9 +5,9 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/cryptomarket/cryptomarket-go/args"
-	"github.com/cryptomarket/cryptomarket-go/internal"
-	"github.com/cryptomarket/cryptomarket-go/models"
+	"github.com/cryptomkt/cryptomkt-go/args"
+	"github.com/cryptomkt/cryptomkt-go/internal"
+	"github.com/cryptomkt/cryptomkt-go/models"
 )
 
 // SpotTradingClient connects via websocket to cryptomarket to enable the user to manage orders. uses SHA256 as auth method and authenticates automatically.

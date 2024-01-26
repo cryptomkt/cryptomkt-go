@@ -9,7 +9,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/cryptomarket/cryptomarket-go/models"
+	"github.com/cryptomkt/cryptomkt-go/models"
 )
 
 func (client *clientBase) authenticate(apiKey, apiSecret string) (err error) {

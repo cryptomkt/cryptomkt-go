@@ -1,4 +1,4 @@
-module github.com/cryptomarket/cryptomarket-go
+module github.com/cryptomkt/cryptomkt-go
 
 go 1.18
 
