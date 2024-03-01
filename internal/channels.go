@@ -1,9 +1,10 @@
 package internal
 
 const (
-	ChannelTrades    = "trades"
-	ChannelCandles   = "candles/%s"
-	ChannelPriceRate = "price/rate/%s"
+	ChannelTrades           = "trades"
+	ChannelCandles          = "candles/%s"
+	ChannelConvertedCandles = "converted/candles/%s"
+	ChannelPriceRate        = "price/rate/%s"
 
 	ChannelMiniTickerInBatch = "ticker/price/%s/batch"
 	ChannelTicker            = "ticker/%s"

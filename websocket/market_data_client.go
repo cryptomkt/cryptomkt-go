@@ -248,7 +248,7 @@ func (client *MarketDataClient) SubscribeToTrades(
 //
 // Arguments:
 //
-//	Period(PeriodType)  // Optional. A valid tick interval. 'M1' (one minute), 'M3', 'M5', 'M15', 'M30', 'H1' (one hour), 'H4', 'D1' (one day), 'D7', '1M' (one month). Default is 'M30'
+//	Period(PeriodType)  // A valid tick interval. Period1Minute, Period3Minutes, Period5Minutes, Period15Minutes, Period30Minutes, Period1Hour, Period4Hours, Period1Day, Period7Days, Period1Month. Default is Period30Minutes
 //	Symbols([]string)  // Optional. A list of symbol ids
 //	Limit(int64)  // Number of historical entries returned in the first feed. Min is 0. Max is 1000. Default is 0
 func (client *MarketDataClient) SubscribeToCandles(
@@ -259,6 +259,47 @@ func (client *MarketDataClient) SubscribeToCandles(
 		return nil, err
 	}
 	channel := fmt.Sprintf(internal.ChannelCandles, params[internal.ArgNamePeriod])
+	response, err := client.doChannelSubscription(
+		methodSubscribe,
+		channel,
+		params,
+	)
+	if err != nil {
+		return nil, err
+	}
+	return &models.Subscription[models.WSCandleFeed]{
+		NotificationCh:      convertChan[models.WSCandleFeed](response.ch),
+		Symbols:             response.symbols,
+		NotificationChannel: channel,
+	}, nil
+}
+
+// GetConvertedCandles gets candles regarding the last price converted to the target currency for all symbols or for the specified symbols
+//
+// # Candles are used for OHLC representation
+//
+// The result contains candles with non-zero volume only (no trades = no candles)
+//
+// Conversion from the symbol quote currency to the target currency is the mean of "best" bid price and "best" ask price in the order book. If there is no "best" bid of ask price, the last price is returned.
+//
+// # Requires no API key Access Rights
+//
+// https://api.exchange.cryptomkt.com/#candles
+//
+// Arguments:
+//
+//	TargetCurrency(string)  // Target currency for conversion
+//	Symbols([]string)  // A list of symbol ids. If empty then gets for all symbols
+//	Period(PeriodType)  // A valid tick interval. Period1Minute, Period3Minutes, Period5Minutes, Period15Minutes, Period30Minutes, Period1Hour, Period4Hours, Period1Day, Period7Days, Period1Month. Default is Period30Minutes
+//	Limit(int)  // Optional. Prices per currency pair. Defaul is 10. Min is 1. Max is 1000
+func (client *MarketDataClient) SubscribeToConvertedCandles(
+	arguments ...args.Argument,
+) (subscription *models.Subscription[models.WSCandleFeed], err error) {
+	params, err := args.BuildParams(arguments, internal.ArgNameSymbols, internal.ArgNamePeriod, internal.ArgNameTargetCurrency)
+	if err != nil {
+		return nil, err
+	}
+	channel := fmt.Sprintf(internal.ChannelConvertedCandles, params[internal.ArgNamePeriod])
 	response, err := client.doChannelSubscription(
 		methodSubscribe,
 		channel,

@@ -2,15 +2,16 @@ package rest
 
 const (
 	// public endpoints
-	endpointCurrency     = "public/currency"
-	endpointSymbol       = "public/symbol"
-	endpointTicker       = "public/ticker"
-	endpointPrices       = "public/price/rate"
-	endpointPriceHistory = "public/price/history"
-	endpointPriceTicker  = "public/price/ticker"
-	endpointTrade        = "public/trades"
-	endpointOrderbook    = "public/orderbook"
-	endpointCandle       = "public/candles"
+	endpointCurrency         = "public/currency"
+	endpointSymbol           = "public/symbol"
+	endpointTicker           = "public/ticker"
+	endpointPrices           = "public/price/rate"
+	endpointPriceHistory     = "public/price/history"
+	endpointPriceTicker      = "public/price/ticker"
+	endpointTrade            = "public/trades"
+	endpointOrderbook        = "public/orderbook"
+	endpointCandles          = "public/candles"
+	endpointConvertedCandles = "public/converted/candles"
 	// trading endpoints
 	endpointTradingBalance    = "spot/balance"
 	endpointOrder             = "spot/order"

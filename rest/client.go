@@ -198,7 +198,7 @@ func (client *Client) handleResponseData(
 //
 // Arguments:
 //
-//	Currencies([]CurrenciesType)  // Optional. A list of currencies ids
+//	Currencies([]CurrenciesType)  // Optional. A list of currencies ids. If empty gets for all currencies
 //	PreferredNetwork(String) // Optional. Code of the default network of the currency
 func (client *Client) GetCurrencies(
 	ctx context.Context,
@@ -228,7 +228,7 @@ func (client *Client) GetCurrency(
 	}
 	err = client.publicGet(
 		ctx,
-		endpointCurrency+"/"+params["currency"].(string),
+		endpointCurrency+"/"+params[internal.ArgNameCurrency].(string),
 		nil,
 		&result,
 	)
@@ -245,7 +245,7 @@ func (client *Client) GetCurrency(
 //
 // Arguments:
 //
-//	Symbols([]string)  // Optional. A list of symbol ids
+//	Symbols([]string)  // Optional. A list of symbol ids. If empty then gets for all symbols
 func (client *Client) GetSymbols(
 	ctx context.Context,
 	arguments ...args.Argument,
@@ -276,7 +276,7 @@ func (client *Client) GetSymbol(
 	}
 	err = client.publicGet(
 		ctx,
-		endpointSymbol+"/"+params["symbol"].(string),
+		endpointSymbol+"/"+params[internal.ArgNameSymbol].(string),
 		nil,
 		&result,
 	)
@@ -291,7 +291,7 @@ func (client *Client) GetSymbol(
 //
 // Arguments:
 //
-//	Symbols([]string)  // Optional. A list of symbol ids
+//	Symbols([]string)  // Optional. A list of symbol ids. If empty then gets for all symbols
 func (client *Client) GetTickers(
 	ctx context.Context,
 	arguments ...args.Argument,
@@ -320,7 +320,7 @@ func (client *Client) GetTickerOfSymbol(
 	}
 	err = client.publicGet(
 		ctx,
-		endpointTicker+"/"+params["symbol"].(string),
+		endpointTicker+"/"+params[internal.ArgNameSymbol].(string),
 		nil,
 		&result,
 	)
@@ -384,7 +384,7 @@ func (client *Client) GetPricesHistory(
 //
 // Arguments:
 //
-//	Symbols([]string)  // Optional. A list of symbol ids
+//	Symbols([]string)  // Optional. A list of symbol ids. If empty then gets for all symbols
 func (client *Client) GetTickerLastPrices(
 	ctx context.Context,
 	arguments ...args.Argument,
@@ -416,7 +416,7 @@ func (client *Client) GetTickerLastPricesOfSymbol(
 	}
 	err = client.publicGet(
 		ctx,
-		endpointPriceTicker+"/"+params["symbol"].(string),
+		endpointPriceTicker+"/"+params[internal.ArgNameSymbol].(string),
 		params,
 		&result,
 	)
@@ -433,7 +433,7 @@ func (client *Client) GetTickerLastPricesOfSymbol(
 //
 // Arguments:
 //
-//	Symbols([]string)  // Optional. A list of symbol ids
+//	Symbols([]string)  // Optional. A list of symbol ids. If empty then gets for all symbols
 //	SortBy(SortByType)  // Optional. Sorting parameter. SortByID or SortByTimestamp. Default is SortByTimestamp
 //	Sort(SortType)  // Optional. Sort direction. SortASC or SortDESC. Default is SortDESC
 //	From(string)  // Optional. Initial value of the queried interval
@@ -473,7 +473,7 @@ func (client *Client) GetTradesOfSymbol(
 	}
 	err = client.publicGet(
 		ctx,
-		endpointTrade+"/"+params["symbol"].(string),
+		endpointTrade+"/"+params[internal.ArgNameSymbol].(string),
 		params,
 		&result,
 	)
@@ -490,7 +490,7 @@ func (client *Client) GetTradesOfSymbol(
 //
 // Arguments:
 //
-//	Symbols([]string)  // Optional. A list of symbol ids
+//	Symbols([]string)  // Optional. A list of symbol ids. If empty then gets for all symbols
 //	Depth(int)  // Optional. Order Book depth. Default value is 100. Set to 0 to view the full Order Book
 func (client *Client) GetOrderbooks(
 	ctx context.Context,
@@ -536,7 +536,7 @@ func (client *Client) GetOrderBookOfSymbol(
 	}
 	err = client.publicGet(
 		ctx,
-		endpointOrderbook+"/"+params["symbol"].(string),
+		endpointOrderbook+"/"+params[internal.ArgNameSymbol].(string),
 		params,
 		&response,
 	)
@@ -576,7 +576,7 @@ func (client *Client) GetOrderBookVolumeOfSymbol(
 	}
 	err = client.publicGet(
 		ctx,
-		endpointOrderbook+"/"+params["symbol"].(string),
+		endpointOrderbook+"/"+params[internal.ArgNameSymbol].(string),
 		params,
 		&response,
 	)
@@ -587,7 +587,7 @@ func (client *Client) GetOrderBookVolumeOfSymbol(
 
 // GetCandles gets a map of candles for all symbols or for specified symbols
 //
-// # Candels are used for OHLC representation
+// # Candles are used for OHLC representation
 //
 // The result contains candles with non-zero volume only (no trades = no candles)
 //
@@ -597,7 +597,7 @@ func (client *Client) GetOrderBookVolumeOfSymbol(
 //
 // Arguments:
 //
-//	Symbols([]string)  // A list of symbol ids
+//	Symbols([]string)  // Optional. A list of symbol ids. If empty then gets for all symbols
 //	Period(PeriodType)  // Optional. A valid tick interval. Period1Minute, Period3Minutes, Period5Minutes, Period15Minutes, Period30Minutes, Period1Hour, Period4Hours, Period1Day, Period7Days, Period1Month. Default is Period30Minutes
 //	Sort(SortType)  // Optional. Sort direction. SortASC or SortDESC. Default is SortDESC
 //	From(string)  // Optional. Initial value of the queried interval. As DateTime
@@ -608,13 +608,13 @@ func (client *Client) GetCandles(
 	arguments ...args.Argument,
 ) (result map[string][]models.Candle, err error) {
 	params, _ := args.BuildParams(arguments)
-	err = client.publicGet(ctx, endpointCandle, params, &result)
+	err = client.publicGet(ctx, endpointCandles, params, &result)
 	return
 }
 
 // GetCandlesOfSymbol get candles of a symbol
 //
-// # Candels are used for OHLC representation
+// # Candles are used for OHLC representation
 //
 // The result contains candles with non-zero volume only (no trades = no candles)
 //
@@ -641,10 +641,77 @@ func (client *Client) GetCandlesOfSymbol(
 	}
 	err = client.publicGet(
 		ctx,
-		endpointCandle+"/"+params["symbol"].(string),
+		endpointCandles+"/"+params[internal.ArgNameSymbol].(string),
 		nil,
 		&result,
 	)
+	return
+}
+
+// GetConvertedCandles gets candles regarding the last price converted to the target currency for all symbols or for the specified symbols
+//
+// # Candles are used for OHLC representation
+//
+// The result contains candles with non-zero volume only (no trades = no candles)
+//
+// Conversion from the symbol quote currency to the target currency is the mean of "best" bid price and "best" ask price in the order book. If there is no "best" bid of ask price, the last price is returned.
+//
+// # Requires no API key Access Rights
+//
+// https://api.exchange.cryptomkt.com/#candles
+//
+// Arguments:
+//
+//	TargetCurrency(string)  // Target currency for conversion
+//	Symbols([]string)  // Optional. A list of symbol ids. If empty then gets for all symbols
+//	Period(PeriodType)  // Optional. A valid tick interval. Period1Minute, Period3Minutes, Period5Minutes, Period15Minutes, Period30Minutes, Period1Hour, Period4Hours, Period1Day, Period7Days, Period1Month. Default is Period30Minutes
+//	Sort(SortType)  // Optional. Sort direction. SortASC or SortDESC. Default is SortDESC
+//	From(string)  // Optional. Initial value of the queried interval. As DateTime
+//	Till(string)  // Optional. Last value of the queried interval. As DateTime
+//	Limit(int)  // Optional. Prices per currency pair. Defaul is 10. Min is 1. Max is 1000
+func (client *Client) GetConvertedCandles(
+	ctx context.Context,
+	arguments ...args.Argument,
+) (result models.ConvertedCandles, err error) {
+	params, err := args.BuildParams(arguments, internal.ArgNameTargetCurrency)
+	if err != nil {
+		return
+	}
+	err = client.publicGet(ctx, endpointConvertedCandles, params, &result)
+	return
+}
+
+// GetConvertedCandles gets candles regarding the last price converted to the target currency for the specified symbol
+//
+// # Candles are used for OHLC representation
+//
+// The result contains candles with non-zero volume only (no trades = no candles)
+//
+// Conversion from the symbol quote currency to the target currency is the mean of "best" bid price and "best" ask price in the order book. If there is no "best" bid of ask price, the last price is returned.
+//
+// # Requires no API key Access Rights
+//
+// https://api.exchange.cryptomkt.com/#candles
+//
+// Arguments:
+//
+//	TargetCurrency(string)  // Target currency for conversion
+//	Symbol(string)  // A symbol id
+//	Period(PeriodType)  // Optional. A valid tick interval. Period1Minute, Period3Minutes, Period5Minutes, Period15Minutes, Period30Minutes, Period1Hour, Period4Hours, Period1Day, Period7Days, Period1Month. Default is Period30Minutes
+//	Sort(SortType)  // Optional. Sort direction. SortASC or SortDESC. Default is SortDESC
+//	From(string)  // Optional. Initial value of the queried interval. As DateTime
+//	Till(string)  // Optional. Last value of the queried interval. As DateTime
+//	Limit(int)  // Optional. Prices per currency pair. Defaul is 10. Min is 1. Max is 1000
+//	Offset(int)  // Optional. Default is 0. Min is 0. Max is 100000
+func (client *Client) GetConvertedCandlesOfSymbol(
+	ctx context.Context,
+	arguments ...args.Argument,
+) (result models.ConvertedCandle, err error) {
+	params, err := args.BuildParams(arguments, internal.ArgNameSymbol, internal.ArgNameTargetCurrency)
+	if err != nil {
+		return
+	}
+	err = client.publicGet(ctx, endpointConvertedCandles+"/"+params[internal.ArgNameSymbol].(string), params, &result)
 	return
 }
 
@@ -728,7 +795,7 @@ func (client *Client) GetActiveSpotOrder(
 	params, _ := args.BuildParams(arguments, internal.ArgNameClientOrderID)
 	err = client.privateGet(
 		ctx,
-		endpointOrder+"/"+params["client_order_id"].(string),
+		endpointOrder+"/"+params[internal.ArgNameClientOrderID].(string),
 		nil,
 		&result,
 	)
@@ -803,7 +870,7 @@ func (client *Client) ReplaceSpotOrder(
 	if err != nil {
 		return
 	}
-	ClientOrderID := params["client_order_id"].(string)
+	ClientOrderID := params[internal.ArgNameNewClientOrderID].(string)
 	delete(params, "client_order_id")
 	err = client.patch(ctx, endpointOrder+"/"+ClientOrderID, params, &result)
 	return
@@ -898,7 +965,7 @@ func (client *Client) CancelSpotOrder(
 	}
 	err = client.delete(
 		ctx,
-		endpointOrder+"/"+params["client_order_id"].(string),
+		endpointOrder+"/"+params[internal.ArgNameClientOrderID].(string),
 		nil,
 		&result,
 	)
@@ -1049,7 +1116,7 @@ func (client *Client) GetWalletBalanceOfCurrency(
 	}
 	err = client.privateGet(
 		ctx,
-		endpointWalletBalance+"/"+params["currency"].(string),
+		endpointWalletBalance+"/"+params[internal.ArgNameCurrency].(string),
 		nil,
 		&result)
 	if err != nil {
@@ -1262,7 +1329,7 @@ func (client *Client) WithdrawCryptoCommit(
 	response := models.BooleanResponse{}
 	err = client.put(
 		ctx,
-		endpointCryptoWithdraw+"/"+params["id"].(string),
+		endpointCryptoWithdraw+"/"+params[internal.ArgNameID].(string),
 		nil,
 		&response,
 	)
@@ -1290,7 +1357,7 @@ func (client *Client) WithdrawCryptoRollback(
 	response := models.BooleanResponse{}
 	err = client.delete(
 		ctx,
-		endpointCryptoWithdraw+"/"+params["id"].(string),
+		endpointCryptoWithdraw+"/"+params[internal.ArgNameID].(string),
 		nil,
 		&response,
 	)
@@ -1564,7 +1631,7 @@ func (client *Client) GetTransaction(
 	}
 	err = client.privateGet(
 		ctx,
-		endpointTransactions+"/"+params["id"].(string),
+		endpointTransactions+"/"+params[internal.ArgNameID].(string),
 		nil,
 		&result,
 	)
