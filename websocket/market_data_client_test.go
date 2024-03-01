@@ -338,7 +338,7 @@ func TestPartialOrderbookSubscriptionOrderbookSequence(t *testing.T) {
 
 func TestPartialOrderbookInBatchesSubscription(t *testing.T) {
 	client, saver := beforeEachMarketDataTest()
-	subscription, err := client.SubscribeToPartialOrderbookInBatchers(
+	subscription, err := client.SubscribeToPartialOrderbookInBatches(
 		args.Symbols([]string{"EOSETH"}),
 		args.WSDepth(args.WSDepth10),
 		args.OrderBookSpeed(args.OrderBookSpeed1000ms),
@@ -378,7 +378,7 @@ func TestOrderbookTopSubscription(t *testing.T) {
 
 func TestOrderbookTopInBatchesSubscription(t *testing.T) {
 	client, saver := beforeEachMarketDataTest()
-	subscription, err := client.SubscribeToOrderbookTopInBatchers(
+	subscription, err := client.SubscribeToOrderbookTopInBatches(
 		args.Symbols([]string{"EOSETH"}),
 		args.OrderBookSpeed(args.OrderBookSpeed1000ms),
 	)
@@ -397,7 +397,7 @@ func TestOrderbookTopInBatchesSubscription(t *testing.T) {
 
 func TestGetActiveSubscriptions(t *testing.T) {
 	client, _ := beforeEachMarketDataTest()
-	_, err := client.SubscribeToOrderbookTopInBatchers(
+	_, err := client.SubscribeToOrderbookTopInBatches(
 		args.Symbols([]string{"EOSETH"}),
 		args.OrderBookSpeed(args.OrderBookSpeed1000ms),
 	)
@@ -421,9 +421,29 @@ func TestGetActiveSubscriptions(t *testing.T) {
 	}
 }
 
-func TestPriceRateSubscription(t *testing.T) {
+func TestPriceRatesSubscription(t *testing.T) {
 	client, saver := beforeEachMarketDataTest()
 	subscription, err := client.SubscribeToPriceRates(
+		args.PriceRateSpeed(args.PriceRateSpeed1s),
+		args.Currencies([]string{"EOS", "ETH"}),
+		args.TargetCurrency("BTC"),
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+	saver.strSaveCh() <- fmt.Sprint(subscription.Symbols)
+	go func() {
+		defer saver.close()
+		for notification := range subscription.NotificationCh {
+			saver.strSaveCh() <- fmt.Sprint(notification.Data)
+		}
+	}()
+	afterEach(t, client, saver, subscription.NotificationChannel)
+}
+
+func TestPriceRatesInBatchesSubscription(t *testing.T) {
+	client, saver := beforeEachMarketDataTest()
+	subscription, err := client.SubscribeToPriceRatesInBatches(
 		args.PriceRateSpeed(args.PriceRateSpeed1s),
 		args.Currencies([]string{"EOS", "ETH"}),
 		args.TargetCurrency("BTC"),

@@ -555,7 +555,7 @@ func (client *MarketDataClient) SubscribeToPartialOrderbook(
 //	OrderBookSpeed(OrderBookSpeedType)  // The speed of the feed. OrderBookSpeedType100ms, OrderBookSpeedType500ms or OrderBookSpeedType1000ms
 //	WSDepth(WSDepthType)  // The depth of the partial orderbook, WSDepth5, WSDepth10 or WSDepth20
 //	Symbols([]string)  // Optional. A list of symbol ids
-func (client *MarketDataClient) SubscribeToPartialOrderbookInBatchers(
+func (client *MarketDataClient) SubscribeToPartialOrderbookInBatches(
 	arguments ...args.Argument,
 ) (subscription *models.Subscription[models.WSOrderbookFeed], err error) {
 	params, err := args.BuildParams(arguments, internal.ArgNameSpeed)
@@ -631,7 +631,7 @@ func (client *MarketDataClient) SubscribeToOrderbookTop(
 //
 //	OrderBookSpeed(OrderBookSpeedType)  // The speed of the feed. OrderBookSpeedType100ms, OrderBookSpeedType500ms or OrderBookSpeedType1000ms
 //	Symbols([]string)  // Optional. A list of symbol ids
-func (client *MarketDataClient) SubscribeToOrderbookTopInBatchers(
+func (client *MarketDataClient) SubscribeToOrderbookTopInBatches(
 	arguments ...args.Argument,
 ) (subscription *models.Subscription[models.OrderbookTopFeed], err error) {
 	params, err := args.BuildParams(arguments, internal.ArgNameSpeed)
@@ -664,8 +664,8 @@ func (client *MarketDataClient) SubscribeToOrderbookTopInBatchers(
 // Arguments:
 //
 //	PriceRateSpeed(TickerSpeedType)  // The speed of the feed. PriceRateSpeed1s or PriceRateSpeed3s
-//	Currencies([]CurrenciesType)  // Optional. A list of currencies ids for the base currencies for the price rates
-//	TargetCurrency(String) quote currency for the price rates
+//	Currencies([]string)  // Optional. A list of currencies ids for the base currencies for the price rates
+//	TargetCurrency(string) quote currency for the price rates
 func (client *MarketDataClient) SubscribeToPriceRates(
 	arguments ...args.Argument,
 ) (subscription *models.Subscription[models.PriceFeed], err error) {
@@ -674,7 +674,40 @@ func (client *MarketDataClient) SubscribeToPriceRates(
 		return nil, err
 	}
 	addAsteriscIfNoCurrencies(&params)
-	subscriptionCh := fmt.Sprintf(internal.ChannelPriceRate, params[internal.ArgNameSpeed])
+	subscriptionCh := fmt.Sprintf(internal.ChannelPriceRates, params[internal.ArgNameSpeed])
+	response, err := client.doChannelSubscription(methodSubscribe, subscriptionCh, params)
+	if err != nil {
+		return nil, err
+	}
+	return &models.Subscription[models.PriceFeed]{
+		NotificationCh:      convertChan[models.PriceFeed](response.ch),
+		Symbols:             response.symbols,
+		NotificationChannel: subscriptionCh,
+	}, nil
+}
+
+// SubscribeToPriceRates subscribe to a feed of price rates.
+//
+// subscription is for all currencies or specified currencies (bases), against a target currency (quote). indexed by currency id (bases)
+//
+// batch subscriptions have a joined update for all currencies
+//
+// https://api.exchange.cryptomkt.com/#subscribe-to-price-rates
+//
+// Arguments:
+//
+//	PriceRateSpeed(TickerSpeedType)  // The speed of the feed. PriceRateSpeed1s or PriceRateSpeed3s
+//	Currencies([]string)  // Optional. A list of currencies ids for the base currencies for the price rates
+//	TargetCurrency(string) quote currency for the price rates
+func (client *MarketDataClient) SubscribeToPriceRatesInBatches(
+	arguments ...args.Argument,
+) (subscription *models.Subscription[models.PriceFeed], err error) {
+	params, err := args.BuildParams(arguments, internal.ArgNameSpeed, internal.ArgNameTargetCurrency)
+	if err != nil {
+		return nil, err
+	}
+	addAsteriscIfNoCurrencies(&params)
+	subscriptionCh := fmt.Sprintf(internal.ChannelPriceRatesInBatches, params[internal.ArgNameSpeed])
 	response, err := client.doChannelSubscription(methodSubscribe, subscriptionCh, params)
 	if err != nil {
 		return nil, err
