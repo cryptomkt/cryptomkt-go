@@ -706,7 +706,7 @@ func (client *Client) GetConvertedCandles(
 func (client *Client) GetConvertedCandlesOfSymbol(
 	ctx context.Context,
 	arguments ...args.Argument,
-) (result models.ConvertedCandle, err error) {
+) (result models.ConvertedCandlesOfSymbol, err error) {
 	params, err := args.BuildParams(arguments, internal.ArgNameSymbol, internal.ArgNameTargetCurrency)
 	if err != nil {
 		return
