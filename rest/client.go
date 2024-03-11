@@ -681,7 +681,7 @@ func (client *Client) GetConvertedCandles(
 	return
 }
 
-// GetConvertedCandles gets candles regarding the last price converted to the target currency for the specified symbol
+// GetConvertedCandlesOfSymbol gets candles regarding the last price converted to the target currency for the specified symbol
 //
 // # Candles are used for OHLC representation
 //
@@ -870,7 +870,7 @@ func (client *Client) ReplaceSpotOrder(
 	if err != nil {
 		return
 	}
-	ClientOrderID := params[internal.ArgNameNewClientOrderID].(string)
+	ClientOrderID := params[internal.ArgNameClientOrderID].(string)
 	delete(params, "client_order_id")
 	err = client.patch(ctx, endpointOrder+"/"+ClientOrderID, params, &result)
 	return

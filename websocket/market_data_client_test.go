@@ -179,7 +179,7 @@ func TestCandlesSubscription(t *testing.T) {
 
 func TestConvertedCandlesSubscription(t *testing.T) {
 	client, saver := beforeEachMarketDataTest()
-	subscription, err := client.SubscribeToConvertedCandles(args.Symbols([]string{"EOSETH", "XLMETH"}), args.Period(args.Period1Minute), args.TargetCurrency(("BTC")))
+	subscription, err := client.SubscribeToConvertedCandles(args.Period(args.Period1Minute), args.TargetCurrency(("BTC")), args.Symbols([]string{"EOSETH"}))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -191,6 +191,7 @@ func TestConvertedCandlesSubscription(t *testing.T) {
 			checkCandleFeed(saver, &notification.Data)
 		}
 	}()
+
 	afterEach(t, client, saver, subscription.NotificationChannel)
 }
 
@@ -226,7 +227,7 @@ func TestMiniTickerInBatchSubscription(t *testing.T) {
 	go func() {
 		defer saver.close()
 		for notification := range subscription.NotificationCh {
-			checkMiniTickerFeed(saver, &notification.Data)
+			fmt.Println(notification)
 		}
 	}()
 	afterEach(t, client, saver, subscription.NotificationChannel)

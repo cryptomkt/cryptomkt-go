@@ -89,6 +89,22 @@ func (client *SpotTradingClient) GetSpotTradingBalanceOfCurrency(
 	return &resp.Result, nil
 }
 
+// GetSpotTradingBalanceByCurrency is an alias of GetSpotTradingBalanceOfCurrency
+func (client *SpotTradingClient) GetSpotTradingBalanceByCurrency(
+	ctx context.Context,
+	arguments ...args.Argument,
+) (*models.Balance, error) {
+	return client.GetSpotTradingBalanceOfCurrency(ctx, arguments...)
+}
+
+// GetSpotTradingBalance is an alias of GetSpotTradingBalanceOfCurrency
+func (client *SpotTradingClient) GetSpotTradingBalance(
+	ctx context.Context,
+	arguments ...args.Argument,
+) (*models.Balance, error) {
+	return client.GetSpotTradingBalanceOfCurrency(ctx, arguments...)
+}
+
 // GetActiveSpotOrders gets the user's active spot orders
 //
 // https://api.exchange.cryptomkt.com/#get-all-active-spot-orders

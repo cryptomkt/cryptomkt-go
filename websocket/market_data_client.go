@@ -248,7 +248,7 @@ func (client *MarketDataClient) SubscribeToTrades(
 //
 // Arguments:
 //
-//	Period(PeriodType)  // A valid tick interval. Period1Minute, Period3Minutes, Period5Minutes, Period15Minutes, Period30Minutes, Period1Hour, Period4Hours, Period1Day, Period7Days, Period1Month. Default is Period30Minutes
+//	Period(PeriodType)  // A valid tick interval. Period1Minute, Period3Minutes, Period5Minutes, Period15Minutes, Period30Minutes, Period1Hour, Period4Hours, Period1Day, Period7Days, Period1Month.
 //	Symbols([]string)  // Optional. A list of symbol ids
 //	Limit(int64)  // Number of historical entries returned in the first feed. Min is 0. Max is 1000. Default is 0
 func (client *MarketDataClient) SubscribeToCandles(
@@ -274,7 +274,9 @@ func (client *MarketDataClient) SubscribeToCandles(
 	}, nil
 }
 
-// GetConvertedCandles gets candles regarding the last price converted to the target currency for all symbols or for the specified symbols
+// SubscribeToConvertedCandles subscribes to a feed of candles regarding the last price converted to the target currency for the specified symbols
+//
+// subscription is only for the specified symbols
 //
 // # Candles are used for OHLC representation
 //
@@ -290,12 +292,12 @@ func (client *MarketDataClient) SubscribeToCandles(
 //
 //	TargetCurrency(string)  // Target currency for conversion
 //	Symbols([]string)  // A list of symbol ids. If empty then gets for all symbols
-//	Period(PeriodType)  // A valid tick interval. Period1Minute, Period3Minutes, Period5Minutes, Period15Minutes, Period30Minutes, Period1Hour, Period4Hours, Period1Day, Period7Days, Period1Month. Default is Period30Minutes
+//	Period(PeriodType)  // A valid tick interval. Period1Minute, Period3Minutes, Period5Minutes, Period15Minutes, Period30Minutes, Period1Hour, Period4Hours, Period1Day, Period7Days, Period1Month.
 //	Limit(int)  // Optional. Prices per currency pair. Defaul is 10. Min is 1. Max is 1000
 func (client *MarketDataClient) SubscribeToConvertedCandles(
 	arguments ...args.Argument,
 ) (subscription *models.Subscription[models.WSCandleFeed], err error) {
-	params, err := args.BuildParams(arguments, internal.ArgNameSymbols, internal.ArgNamePeriod, internal.ArgNameTargetCurrency)
+	params, err := args.BuildParams(arguments, internal.ArgNamePeriod, internal.ArgNameTargetCurrency, internal.ArgNameSymbols)
 	if err != nil {
 		return nil, err
 	}
@@ -317,7 +319,7 @@ func (client *MarketDataClient) SubscribeToConvertedCandles(
 
 // SubscribeToMiniTicker subscribe to a feed of mini tickers
 //
-// subscription is for all symbols or for the specified symbols
+// subscription is for the specified symbols
 //
 // normal subscriptions have one update message per symbol
 //

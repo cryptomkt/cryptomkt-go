@@ -85,6 +85,7 @@ func TestOrderFlow(t *testing.T) {
 	if err = checkOrder(order); err != nil {
 		t.Fatal(err)
 	}
+	time.Sleep(4 * time.Second)
 	newClientOrderID := strconv.FormatInt(time.Now().UnixMicro(), 10)
 	order, err = client.ReplaceSpotOrder(bg,
 		args.ClientOrderID(order.ClientOrderID),
