@@ -352,6 +352,13 @@ func (client *SpotTradingClient) GetSpotFee(
 	return &resp.Result, nil
 }
 
+func (client *SpotTradingClient) GetSpotTradingFee(
+	ctx context.Context,
+	arguments ...args.Argument,
+) (*models.TradingCommission, error) {
+	return client.GetSpotFee(ctx, arguments...)
+}
+
 ///////////////////
 // Subscriptions //
 ///////////////////

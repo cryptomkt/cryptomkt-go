@@ -17,8 +17,24 @@ func (client *Client) GetTickerBySymbol(
 	return client.GetTickerOfSymbol(ctx, arguments...)
 }
 
+// GetTicker is an alias of GetTickerOfSymbol
+func (client *Client) GetTicker(
+	ctx context.Context,
+	arguments ...args.Argument,
+) (result *models.Ticker, err error) {
+	return client.GetTickerOfSymbol(ctx, arguments...)
+}
+
 // GetTickerLastPricesBySymbol is an alias of GetTickerLastPricesOfSymbol
 func (client *Client) GetTickerLastPricesBySymbol(
+	ctx context.Context,
+	arguments ...args.Argument,
+) (result *models.Price, err error) {
+	return client.GetTickerLastPricesOfSymbol(ctx, arguments...)
+}
+
+// GetTickerLastPrice is an alias of GetTickerLastPricesOfSymbol
+func (client *Client) GetTickerLastPrice(
 	ctx context.Context,
 	arguments ...args.Argument,
 ) (result *models.Price, err error) {
@@ -41,8 +57,24 @@ func (client *Client) GetOrderBookBySymbol(
 	return client.GetOrderBookOfSymbol(ctx, arguments...)
 }
 
+// GetOrderBook is an alias of GetOrderBookOfSymbol
+func (client *Client) GetOrderBook(
+	ctx context.Context,
+	arguments ...args.Argument,
+) (result *models.OrderBook, err error) {
+	return client.GetOrderBookOfSymbol(ctx, arguments...)
+}
+
 // GetOrderBookVolumeBySymbol is an alias of GetOrderBookVolumeOfSymbol
 func (client *Client) GetOrderBookVolumeBySymbol(
+	ctx context.Context,
+	arguments ...args.Argument,
+) (result *models.OrderBook, err error) {
+	return client.GetOrderBookVolumeOfSymbol(ctx, arguments...)
+}
+
+// GetOrderBookVolume is an alias of GetOrderBookVolumeOfSymbol
+func (client *Client) GetOrderBookVolume(
 	ctx context.Context,
 	arguments ...args.Argument,
 ) (result *models.OrderBook, err error) {

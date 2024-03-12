@@ -286,7 +286,7 @@ func (client *MarketDataClient) SubscribeToCandles(
 //
 // # Requires no API key Access Rights
 //
-// https://api.exchange.cryptomkt.com/#candles
+// https://api.exchange.cryptomkt.com/#subscribe-to-converted-candles
 //
 // Arguments:
 //
