@@ -3,7 +3,7 @@ package rest
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"os"
 
 	"github.com/cryptomkt/cryptomkt-go/v3/models"
 )
@@ -14,7 +14,7 @@ type APIKeys struct {
 }
 
 func LoadKeys() (apiKeys APIKeys) {
-	data, err := ioutil.ReadFile("../../../keys.json")
+	data, err := os.ReadFile("../../../keys.json")
 	if err != nil {
 		fmt.Print(err)
 	}
@@ -250,26 +250,6 @@ func checkTransaction(model *models.Transaction) (err error) {
 		"type":      model.Type,
 		"createdAt": model.CreatedAt,
 		"updatedAt": model.UpdatedAt,
-	}
-	err = checkFields(fields)
-	return
-}
-
-func checkReport(model *models.Report) (err error) {
-	fields := map[string]interface{}{
-		"id":            model.ID,
-		"clientOrderId": model.ClientOrderID,
-		"symbol":        model.Symbol,
-		"side":          model.Side,
-		"status":        model.Status,
-		"type":          model.OrderType,
-		"timeInForce":   model.TimeInForce,
-		"quantity":      model.Quantity,
-		"price":         model.Price,
-		"cumQuantity":   model.QuantityCumulative,
-		"createdAt":     model.CreatedAt,
-		"updatedAt":     model.UpdatedAt,
-		"report type":   model.ReportType,
 	}
 	err = checkFields(fields)
 	return

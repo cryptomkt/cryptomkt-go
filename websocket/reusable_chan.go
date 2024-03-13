@@ -24,10 +24,6 @@ func (reusableChan *reusableChan) send(data []byte) {
 	}
 	reusableChan.callCount--
 	reusableChan.channel <- data
-	if reusableChan.isDone() {
-		reusableChan.closed = true
-		reusableChan.close()
-	}
 }
 
 func (reusableChan *reusableChan) close() {
