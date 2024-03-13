@@ -442,3 +442,58 @@ func TestGetCandlesOfSymbol(t *testing.T) {
 		t.Error(result)
 	})
 }
+
+func TestGetConvertedCandles(t *testing.T) {
+	client := NewPublicClient()
+	t.Run("from all symbols, no arguments", func(t *testing.T) {
+		result, err := client.GetConvertedCandles(context.Background(), args.TargetCurrency("BTC"))
+		if err != nil {
+			t.Fatal(err)
+			return
+		}
+		for _, candles := range result.Data {
+			for _, candle := range candles {
+				if err = checkCandle(&candle); err != nil {
+					t.Fatal(err)
+				}
+			}
+		}
+	})
+	t.Run("from some symbols, limit at 2", func(t *testing.T) {
+		result, err := client.GetConvertedCandles(context.Background(), args.Symbols([]string{"EOSETH", "ETHBTC"}), args.Limit(2), args.TargetCurrency("ETH"))
+		if err != nil {
+			t.Fatal(err)
+			return
+		}
+		for _, candles := range result.Data {
+			for _, candle := range candles {
+				if err = checkCandle(&candle); err != nil {
+					t.Fatal(err)
+				}
+			}
+		}
+	})
+}
+
+func TestGetConvertedCandlesOfSymbol(t *testing.T) {
+	client := NewPublicClient()
+	t.Run("from valid symbol", func(t *testing.T) {
+		result, err := client.GetConvertedCandlesOfSymbol(context.Background(), args.Symbol("EOSETH"), args.Limit(2), args.TargetCurrency("ETH"))
+		if err != nil {
+			t.Fatal(err)
+			return
+		}
+		for _, candle := range result.Data {
+			if err = checkCandle(&candle); err != nil {
+				t.Fatal(err)
+			}
+		}
+	})
+	t.Run("from invalid symbol", func(t *testing.T) {
+		result, err := client.GetConvertedCandlesOfSymbol(context.Background(), args.Symbol("orange"))
+		if err != nil {
+			return
+		}
+		t.Error(result)
+	})
+}

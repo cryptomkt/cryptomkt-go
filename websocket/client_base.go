@@ -23,6 +23,9 @@ func (client *clientBase) handle(rcvCh chan []byte) {
 		json.Unmarshal(data, &resp)
 		if reusableCh, ok := client.chanCache.getChan(resp.ID); ok {
 			reusableCh.send(data)
+			if reusableCh.isDone() {
+				client.chanCache.closeAndRemoveCh(resp.ID)
+			}
 			continue
 		}
 		if key, ok := getSubscriptionKey(resp); ok {

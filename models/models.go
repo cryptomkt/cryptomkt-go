@@ -244,6 +244,15 @@ type Candle struct {
 	VolumeQuote string `json:"volume_quote"`
 }
 
+type ConvertedCandles struct {
+	TargetCurrency string              `json:"target_currency"`
+	Data           map[string][]Candle `json:"data"`
+}
+type ConvertedCandlesOfSymbol struct {
+	TargetCurrency string   `json:"target_currency"`
+	Data           []Candle `json:"data"`
+}
+
 type Ticker struct {
 	Timestamp   string `json:"timestamp"`
 	Open        string `json:"open"`

@@ -2,6 +2,7 @@ package rest
 
 import (
 	"context"
+	"fmt"
 	"testing"
 
 	"github.com/cryptomkt/cryptomkt-go/v3/args"

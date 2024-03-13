@@ -89,6 +89,22 @@ func (client *WalletManagementClient) GetWalletBalanceOfCurrency(
 	return &resp.Result, nil
 }
 
+// GetWalletBalanceByCurrency is an alias of GetWalletBalanceOfCurrency
+func (client *WalletManagementClient) GetWalletBalanceByCurrency(
+	ctx context.Context,
+	arguments ...args.Argument,
+) (*models.Balance, error) {
+	return client.GetWalletBalanceOfCurrency(ctx, arguments...)
+}
+
+// GetWalletBalance is an alias of GetWalletBalanceOfCurrency
+func (client *WalletManagementClient) GetWalletBalance(
+	ctx context.Context,
+	arguments ...args.Argument,
+) (*models.Balance, error) {
+	return client.GetWalletBalanceOfCurrency(ctx, arguments...)
+}
+
 // GetTransactions gets the transactions of the account
 //
 // Important:
