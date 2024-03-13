@@ -16,7 +16,6 @@ func beforeEach() (*Client, context.Context) {
 func TestGetWalletBalances(t *testing.T) {
 	client, bg := beforeEach()
 	result, err := client.GetWalletBallances(bg)
-	fmt.Println(result)
 	if err != nil {
 		t.Fatal(err)
 	}
