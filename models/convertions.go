@@ -10,7 +10,7 @@ func FromOrderbookJsonToOrderbook(obJson OrderBookJson) OrderBook {
 	}
 	bids := make([]BookLevel, 0, len(obJson.Bid))
 	for _, level := range obJson.Bid {
-		bids = append(asks, BookLevel{
+		bids = append(bids, BookLevel{
 			Price:  level[0],
 			Amount: level[1],
 		})
