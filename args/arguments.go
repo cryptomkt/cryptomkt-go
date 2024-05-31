@@ -96,6 +96,12 @@ func BuildQuery(params map[string]interface{}) string {
 	return query.Encode()
 }
 
+func Parameter(key string, val interface{}) Argument {
+	return func(params map[string]interface{}) {
+		params[key] = val
+	}
+}
+
 func Currencies(val []string) Argument {
 	return func(params map[string]interface{}) {
 		params[internal.ArgNameCurrencies] = val
