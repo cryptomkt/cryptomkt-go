@@ -56,6 +56,18 @@ func NewPublicClient() *Client {
 	}
 }
 
+// ChangeCredentials changes the api and secret key used by the client for authentication. effectively permitting the use of the same http connection for the comunication to the api as another user.
+func (client *Client) ChangeCredentials(apiKey, apiSecret string) {
+	client.hclient.apiKey = apiKey
+	client.hclient.apiSecret = apiSecret
+}
+
+// ChangeWindow changes the window used by the client for authentication. effectively permitting the use a diferent window per request.
+// The window is the timeout in millis on the server to respond a request. Default is 10_000. Max is 60_000.
+func (client *Client) ChangeWindow(window int) {
+	client.hclient.window = window
+}
+
 func (client *Client) publicGet(
 	ctx context.Context,
 	endpoint string,
@@ -1592,7 +1604,7 @@ func (client *Client) TransferMoneyToAnotherUser(
 //	TransactionTypes([]TransactionType)  // Optional. List of types to query. valid types are: TransactionDeposit, TransactionWithdraw, TransactionTransfer and TransactionSwap
 //	TransactionSubTypes([]TransactionSubType)  // Optional. List of subtypes to query. valid subtypes are: TransactionSubTypeUnclassified, TransactionSubTypeBlockchain,  TransactionSubTypeAffiliate,  TransactionSubtypeOffchain, TransactionSubTypeFiat, TransactionSubTypeSubAccount, TransactionSubTypeWalletToSpot, TransactionSubTypeSpotToWallet, TransactionSubTypeChainSwitchFrom and TransactionSubTypeChainSwitchTo
 //	TransactionStatuses([]TransactionStatusType)  // Optional. List of statuses to query. valid subtypes are: TransactionStatusCreated, TransactionStatusPending, TransactionStatusFailed, TransactionStatusSuccess and TransactionStatusRolledBack
-//	SortBy(SortByType)  // Optional. sorting parameter. SortByCreatedAt or SortByID. Default is SortByCreatedAt
+//	OrderBy(OrderByType)  // Optional. sorting parameter. OrderByID, OrderByCreatedAt, OrderByUpdateAt or OrderByLastActivityAt. Default is OrderByCreatedAt
 //	From(string)  // Optional. Interval initial value when ordering by CreatedAt. As Datetime.
 //	Till(string)  // Optional. Interval end value when ordering by CreatedAt. As Datetime.
 //	IDFrom(string)  // Optional. Interval initial value when ordering by id. Min is 0
@@ -1600,6 +1612,7 @@ func (client *Client) TransferMoneyToAnotherUser(
 //	Sort(SortType)  // Optional. Sort direction. SortASC or SortDESC. Default is SortDESC
 //	Limit(int)  // Optional. Transactions per query. Defaul is 100. Max is 1000
 //	Offset(int)  // Optional. Default is 0. Max is 100000
+//	GroupTransactions(bool) // Optional. Flag indicating whether the returned transactions will be parts of a single operation. Default is False
 func (client *Client) GetTransactionHistory(
 	ctx context.Context,
 	arguments ...args.Argument,

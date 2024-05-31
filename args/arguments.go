@@ -132,6 +132,12 @@ func SortBy(val SortByType) Argument {
 	}
 }
 
+func OrderBy(val OrderByType) Argument {
+	return func(params map[string]interface{}) {
+		params[internal.ArgNameOrderBy] = val
+	}
+}
+
 func From(val string) Argument {
 	return func(params map[string]interface{}) {
 		params[internal.ArgNameFrom] = val
@@ -591,5 +597,11 @@ type FeeRequest struct {
 func FeeRequests(val []FeeRequest) Argument {
 	return func(params map[string]interface{}) {
 		params[internal.SDKArgNameFeeRequest] = val
+	}
+}
+
+func GroupTransactions(val bool) Argument {
+	return func(params map[string]interface{}) {
+		params[internal.ArgNameGroupTransactions] = val
 	}
 }

@@ -17,26 +17,35 @@ type Currency struct {
 	QRPrefix            string    `json:"qr_prefix"`
 	CryptoPaymentIDName string    `json:"crypto_payment_id_name"`
 	CryptoExplorer      string    `json:"crypto_explorer"`
+	AccountTopOrder     int64     `json:"account_top_order"`
 	Delisted            bool      `json:"delisted"`
 	Networks            []Network `json:"networks"`
 }
 
 type Network struct {
-	Network            string `json:"network"`
-	Protocol           string `json:"protocol"`
-	Default            bool   `json:"default"`
-	PayinEnabled       bool   `json:"payin_enabled"`
-	PayoutEnabled      bool   `json:"payout_enabled"`
-	PrecisionPayout    string `json:"presicion_payout"`
-	PayoutFee          string `str:"payout_fee"`
-	PayoutIsPaymentID  bool   `json:"payout_is_payment_id"`
-	PayinPaymentID     bool   `json:"payin_payment_id"`
-	PayinConfirmations int    `json:"payin_confirmation"`
-	AddressRegex       string `json:"address_confirmation"`
-	PaymentIDRegex     string `json:"payment_id_regex"`
-	LowProcessingTime  string `json:"low_processing_time"`
-	HighProcessingTime string `json:"high_processing_time"`
-	AvgProcessingTime  string `json:"avg_processing_time"`
+	Code                string            `json:"code"`
+	Network             string            `json:"network"`
+	NetworkName         string            `json:"network_name"`
+	IsEnsAvailable      bool              `json:"is_ens_available"`
+	Protocol            string            `json:"protocol"`
+	Default             bool              `json:"default"`
+	PayinEnabled        bool              `json:"payin_enabled"`
+	PayoutEnabled       bool              `json:"payout_enabled"`
+	PrecisionPayout     string            `json:"presicion_payout"`
+	PayoutFee           string            `json:"payout_fee"`
+	PayoutIsPaymentID   bool              `json:"payout_is_payment_id"`
+	PayinPaymentID      bool              `json:"payin_payment_id"`
+	PayinConfirmations  int               `json:"payin_confirmation"`
+	AddressRegex        string            `json:"address_confirmation"`
+	PaymentIDRegex      string            `json:"payment_id_regex"`
+	LowProcessingTime   string            `json:"low_processing_time"`
+	HighProcessingTime  string            `json:"high_processing_time"`
+	AvgProcessingTime   string            `json:"avg_processing_time"`
+	CryptoPaymentIdName string            `json:"crypto_payment_id_name"`
+	CryptoExplorer      string            `json:"crypto_explorer"`
+	ContractAddress     string            `json:"contract_address"`
+	IsMultiChain        bool              `json:"is_multichain"`
+	AssetId             map[string]string `json:"asset_id"`
 }
 
 // Balance is the amount of currency a user have
@@ -172,14 +181,16 @@ type Trade struct {
 // Transaction is a movement of currency,
 // not in the market, but related on the exchange
 type Transaction struct {
-	ID        int64                       `json:"id"`
-	Status    args.TransactionStatusType  `json:"status"`
-	Type      args.TransactionTypeType    `json:"type"`
-	SubType   args.TransactionSubTypeType `json:"subtype"`
-	CreatedAt string                      `json:"created_at"`
-	UpdatedAt string                      `json:"updated_at"`
-	Native    NativeTransaction           `json:"native"`
-	Meta      MetaTransaction             `json:"meta"`
+	ID             int64                       `json:"id"`
+	Status         args.TransactionStatusType  `json:"status"`
+	Type           args.TransactionTypeType    `json:"type"`
+	SubType        args.TransactionSubTypeType `json:"subtype"`
+	CreatedAt      string                      `json:"created_at"`
+	UpdatedAt      string                      `json:"updated_at"`
+	LastActivityAt string                      `json:"last_activity_at"`
+	Native         NativeTransaction           `json:"native"`
+	Meta           MetaTransaction             `json:"meta"`
+	CommitRisk     CommitRisk                  `json:"commit_risk"`
 }
 
 type NativeTransaction struct {
@@ -215,6 +226,12 @@ type MetaTransaction struct {
 	UpdatedAt         string                         `json:"updated_at"`
 	DeletedAt         string                         `json:"deleted_at"`
 	PaymentMethodType string                         `json:"payment_method_type"`
+}
+
+type CommitRisk struct {
+	Score  int  `json:"score"`
+	Rbf    bool `json:"rbf"`
+	LowFee bool `json:"low_fee"`
 }
 
 // CryptoAddress is an crypto address
