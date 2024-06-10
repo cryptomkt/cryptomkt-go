@@ -1386,7 +1386,7 @@ func (client *Client) WithdrawCryptoRollback(
 // Arguments:
 //
 //	FeeRequests([]FeeRequest) // the fees to request
-func (client *Client) GetEstimateWithdrawFees(
+func (client *Client) GetEstimateWithdrawalFees(
 	ctx context.Context,
 	arguments ...args.Argument,
 ) (result []models.Fee, err error) {
@@ -1404,7 +1404,74 @@ func (client *Client) GetEstimateWithdrawFees(
 	requestData := &RequestData{
 		cxt:                ctx,
 		method:             methodPost,
-		endpoint:           endpointEstimateWithdrawFees,
+		endpoint:           endpointEstimateWithdrawalFees,
+		urlEncodedPayload:  "",
+		jsonEncodedPayload: string(jsonData),
+		public:             privateCall,
+	}
+	err = client.doRequest(requestData, &result)
+	if err != nil {
+		return nil, err
+	}
+	return result, err
+}
+
+// GetEstimateDepositFee gets an estimate of the deposit fee
+//
+// Requires the "Payment information" API key Access Right
+//
+// https://api.exchange.cryptomkt.com/#estimate-withdraw-fee
+//
+// Arguments:
+//
+//	Currency(string)  // the currency code for deposit
+//	Amount(string)  // the expected deposit amount
+//	NetworkCode(String) // Optional. network code
+func (client *Client) GetEstimateDepositFee(
+	ctx context.Context,
+	arguments ...args.Argument,
+) (result string, err error) {
+	params, err := args.BuildParams(
+		arguments,
+		internal.ArgNameCurrency,
+		internal.ArgNameAmount,
+	)
+	if err != nil {
+		return
+	}
+	response := models.FeeResponse{}
+	err = client.privateGet(ctx, endpointEstimateDepositFee, params, &response)
+	return response.Fee, err
+}
+
+// GetEstimateWithdrawalFees gets a list of estimates of the withdrawal fee of a currency
+//
+// Requires the "Payment information" API key Access Right
+//
+// https://api.exchange.cryptomkt.com/#estimate-withdrawal-fees
+//
+// Arguments:
+//
+//	FeeRequests([]FeeRequest) // the fees to request
+func (client *Client) GetBulkEstimateDepositFees(
+	ctx context.Context,
+	arguments ...args.Argument,
+) (result []models.Fee, err error) {
+	params, err := args.BuildParams(
+		arguments,
+		internal.SDKArgNameFeeRequest,
+	)
+	if err != nil {
+		return
+	}
+	jsonData, err := json.Marshal(params[internal.SDKArgNameFeeRequest])
+	if err != nil {
+		return nil, fmt.Errorf("CryptomarketSDKError: %v", err)
+	}
+	requestData := &RequestData{
+		cxt:                ctx,
+		method:             methodPost,
+		endpoint:           endpointBulkEstimateDepositFees,
 		urlEncodedPayload:  "",
 		jsonEncodedPayload: string(jsonData),
 		public:             privateCall,
@@ -1440,8 +1507,47 @@ func (client *Client) GetEstimateWithdrawFee(
 		return
 	}
 	response := models.FeeResponse{}
-	err = client.privateGet(ctx, endpointEstimateWithdrawFee, params, &response)
+	err = client.privateGet(ctx, endpointEstimateWithdrawalFee, params, &response)
 	return response.Fee, err
+}
+
+// GetEstimateWithdrawalFees gets a list of estimates of the withdrawal fee of a currency
+//
+// Requires the "Payment information" API key Access Right
+//
+// https://api.exchange.cryptomkt.com/#bulk-estimate-withdrawal-fee
+//
+// Arguments:
+//
+//	FeeRequests([]FeeRequest) // the fees to request
+func (client *Client) GetBulkEstimateWithdrawalFees(
+	ctx context.Context,
+	arguments ...args.Argument,
+) (result []models.Fee, err error) {
+	params, err := args.BuildParams(
+		arguments,
+		internal.SDKArgNameFeeRequest,
+	)
+	if err != nil {
+		return
+	}
+	jsonData, err := json.Marshal(params[internal.SDKArgNameFeeRequest])
+	if err != nil {
+		return nil, fmt.Errorf("CryptomarketSDKError: %v", err)
+	}
+	requestData := &RequestData{
+		cxt:                ctx,
+		method:             methodPost,
+		endpoint:           endpointBulkEstimateWithdrawalFees,
+		urlEncodedPayload:  "",
+		jsonEncodedPayload: string(jsonData),
+		public:             privateCall,
+	}
+	err = client.doRequest(requestData, &result)
+	if err != nil {
+		return nil, err
+	}
+	return result, err
 }
 
 // ConvertBetweenCurrencies Converts between currencies
@@ -1605,8 +1711,8 @@ func (client *Client) TransferMoneyToAnotherUser(
 //	TransactionSubTypes([]TransactionSubType)  // Optional. List of subtypes to query. valid subtypes are: TransactionSubTypeUnclassified, TransactionSubTypeBlockchain,  TransactionSubTypeAffiliate,  TransactionSubtypeOffchain, TransactionSubTypeFiat, TransactionSubTypeSubAccount, TransactionSubTypeWalletToSpot, TransactionSubTypeSpotToWallet, TransactionSubTypeChainSwitchFrom and TransactionSubTypeChainSwitchTo
 //	TransactionStatuses([]TransactionStatusType)  // Optional. List of statuses to query. valid subtypes are: TransactionStatusCreated, TransactionStatusPending, TransactionStatusFailed, TransactionStatusSuccess and TransactionStatusRolledBack
 //	OrderBy(OrderByType)  // Optional. sorting parameter. OrderByID, OrderByCreatedAt, OrderByUpdateAt or OrderByLastActivityAt. Default is OrderByCreatedAt
-//	From(string)  // Optional. Interval initial value when ordering by CreatedAt. As Datetime.
-//	Till(string)  // Optional. Interval end value when ordering by CreatedAt. As Datetime.
+//	From(string)  // Optional. Optional. Interval initial value (inclusive). The value type depends on orderBy
+//	Till(string)  // Optional. Interval end value (inclusive). The value type depends on orderBy
 //	IDFrom(string)  // Optional. Interval initial value when ordering by id. Min is 0
 //	IDTill(string)  // Optional. Interval end value when ordering by id. Min is 0
 //	Sort(SortType)  // Optional. Sort direction. SortASC or SortDESC. Default is SortDESC

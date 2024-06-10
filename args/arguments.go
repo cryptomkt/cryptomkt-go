@@ -598,6 +598,7 @@ type FeeRequest struct {
 	Currency    string `json:"currency"`
 	Amount      string `json:"amount"`
 	NetworkCode string `json:"network_code,omitempty"`
+	NetworkFee  string `json:"network_fee,omitempty"`
 }
 
 func FeeRequests(val []FeeRequest) Argument {

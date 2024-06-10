@@ -268,10 +268,10 @@ func checkCryptoAddress(model *models.CryptoAddress) (err error) {
 
 func checkFee(model *models.Fee) (err error) {
 	fields := map[string]interface{}{
-		"currency":    model.Currency,
-		"amount":      model.Amount,
-		"fee":         model.Fee,
-		"network fee": model.NetworkFee,
+		"currency": model.Currency,
+		"amount":   model.Amount,
+		"fee":      model.Fee,
+		// "network fee": model.NetworkFee,
 	}
 	err = checkFields(fields)
 	return
