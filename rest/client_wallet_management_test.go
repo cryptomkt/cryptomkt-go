@@ -309,6 +309,26 @@ func TestGetTransactionHistory(t *testing.T) {
 	}
 }
 
+func TestGetTransactionHistoryWithParams(t *testing.T) {
+	client, bg := beforeEach()
+	result, err := client.GetTransactionHistory(bg,
+		args.OrderBy(args.OrderByCreatedAt),
+		args.Sort(args.SortASC),
+		args.Limit(1000),
+		args.Offset(0),
+		args.Currencies([]string{}),
+		args.From("1614815872000"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(result) == 0 {
+		t.Fatal("should have transactions")
+	}
+	if err = checkList(checkTransaction, result); err != nil {
+		t.Fatal(err)
+	}
+}
+
 func TestGetTransaction(t *testing.T) {
 	client, bg := beforeEach()
 	result, err := client.GetTransactionHistory(bg, args.TransactionTypes(args.TransactionTypeDeposit))
