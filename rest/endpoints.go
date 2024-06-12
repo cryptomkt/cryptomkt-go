@@ -35,9 +35,9 @@ const (
 	endpointEstimateWithdrawalFees     = "wallet/crypto/fees/estimate"
 	endpointEstimateWithdrawalFee      = "wallet/crypto/fee/estimate"
 	endpointBulkEstimateWithdrawalFees = "wallet/crypto/fee/estimate/bulk"
-	endpointEstimateDepositFee         = "wallet/crypto/fee/deposit/estimate"
-	endpointBulkEstimateDepositFees    = "wallet/crypto/fee/deposit/estimate/bulk"
-	endpointAmountLocks                = "wallet/amount-locks"
+	// endpointEstimateDepositFee         = "wallet/crypto/fee/deposit/estimate"
+	// endpointBulkEstimateDepositFees    = "wallet/crypto/fee/deposit/estimate/bulk"
+	endpointAmountLocks = "wallet/amount-locks"
 	// sub accounts
 	endpointSubAccountList          = "sub-account"
 	endpointFreezeSubAccount        = "sub-account/freeze"
