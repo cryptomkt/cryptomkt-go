@@ -72,6 +72,31 @@ func TestGetTransactions(t *testing.T) {
 	}
 }
 
+func TestGetTransactionWithParams(t *testing.T) {
+	client, err := loadWalletClient()
+	if err != nil {
+		t.Fatal(err)
+	}
+	transactions, err := client.GetTransactions(
+		context.Background(),
+		args.OrderBy(args.OrderByCreatedAt),
+		args.Sort(args.SortASC),
+		args.Limit(1000),
+		args.Offset(0),
+		args.From("1614815872000"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(transactions) == 0 {
+		t.Fatal("should have transactions")
+	}
+	for _, transaction := range transactions {
+		if err = checkTransaction(&transaction); err != nil {
+			t.Fatal(err)
+		}
+	}
+}
+
 func TestTransactionsSubscription(t *testing.T) {
 	bg := context.Background()
 	apiKeys := LoadKeys()

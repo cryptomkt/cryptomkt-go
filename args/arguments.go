@@ -96,6 +96,12 @@ func BuildQuery(params map[string]interface{}) string {
 	return query.Encode()
 }
 
+func Parameter(key string, val interface{}) Argument {
+	return func(params map[string]interface{}) {
+		params[key] = val
+	}
+}
+
 func Currencies(val []string) Argument {
 	return func(params map[string]interface{}) {
 		params[internal.ArgNameCurrencies] = val
@@ -129,6 +135,12 @@ func Sort(val SortType) Argument {
 func SortBy(val SortByType) Argument {
 	return func(params map[string]interface{}) {
 		params[internal.ArgNameSortBy] = val
+	}
+}
+
+func OrderBy(val OrderByType) Argument {
+	return func(params map[string]interface{}) {
+		params[internal.ArgNameOrderBy] = val
 	}
 }
 
@@ -586,10 +598,17 @@ type FeeRequest struct {
 	Currency    string `json:"currency"`
 	Amount      string `json:"amount"`
 	NetworkCode string `json:"network_code,omitempty"`
+	NetworkFee  string `json:"network_fee,omitempty"`
 }
 
 func FeeRequests(val []FeeRequest) Argument {
 	return func(params map[string]interface{}) {
 		params[internal.SDKArgNameFeeRequest] = val
+	}
+}
+
+func GroupTransactions(val bool) Argument {
+	return func(params map[string]interface{}) {
+		params[internal.ArgNameGroupTransactions] = val
 	}
 }

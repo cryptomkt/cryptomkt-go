@@ -40,13 +40,22 @@ const (
 	SortDESC SortType = "DESC"
 )
 
-// SortBy is the field used for sorting lists
+// SortBy is a field used for sorting lists
 type SortByType string
 
 const (
 	SortByTimestamp SortByType = "timestamp"
 	SortByID        SortByType = "id"
-	SortByCreatedAt SortByType = "created_at"
+)
+
+// OrderBy is a field used for sorting lists
+type OrderByType string
+
+const (
+	OrderByID             OrderByType = "id"
+	OrderByCreatedAt      OrderByType = "created_at"
+	OrderByUpdateAt       OrderByType = "updated_at"
+	OrderByLastActivityAt OrderByType = "last_activity_at"
 )
 
 // PeriodType is the period of a candle

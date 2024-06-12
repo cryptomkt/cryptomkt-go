@@ -56,6 +56,18 @@ func NewPublicClient() *Client {
 	}
 }
 
+// ChangeCredentials changes the api and secret key used by the client for authentication. effectively permitting the use of the same http connection for the comunication to the api as another user.
+func (client *Client) ChangeCredentials(apiKey, apiSecret string) {
+	client.hclient.apiKey = apiKey
+	client.hclient.apiSecret = apiSecret
+}
+
+// ChangeWindow changes the window used by the client for authentication. effectively permitting the use a diferent window per request.
+// The window is the timeout in millis on the server to respond a request. Default is 10_000. Max is 60_000.
+func (client *Client) ChangeWindow(window int) {
+	client.hclient.window = window
+}
+
 func (client *Client) publicGet(
 	ctx context.Context,
 	endpoint string,
@@ -1374,7 +1386,7 @@ func (client *Client) WithdrawCryptoRollback(
 // Arguments:
 //
 //	FeeRequests([]FeeRequest) // the fees to request
-func (client *Client) GetEstimateWithdrawFees(
+func (client *Client) GetEstimateWithdrawalFees(
 	ctx context.Context,
 	arguments ...args.Argument,
 ) (result []models.Fee, err error) {
@@ -1392,7 +1404,7 @@ func (client *Client) GetEstimateWithdrawFees(
 	requestData := &RequestData{
 		cxt:                ctx,
 		method:             methodPost,
-		endpoint:           endpointEstimateWithdrawFees,
+		endpoint:           endpointEstimateWithdrawalFees,
 		urlEncodedPayload:  "",
 		jsonEncodedPayload: string(jsonData),
 		public:             privateCall,
@@ -1403,6 +1415,73 @@ func (client *Client) GetEstimateWithdrawFees(
 	}
 	return result, err
 }
+
+// // GetEstimateDepositFee gets an estimate of the deposit fee
+// //
+// // Requires the "Payment information" API key Access Right
+// //
+// // https://api.exchange.cryptomkt.com/#estimate-withdraw-fee
+// //
+// // Arguments:
+// //
+// //	Currency(string)  // the currency code for deposit
+// //	Amount(string)  // the expected deposit amount
+// //	NetworkCode(String) // Optional. network code
+// func (client *Client) GetEstimateDepositFee(
+// 	ctx context.Context,
+// 	arguments ...args.Argument,
+// ) (result string, err error) {
+// 	params, err := args.BuildParams(
+// 		arguments,
+// 		internal.ArgNameCurrency,
+// 		internal.ArgNameAmount,
+// 	)
+// 	if err != nil {
+// 		return
+// 	}
+// 	response := models.FeeResponse{}
+// 	err = client.privateGet(ctx, endpointEstimateDepositFee, params, &response)
+// 	return response.Fee, err
+// }
+
+// // // GetEstimateWithdrawalFees gets a list of estimates of the withdrawal fee of a currency
+// // //
+// // // Requires the "Payment information" API key Access Right
+// // //
+// // // https://api.exchange.cryptomkt.com/#estimate-withdrawal-fees
+// // //
+// // // Arguments:
+// // //
+// // //	FeeRequests([]FeeRequest) // the fees to request
+// // func (client *Client) GetBulkEstimateDepositFees(
+// // 	ctx context.Context,
+// // 	arguments ...args.Argument,
+// // ) (result []models.Fee, err error) {
+// // 	params, err := args.BuildParams(
+// // 		arguments,
+// // 		internal.SDKArgNameFeeRequest,
+// // 	)
+// // 	if err != nil {
+// // 		return
+// // 	}
+// // 	jsonData, err := json.Marshal(params[internal.SDKArgNameFeeRequest])
+// // 	if err != nil {
+// // 		return nil, fmt.Errorf("CryptomarketSDKError: %v", err)
+// // 	}
+// // 	requestData := &RequestData{
+// // 		cxt:                ctx,
+// // 		method:             methodPost,
+// // 		endpoint:           endpointBulkEstimateDepositFees,
+// // 		urlEncodedPayload:  "",
+// // 		jsonEncodedPayload: string(jsonData),
+// // 		public:             privateCall,
+// // 	}
+// // 	err = client.doRequest(requestData, &result)
+// // 	if err != nil {
+// // 		return nil, err
+// // 	}
+// // 	return result, err
+// // }
 
 // GetEstimateWithdrawalFee gets an estimate of the withdrawal fee
 //
@@ -1428,8 +1507,47 @@ func (client *Client) GetEstimateWithdrawFee(
 		return
 	}
 	response := models.FeeResponse{}
-	err = client.privateGet(ctx, endpointEstimateWithdrawFee, params, &response)
+	err = client.privateGet(ctx, endpointEstimateWithdrawalFee, params, &response)
 	return response.Fee, err
+}
+
+// GetEstimateWithdrawalFees gets a list of estimates of the withdrawal fee of a currency
+//
+// Requires the "Payment information" API key Access Right
+//
+// https://api.exchange.cryptomkt.com/#bulk-estimate-withdrawal-fee
+//
+// Arguments:
+//
+//	FeeRequests([]FeeRequest) // the fees to request
+func (client *Client) GetBulkEstimateWithdrawalFees(
+	ctx context.Context,
+	arguments ...args.Argument,
+) (result []models.Fee, err error) {
+	params, err := args.BuildParams(
+		arguments,
+		internal.SDKArgNameFeeRequest,
+	)
+	if err != nil {
+		return
+	}
+	jsonData, err := json.Marshal(params[internal.SDKArgNameFeeRequest])
+	if err != nil {
+		return nil, fmt.Errorf("CryptomarketSDKError: %v", err)
+	}
+	requestData := &RequestData{
+		cxt:                ctx,
+		method:             methodPost,
+		endpoint:           endpointBulkEstimateWithdrawalFees,
+		urlEncodedPayload:  "",
+		jsonEncodedPayload: string(jsonData),
+		public:             privateCall,
+	}
+	err = client.doRequest(requestData, &result)
+	if err != nil {
+		return nil, err
+	}
+	return result, err
 }
 
 // ConvertBetweenCurrencies Converts between currencies
@@ -1592,14 +1710,15 @@ func (client *Client) TransferMoneyToAnotherUser(
 //	TransactionTypes([]TransactionType)  // Optional. List of types to query. valid types are: TransactionDeposit, TransactionWithdraw, TransactionTransfer and TransactionSwap
 //	TransactionSubTypes([]TransactionSubType)  // Optional. List of subtypes to query. valid subtypes are: TransactionSubTypeUnclassified, TransactionSubTypeBlockchain,  TransactionSubTypeAffiliate,  TransactionSubtypeOffchain, TransactionSubTypeFiat, TransactionSubTypeSubAccount, TransactionSubTypeWalletToSpot, TransactionSubTypeSpotToWallet, TransactionSubTypeChainSwitchFrom and TransactionSubTypeChainSwitchTo
 //	TransactionStatuses([]TransactionStatusType)  // Optional. List of statuses to query. valid subtypes are: TransactionStatusCreated, TransactionStatusPending, TransactionStatusFailed, TransactionStatusSuccess and TransactionStatusRolledBack
-//	SortBy(SortByType)  // Optional. sorting parameter. SortByCreatedAt or SortByID. Default is SortByCreatedAt
-//	From(string)  // Optional. Interval initial value when ordering by CreatedAt. As Datetime.
-//	Till(string)  // Optional. Interval end value when ordering by CreatedAt. As Datetime.
+//	OrderBy(OrderByType)  // Optional. sorting parameter. OrderByID, OrderByCreatedAt, OrderByUpdateAt or OrderByLastActivityAt. Default is OrderByCreatedAt
+//	From(string)  // Optional. Optional. Interval initial value (inclusive). The value type depends on orderBy
+//	Till(string)  // Optional. Interval end value (inclusive). The value type depends on orderBy
 //	IDFrom(string)  // Optional. Interval initial value when ordering by id. Min is 0
 //	IDTill(string)  // Optional. Interval end value when ordering by id. Min is 0
 //	Sort(SortType)  // Optional. Sort direction. SortASC or SortDESC. Default is SortDESC
 //	Limit(int)  // Optional. Transactions per query. Defaul is 100. Max is 1000
 //	Offset(int)  // Optional. Default is 0. Max is 100000
+//	GroupTransactions(bool) // Optional. Flag indicating whether the returned transactions will be parts of a single operation. Default is False
 func (client *Client) GetTransactionHistory(
 	ctx context.Context,
 	arguments ...args.Argument,
