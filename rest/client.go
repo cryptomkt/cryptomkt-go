@@ -1416,72 +1416,72 @@ func (client *Client) GetEstimateWithdrawalFees(
 	return result, err
 }
 
-// GetEstimateDepositFee gets an estimate of the deposit fee
-//
-// Requires the "Payment information" API key Access Right
-//
-// https://api.exchange.cryptomkt.com/#estimate-withdraw-fee
-//
-// Arguments:
-//
-//	Currency(string)  // the currency code for deposit
-//	Amount(string)  // the expected deposit amount
-//	NetworkCode(String) // Optional. network code
-func (client *Client) GetEstimateDepositFee(
-	ctx context.Context,
-	arguments ...args.Argument,
-) (result string, err error) {
-	params, err := args.BuildParams(
-		arguments,
-		internal.ArgNameCurrency,
-		internal.ArgNameAmount,
-	)
-	if err != nil {
-		return
-	}
-	response := models.FeeResponse{}
-	err = client.privateGet(ctx, endpointEstimateDepositFee, params, &response)
-	return response.Fee, err
-}
+// // GetEstimateDepositFee gets an estimate of the deposit fee
+// //
+// // Requires the "Payment information" API key Access Right
+// //
+// // https://api.exchange.cryptomkt.com/#estimate-withdraw-fee
+// //
+// // Arguments:
+// //
+// //	Currency(string)  // the currency code for deposit
+// //	Amount(string)  // the expected deposit amount
+// //	NetworkCode(String) // Optional. network code
+// func (client *Client) GetEstimateDepositFee(
+// 	ctx context.Context,
+// 	arguments ...args.Argument,
+// ) (result string, err error) {
+// 	params, err := args.BuildParams(
+// 		arguments,
+// 		internal.ArgNameCurrency,
+// 		internal.ArgNameAmount,
+// 	)
+// 	if err != nil {
+// 		return
+// 	}
+// 	response := models.FeeResponse{}
+// 	err = client.privateGet(ctx, endpointEstimateDepositFee, params, &response)
+// 	return response.Fee, err
+// }
 
-// GetEstimateWithdrawalFees gets a list of estimates of the withdrawal fee of a currency
-//
-// Requires the "Payment information" API key Access Right
-//
-// https://api.exchange.cryptomkt.com/#estimate-withdrawal-fees
-//
-// Arguments:
-//
-//	FeeRequests([]FeeRequest) // the fees to request
-func (client *Client) GetBulkEstimateDepositFees(
-	ctx context.Context,
-	arguments ...args.Argument,
-) (result []models.Fee, err error) {
-	params, err := args.BuildParams(
-		arguments,
-		internal.SDKArgNameFeeRequest,
-	)
-	if err != nil {
-		return
-	}
-	jsonData, err := json.Marshal(params[internal.SDKArgNameFeeRequest])
-	if err != nil {
-		return nil, fmt.Errorf("CryptomarketSDKError: %v", err)
-	}
-	requestData := &RequestData{
-		cxt:                ctx,
-		method:             methodPost,
-		endpoint:           endpointBulkEstimateDepositFees,
-		urlEncodedPayload:  "",
-		jsonEncodedPayload: string(jsonData),
-		public:             privateCall,
-	}
-	err = client.doRequest(requestData, &result)
-	if err != nil {
-		return nil, err
-	}
-	return result, err
-}
+// // // GetEstimateWithdrawalFees gets a list of estimates of the withdrawal fee of a currency
+// // //
+// // // Requires the "Payment information" API key Access Right
+// // //
+// // // https://api.exchange.cryptomkt.com/#estimate-withdrawal-fees
+// // //
+// // // Arguments:
+// // //
+// // //	FeeRequests([]FeeRequest) // the fees to request
+// // func (client *Client) GetBulkEstimateDepositFees(
+// // 	ctx context.Context,
+// // 	arguments ...args.Argument,
+// // ) (result []models.Fee, err error) {
+// // 	params, err := args.BuildParams(
+// // 		arguments,
+// // 		internal.SDKArgNameFeeRequest,
+// // 	)
+// // 	if err != nil {
+// // 		return
+// // 	}
+// // 	jsonData, err := json.Marshal(params[internal.SDKArgNameFeeRequest])
+// // 	if err != nil {
+// // 		return nil, fmt.Errorf("CryptomarketSDKError: %v", err)
+// // 	}
+// // 	requestData := &RequestData{
+// // 		cxt:                ctx,
+// // 		method:             methodPost,
+// // 		endpoint:           endpointBulkEstimateDepositFees,
+// // 		urlEncodedPayload:  "",
+// // 		jsonEncodedPayload: string(jsonData),
+// // 		public:             privateCall,
+// // 	}
+// // 	err = client.doRequest(requestData, &result)
+// // 	if err != nil {
+// // 		return nil, err
+// // 	}
+// // 	return result, err
+// // }
 
 // GetEstimateWithdrawalFee gets an estimate of the withdrawal fee
 //

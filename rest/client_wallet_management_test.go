@@ -207,30 +207,31 @@ func TestGetBulkEstimateWithdrawalFees(t *testing.T) {
 		t.Fatal(err)
 	}
 }
-func TestGetEstimateDepositFee(t *testing.T) {
-	client, bg := beforeEach()
-	result, err := client.GetEstimateDepositFee(bg, args.Currency("USDT"), args.Amount("1"), args.NetworkCode("TRX"))
-	if err != nil {
-		t.Fatal(err)
-	}
-	if result == "" {
-		t.Fatal("should have a result")
-	}
-}
 
-func TestGetBulkEstimateDepositFees(t *testing.T) {
-	client, bg := beforeEach()
-	result, err := client.GetBulkEstimateDepositFees(bg, args.FeeRequests([]args.FeeRequest{
-		{Currency: "EOS", Amount: "100"},
-		{Currency: "ETH", Amount: "200"},
-	}))
-	if err != nil {
-		t.Fatal(err)
-	}
-	if err = checkList(checkFee, result); err != nil {
-		t.Fatal(err)
-	}
-}
+// func TestGetEstimateDepositFee(t *testing.T) {
+// 	client, bg := beforeEach()
+// 	result, err := client.GetEstimateDepositFee(bg, args.Currency("USDT"), args.Amount("1"), args.NetworkCode("TRX"))
+// 	if err != nil {
+// 		t.Fatal(err)
+// 	}
+// 	if result == "" {
+// 		t.Fatal("should have a result")
+// 	}
+// }
+
+// func TestGetBulkEstimateDepositFees(t *testing.T) {
+// 	client, bg := beforeEach()
+// 	result, err := client.GetBulkEstimateDepositFees(bg, args.FeeRequests([]args.FeeRequest{
+// 		{Currency: "EOS", Amount: "100"},
+// 		{Currency: "ETH", Amount: "200"},
+// 	}))
+// 	if err != nil {
+// 		t.Fatal(err)
+// 	}
+// 	if err = checkList(checkFee, result); err != nil {
+// 		t.Fatal(err)
+// 	}
+// }
 
 func TestCryptoAddressBelongToCurrentAccount(t *testing.T) {
 	client, bg := beforeEach()
