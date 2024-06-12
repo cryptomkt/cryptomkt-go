@@ -123,9 +123,9 @@ func (client *WalletManagementClient) GetWalletBalance(
 //	TransactionTypes([]TransactionType)  // Optional. List of types to query. valid types are: TransactionDeposit, TransactionWithdraw, TransactionTransfer and TransactionSwap
 //	TransactionSubTypes([]TransactionSubType)  // Optional. List of subtypes to query. valid subtypes are: TransactionSubTypeUnclassified, TransactionSubTypeBlockchain,  TransactionSubTypeAffiliate,  TransactionSubtypeOffchain, TransactionSubTypeFiat, TransactionSubTypeSubAccount, TransactionSubTypeWalletToSpot, TransactionSubTypeSpotToWallet, TransactionSubTypeChainSwitchFrom and TransactionSubTypeChainSwitchTo
 //	TransactionStatuses([]TransactionStatusType)  // Optional. List of statuses to query. valid subtypes are: TransactionStatusCreated, TransactionStatusPending, TransactionStatusFailed, TransactionStatusSuccess and TransactionStatusRolledBack
-//	SortBy(SortByType)  // Optional. sorting parameter. SortByCreatedAt or SortByID. Default is SortByCreatedAt
-//	From(string)  // Optional. Interval initial value when ordering by CreatedAt. As Datetime.
-//	Till(string)  // Optional. Interval end value when ordering by CreatedAt. As Datetime.
+//	OrderBy(OrderByType)  // Optional. sorting parameter. OrderByID, OrderByCreatedAt, OrderByUpdateAt or OrderByLastActivityAt. Default is OrderByCreatedAt
+//	From(string)  // Optional. Optional. Interval initial value (inclusive). The value type depends on orderBy
+//	Till(string)  // Optional. Interval end value (inclusive). The value type depends on orderBy
 //	IDFrom(string)  // Optional. Interval initial value when ordering by id. Min is 0
 //	IDTill(string)  // Optional. Interval end value when ordering by id. Min is 0
 //	Sort(SortType)  // Optional. Sort direction. SortASC or SortDESC. Default is SortDESC

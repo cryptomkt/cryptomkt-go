@@ -13,6 +13,7 @@ const (
 	ArgNameSort                 string = "sort"
 	ArgNameSortBy               string = "by"
 	ArgNameIdentifyBy           string = "by"
+	ArgNameOrderBy              string = "order_by"
 	ArgNameTo                   string = "to"
 	ArgNameSince                string = "since"
 	ArgNameUntil                string = "until"
@@ -75,6 +76,7 @@ const (
 	ArgNameMode                 string = "mode"
 	ArgNameTargetCurrency       string = "target_currency"
 	ArgNamePrefferedNetwork     string = "preferred_network"
+	ArgNameGroupTransactions    string = "group_transactions"
 
 	ArgNameDepositAddressGenerationEnabled string = "deposit_address_generation_enabled"
 
