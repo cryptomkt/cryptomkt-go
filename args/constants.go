@@ -120,6 +120,7 @@ const (
 	TransactionSubTypeSpotToWallet    TransactionSubTypeType = "SPOT_TO_WALLET"
 	TransactionSubTypeChainSwitchFrom TransactionSubTypeType = "CHAIN_SWITCH_FROM"
 	TransactionSubTypeChainSwitchTo   TransactionSubTypeType = "CHAIN_SWITCH_TO"
+	TransactionSubTypeAirdrop         TransactionSubTypeType = "AIRDROP"
 )
 
 type TransactionStatusType string
