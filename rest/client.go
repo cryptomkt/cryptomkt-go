@@ -1559,8 +1559,9 @@ func (client *Client) GetBulkEstimateWithdrawalFees(
 func (client *Client) GetWithdrawalFeesHash(
 	ctx context.Context,
 ) (result string, err error) {
-	err = client.privateGet(ctx, endpointWithdrawalFeesHash, nil, &result)
-	return
+	response := models.FeesHashResponse{}
+	err = client.privateGet(ctx, endpointWithdrawalFeesHash, nil, &response)
+	return response.Hash
 }
 
 // ConvertBetweenCurrencies Converts between currencies

@@ -383,6 +383,10 @@ type FeeResponse struct {
 	NetworkCode string `json:"networkCode"`
 }
 
+type FeesHashResponse struct {
+	Hash string `json:"hash"`
+}
+
 type SubAccount struct {
 	ID     string `json:"sub_account_id"`
 	Email  string `json:"email"`
