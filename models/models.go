@@ -236,11 +236,19 @@ type CommitRisk struct {
 
 // CryptoAddress is an crypto address
 type CryptoAddress struct {
-	Currency    string `json:"currency"`
 	Address     string `json:"address"`
+	Currency    string `json:"currency"`
+	NetworkCode string `json:"network_code"`
 	PaymentID   string `json:"payment_id"`
 	PublicKey   string `json:"publicKey"`
-	NetworkCode string `json:"network_code"`
+}
+
+// WhitelistAddress is an crypto address
+type WhitelistAddress struct {
+	Address     string `json:"address"`
+	Name        string `json:"name"`
+	Currency    string `json:"currency"`
+	Network     string `json:"network"`
 }
 
 // PayoutCryptoAddress is for external crypto addresses

@@ -1138,6 +1138,19 @@ func (client *Client) GetWalletBalanceOfCurrency(
 	return
 }
 
+	// Gets the list of whitelisted addresses
+	//
+	// Requires the "Payment information" API key Access Right
+	// 
+	// https://api.exchange.cryptomkt.com/#get-whitelisted-addresses
+func (client *Client) getWhitelistedAddresses(
+		ctx context.Context,
+) (result []models.WhitelistAddress, err error) {
+	err = client.privateGet(ctx, endpointWhitelistedAdresses, nil, &result)
+	return
+
+}
+
 // GetDepositCryptoAddresses gets a list of addresses with the current addresses of all currencies
 //
 // Requires the "Payment information" API key Access Right
@@ -1965,7 +1978,7 @@ func (client *Client) TransferToSuperAccount(
 		return
 	}
 	response := models.BooleanResponse{}
-	err = client.post(ctx, endpointSubAccountTransferFunds, params, &response)
+	err = client.post(ctx, endpointSubAccountTransferToSuperAccount, params, &response)
 	return response.Result, err
 }
 
@@ -2002,7 +2015,7 @@ func (client *Client) TransferToAnotherSubAccount(
 		return
 	}
 	response := models.BooleanResponse{}
-	err = client.post(ctx, endpointSubAccountTransferFunds, params, &response)
+	err = client.post(ctx, endpointSubAccountTransferToAnotherSubAccount, params, &response)
 	return response.Result, err
 }
 
