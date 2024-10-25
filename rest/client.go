@@ -869,6 +869,7 @@ func (client *Client) CreateSpotOrder(
 //	Quantity(string)  // Order quantity
 //	StrictValidate(bool)  // Price and quantity will be checked for incrementation within the symbol’s tick size and quantity step. See the symbol's TickSize and QuantityIncrement
 //	Price(string)  // Required for OrderLimit, OrderStopLimit, or OrderTakeProfitLimit. Order price
+//
 // StopPrice(string) // Required if order type is OrderStopLimit', OrderStopMarket', OrderTakeProfitLimit, or OrderTakeProfitMarket. Order stop price
 func (client *Client) ReplaceSpotOrder(
 	ctx context.Context,
@@ -1139,13 +1140,13 @@ func (client *Client) GetWalletBalanceOfCurrency(
 	return
 }
 
-	// Gets the list of whitelisted addresses
-	//
-	// Requires the "Payment information" API key Access Right
-	// 
-	// https://api.exchange.cryptomkt.com/#get-whitelisted-addresses
+// Gets the list of whitelisted addresses
+//
+// Requires the "Payment information" API key Access Right
+//
+// https://api.exchange.cryptomkt.com/#get-whitelisted-addresses
 func (client *Client) getWhitelistedAddresses(
-		ctx context.Context,
+	ctx context.Context,
 ) (result []models.WhitelistAddress, err error) {
 	err = client.privateGet(ctx, endpointWhitelistedAdresses, nil, &result)
 	return
@@ -1564,18 +1565,17 @@ func (client *Client) GetBulkEstimateWithdrawalFees(
 	return result, err
 }
 
-
 // GetWithdrawalFeesHash gets the hash of withdrawal fees
-// 
+//
 // Requires the "Payment information" API key Access Right
-// 
+//
 // https://api.exchange.cryptomkt.com/#get-withdrawal-fees-hash
 func (client *Client) GetWithdrawalFeesHash(
 	ctx context.Context,
 ) (result string, err error) {
 	response := models.FeesHashResponse{}
 	err = client.privateGet(ctx, endpointWithdrawalFeesHash, nil, &response)
-	return response.Hash
+	return response.Hash, err
 }
 
 // ConvertBetweenCurrencies Converts between currencies
@@ -1949,17 +1949,16 @@ func (client *Client) TransferFunds(
 	return response.Result, err
 }
 
-
 // TransferToSuperAccount creates and commits a transfer from a subaccount to its super account
-// 
-// Call is being sent by a subaccount
-// 
+//
+// # Call is being sent by a subaccount
+//
 // Created but not committed transfer will reserve pending amount on the sender
 // wallet affecting their ability to withdraw or transfer crypto to another
 // account. Incomplete withdrawals affect subaccount transfers the same way
-// 
+//
 // Requires the "Withdraw cryptocurrencies" API key Access Right
-// 
+//
 // https://api.exchange.cryptomkt.com/#transfer-to-super-account
 //
 // Arguments:
@@ -1983,18 +1982,17 @@ func (client *Client) TransferToSuperAccount(
 	return response.Result, err
 }
 
-
 // TransferToAnotherSubAccount creates and commits a transfer between the user (subaccount) and another
 // subaccount.
 //
-// Call is being sent by a subaccount
+// # Call is being sent by a subaccount
 //
 // Created but not committed transfer will reserve pending amount on the sender
 // wallet affecting their ability to withdraw or transfer crypto to another
 // account. Incomplete withdrawals affect subaccount transfers the same way
-// 
+//
 // Requires the "Withdraw cryptocurrencies" API key Access Right
-// 
+//
 // https://api.exchange.cryptomkt.com/#transfer-across-subaccounts
 //
 // Arguments:
