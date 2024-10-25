@@ -1550,6 +1550,19 @@ func (client *Client) GetBulkEstimateWithdrawalFees(
 	return result, err
 }
 
+
+// Gets the hash of withdrawal fees
+// 
+// Requires the "Payment information" API key Access Right
+// 
+// https://api.exchange.cryptomkt.com/#get-withdrawal-fees-hash
+func (client *Client) GetWithdrawalFeesHash(
+	ctx context.Context,
+) (result string, err error) {
+	err = client.privateGet(ctx, endpointWithdrawalFeesHash, nil, &result)
+	return
+}
+
 // ConvertBetweenCurrencies Converts between currencies
 //
 // Successful response to the request does not necessarily mean the resulting transaction got executed immediately. It has to be processed first and may eventually be rolled back
