@@ -1551,7 +1551,7 @@ func (client *Client) GetBulkEstimateWithdrawalFees(
 }
 
 
-// Gets the hash of withdrawal fees
+// GetWithdrawalFeesHash gets the hash of withdrawal fees
 // 
 // Requires the "Payment information" API key Access Right
 // 
@@ -1927,6 +1927,77 @@ func (client *Client) TransferFunds(
 	arguments ...args.Argument,
 ) (result bool, err error) {
 	params, err := args.BuildParams(arguments, internal.ArgNameSubAccountID)
+	if err != nil {
+		return
+	}
+	response := models.BooleanResponse{}
+	err = client.post(ctx, endpointSubAccountTransferFunds, params, &response)
+	return response.Result, err
+}
+
+
+// TransferToSuperAccount creates and commits a transfer from a subaccount to its super account
+// 
+// Call is being sent by a subaccount
+// 
+// Created but not committed transfer will reserve pending amount on the sender
+// wallet affecting their ability to withdraw or transfer crypto to another
+// account. Incomplete withdrawals affect subaccount transfers the same way
+// 
+// Requires the "Withdraw cryptocurrencies" API key Access Right
+// 
+// https://api.exchange.cryptomkt.com/#transfer-to-super-account
+//
+// Arguments:
+//
+//	Amount(string)  // amount to transfer
+//	Currency(string)  // currency of transfer
+func (client *Client) TransferToSuperAccount(
+	ctx context.Context,
+	arguments ...args.Argument,
+) (result bool, err error) {
+	params, err := args.BuildParams(
+		arguments,
+		internal.ArgNameCurrency,
+		internal.ArgNameAmount,
+	)
+	if err != nil {
+		return
+	}
+	response := models.BooleanResponse{}
+	err = client.post(ctx, endpointSubAccountTransferFunds, params, &response)
+	return response.Result, err
+}
+
+
+// TransferToAnotherSubAccount creates and commits a transfer between the user (subaccount) and another
+// subaccount.
+//
+// Call is being sent by a subaccount
+//
+// Created but not committed transfer will reserve pending amount on the sender
+// wallet affecting their ability to withdraw or transfer crypto to another
+// account. Incomplete withdrawals affect subaccount transfers the same way
+// 
+// Requires the "Withdraw cryptocurrencies" API key Access Right
+// 
+// https://api.exchange.cryptomkt.com/#transfer-across-subaccounts
+//
+// Arguments:
+//
+//	SubAccountID(string)  // id of the sub-account to transfer to
+//	Amount(string)  // amount to transfer
+//	Currency(string)  // currency of transfer
+func (client *Client) TransferToAnotherSubAccount(
+	ctx context.Context,
+	arguments ...args.Argument,
+) (result bool, err error) {
+	params, err := args.BuildParams(
+		arguments,
+		internal.ArgNameSubAccountIDs,
+		internal.ArgNameCurrency,
+		internal.ArgNameAmount,
+	)
 	if err != nil {
 		return
 	}
