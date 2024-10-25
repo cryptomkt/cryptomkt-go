@@ -869,6 +869,7 @@ func (client *Client) CreateSpotOrder(
 //	Quantity(string)  // Order quantity
 //	StrictValidate(bool)  // Price and quantity will be checked for incrementation within the symbol’s tick size and quantity step. See the symbol's TickSize and QuantityIncrement
 //	Price(string)  // Required for OrderLimit, OrderStopLimit, or OrderTakeProfitLimit. Order price
+// StopPrice(string) // Required if order type is OrderStopLimit', OrderStopMarket', OrderTakeProfitLimit, or OrderTakeProfitMarket. Order stop price
 func (client *Client) ReplaceSpotOrder(
 	ctx context.Context,
 	arguments ...args.Argument,
