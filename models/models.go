@@ -152,6 +152,7 @@ type Order struct {
 	Trades                []TradeOfOrder       `json:"trades"`
 	Contingency           args.ContingencyType `json:"contingency_type"`
 	OrderListID           string               `json:"order_list_id"`
+	AveragePrice          string               `json:"price_avergae"`
 }
 
 // TradeOfOrder is the trade information of trades of an order
@@ -245,10 +246,10 @@ type CryptoAddress struct {
 
 // WhitelistAddress is an crypto address
 type WhitelistAddress struct {
-	Address     string `json:"address"`
-	Name        string `json:"name"`
-	Currency    string `json:"currency"`
-	Network     string `json:"network"`
+	Address  string `json:"address"`
+	Name     string `json:"name"`
+	Currency string `json:"currency"`
+	Network  string `json:"network"`
 }
 
 // PayoutCryptoAddress is for external crypto addresses
