@@ -152,6 +152,7 @@ type Order struct {
 	Trades                []TradeOfOrder       `json:"trades"`
 	Contingency           args.ContingencyType `json:"contingency_type"`
 	OrderListID           string               `json:"order_list_id"`
+	AveragePrice          string               `json:"price_average"`
 }
 
 // TradeOfOrder is the trade information of trades of an order
@@ -236,11 +237,19 @@ type CommitRisk struct {
 
 // CryptoAddress is an crypto address
 type CryptoAddress struct {
-	Currency    string `json:"currency"`
 	Address     string `json:"address"`
+	Currency    string `json:"currency"`
+	NetworkCode string `json:"network_code"`
 	PaymentID   string `json:"payment_id"`
 	PublicKey   string `json:"publicKey"`
-	NetworkCode string `json:"network_code"`
+}
+
+// WhitelistAddress is an crypto address
+type WhitelistAddress struct {
+	Address  string `json:"address"`
+	Name     string `json:"name"`
+	Currency string `json:"currency"`
+	Network  string `json:"network"`
 }
 
 // PayoutCryptoAddress is for external crypto addresses
@@ -381,6 +390,10 @@ type BooleanResponse struct {
 type FeeResponse struct {
 	Fee         string `json:"fee"`
 	NetworkCode string `json:"networkCode"`
+}
+
+type FeesHashResponse struct {
+	Hash string `json:"hash"`
 }
 
 type SubAccount struct {

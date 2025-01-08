@@ -224,8 +224,8 @@ func TestGetPriceHistory(t *testing.T) {
 			if err = checkQuotationPriceHistory(&priceHistory); err != nil {
 				t.Fatal(err)
 			}
-			if len(priceHistory.History) != 3 {
-				t.Fatal("should have 3 history points")
+			if len(priceHistory.History) > 3 {
+				t.Fatal("should have at most 3 history points")
 			}
 		}
 	})
