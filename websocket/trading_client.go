@@ -289,6 +289,7 @@ func (client *SpotTradingClient) CancelAllSpotOrders(
 //	NewClientOrderID(string)  // the new client order id for the modified order. must be unique within the trading day
 //	Quantity(string)  // new order quantity
 //	Price(string)  // new order price
+// StopPrice(string) // Required if order type is OrderStopLimit', OrderStopMarket', OrderTakeProfitLimit, or OrderTakeProfitMarket. Order stop price
 //	StrictValidate(bool)  //  price and quantity will be checked for the incrementation with tick size and quantity step. See symbol's tick_size and quantity_increment
 func (client *SpotTradingClient) ReplaceSpotOrder(
 	ctx context.Context,

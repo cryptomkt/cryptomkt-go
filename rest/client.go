@@ -869,6 +869,8 @@ func (client *Client) CreateSpotOrder(
 //	Quantity(string)  // Order quantity
 //	StrictValidate(bool)  // Price and quantity will be checked for incrementation within the symbol’s tick size and quantity step. See the symbol's TickSize and QuantityIncrement
 //	Price(string)  // Required for OrderLimit, OrderStopLimit, or OrderTakeProfitLimit. Order price
+//
+// StopPrice(string) // Required if order type is OrderStopLimit', OrderStopMarket', OrderTakeProfitLimit, or OrderTakeProfitMarket. Order stop price
 func (client *Client) ReplaceSpotOrder(
 	ctx context.Context,
 	arguments ...args.Argument,
@@ -1136,6 +1138,19 @@ func (client *Client) GetWalletBalanceOfCurrency(
 	}
 	result.Currency = params[internal.ArgNameCurrency].(string)
 	return
+}
+
+// Gets the list of whitelisted addresses
+//
+// Requires the "Payment information" API key Access Right
+//
+// https://api.exchange.cryptomkt.com/#get-whitelisted-addresses
+func (client *Client) getWhitelistedAddresses(
+	ctx context.Context,
+) (result []models.WhitelistAddress, err error) {
+	err = client.privateGet(ctx, endpointWhitelistedAdresses, nil, &result)
+	return
+
 }
 
 // GetDepositCryptoAddresses gets a list of addresses with the current addresses of all currencies
@@ -1550,6 +1565,19 @@ func (client *Client) GetBulkEstimateWithdrawalFees(
 	return result, err
 }
 
+// GetWithdrawalFeesHash gets the hash of withdrawal fees
+//
+// Requires the "Payment information" API key Access Right
+//
+// https://api.exchange.cryptomkt.com/#get-withdrawal-fees-hash
+func (client *Client) GetWithdrawalFeesHash(
+	ctx context.Context,
+) (result string, err error) {
+	response := models.FeesHashResponse{}
+	err = client.privateGet(ctx, endpointWithdrawalFeesHash, nil, &response)
+	return response.Hash, err
+}
+
 // ConvertBetweenCurrencies Converts between currencies
 //
 // Successful response to the request does not necessarily mean the resulting transaction got executed immediately. It has to be processed first and may eventually be rolled back
@@ -1918,6 +1946,75 @@ func (client *Client) TransferFunds(
 	}
 	response := models.BooleanResponse{}
 	err = client.post(ctx, endpointSubAccountTransferFunds, params, &response)
+	return response.Result, err
+}
+
+// TransferToSuperAccount creates and commits a transfer from a subaccount to its super account
+//
+// # Call is being sent by a subaccount
+//
+// Created but not committed transfer will reserve pending amount on the sender
+// wallet affecting their ability to withdraw or transfer crypto to another
+// account. Incomplete withdrawals affect subaccount transfers the same way
+//
+// Requires the "Withdraw cryptocurrencies" API key Access Right
+//
+// https://api.exchange.cryptomkt.com/#transfer-to-super-account
+//
+// Arguments:
+//
+//	Amount(string)  // amount to transfer
+//	Currency(string)  // currency of transfer
+func (client *Client) TransferToSuperAccount(
+	ctx context.Context,
+	arguments ...args.Argument,
+) (result bool, err error) {
+	params, err := args.BuildParams(
+		arguments,
+		internal.ArgNameCurrency,
+		internal.ArgNameAmount,
+	)
+	if err != nil {
+		return
+	}
+	response := models.BooleanResponse{}
+	err = client.post(ctx, endpointSubAccountTransferToSuperAccount, params, &response)
+	return response.Result, err
+}
+
+// TransferToAnotherSubAccount creates and commits a transfer between the user (subaccount) and another
+// subaccount.
+//
+// # Call is being sent by a subaccount
+//
+// Created but not committed transfer will reserve pending amount on the sender
+// wallet affecting their ability to withdraw or transfer crypto to another
+// account. Incomplete withdrawals affect subaccount transfers the same way
+//
+// Requires the "Withdraw cryptocurrencies" API key Access Right
+//
+// https://api.exchange.cryptomkt.com/#transfer-across-subaccounts
+//
+// Arguments:
+//
+//	SubAccountID(string)  // id of the sub-account to transfer to
+//	Amount(string)  // amount to transfer
+//	Currency(string)  // currency of transfer
+func (client *Client) TransferToAnotherSubAccount(
+	ctx context.Context,
+	arguments ...args.Argument,
+) (result bool, err error) {
+	params, err := args.BuildParams(
+		arguments,
+		internal.ArgNameSubAccountIDs,
+		internal.ArgNameCurrency,
+		internal.ArgNameAmount,
+	)
+	if err != nil {
+		return
+	}
+	response := models.BooleanResponse{}
+	err = client.post(ctx, endpointSubAccountTransferToAnotherSubAccount, params, &response)
 	return response.Result, err
 }
 
